@@ -1,4 +1,4 @@
-# 🚀 Antigravity - Professional Network Platform
+# 🚀 LinkUp - Professional Network Platform
 
 <div align="center">
 
@@ -40,7 +40,7 @@
 
 **linkup** is a comprehensive professional networking platform designed to connect professionals, facilitate job opportunities, and enable meaningful interactions. Built with Django and modern web technologies, it offers a seamless experience for users to build their professional network.
 
-### Why Antigravity?
+### Why LinkUp?
 
 - 🎯 **Professional Focus**: Tailored for career networking and professional growth
 - 🚀 **Real-time Features**: Instant messaging and live notifications
