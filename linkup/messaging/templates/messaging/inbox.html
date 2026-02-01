@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Messages</h1>
+        <p class="text-gray-600">Stay connected with your professional network</p>
+    </div>
+    
+    <!-- Search and Filter Bar -->
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+        <div class="flex items-center space-x-4">
+            <!-- Search -->
+            <div class="flex-1 relative">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input 
+                    type="text" 
+                    id="search-messages"
+                    placeholder="Search conversations..." 
+                    class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+            </div>
+            
+            <!-- Filter Buttons -->
+            <div class="flex space-x-2">
+                <button class="px-4 py-2 text-sm font-medium text-purple-600 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+                    All
+                </button>
+                <button class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    Unread
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    {% if conversations %}
+        <!-- Conversations List -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            {% for conv in conversations %}
+                <a href="{% url 'messaging:chat_view' conv.user.username %}" 
+                   class="conversation-item block border-b border-gray-100 hover:bg-gradient-to-r hover:from-purple-50 hover:to-transparent transition-all duration-200 {% if conv.unread_count > 0 %}bg-purple-50/30{% endif %}"
+                   data-username="{{ conv.user.username|lower }}">
+                    <div class="p-4 flex items-center space-x-4">
+                        <!-- Avatar with online indicator -->
+                        <div class="relative flex-shrink-0">
+                            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 p-0.5">
+                                <div class="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-white">
+                                    <div class="w-full h-full rounded-full flex items-center justify-center bg-gradient-to-br from-purple-400 to-purple-600 text-white font-bold text-lg">
+                                        {{ conv.user.username|slice:":1"|upper }}
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Online Status Indicator -->
+                            <span class="absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white {% if conv.is_online %}bg-green-500 animate-pulse{% else %}bg-gray-400{% endif %}"></span>
+                        </div>
+                        
+                        <!-- Conversation Info -->
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between mb-1">
+                                <h3 class="font-semibold text-gray-900 truncate {% if conv.unread_count > 0 %}text-purple-900{% endif %}">
+                                    {{ conv.user.get_full_name|default:conv.user.username }}
+                                </h3>
+                                <span class="text-xs text-gray-500 flex-shrink-0 ml-2">
+                                    {{ conv.last_message.created_at|timesince }} ago
+                                </span>
+                            </div>
+                            
+                            <!-- Username and Online Status -->
+                            <div class="flex items-center space-x-2 mb-1">
+                                <p class="text-xs text-gray-500">@{{ conv.user.username }}</p>
+                                <span class="text-gray-300">•</span>
+                                <p class="text-xs {% if conv.is_online %}text-green-600 font-medium{% else %}text-gray-500{% endif %}">
+                                    {% if conv.is_online %}
+                                        <span class="inline-flex items-center">
+                                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1 animate-pulse"></span>
+                                            Online
+                                        </span>
+                                    {% else %}
+                                        {% if conv.last_seen %}
+                                            Last seen {{ conv.last_seen|timesince }} ago
+                                        {% else %}
+                                            Offline
+                                        {% endif %}
+                                    {% endif %}
+                                </p>
+                            </div>
+                            
+                            <!-- Last Message Preview -->
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm text-gray-600 truncate {% if conv.unread_count > 0 %}font-medium text-gray-900{% endif %}">
+                                    {% if conv.last_message.sender == user %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1 {% if conv.last_message.is_read %}text-blue-500{% else %}text-gray-400{% endif %}" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M0 11l2-2 5 5L18 3l2 2L7 18z"/>
+                                            <path d="M7 11l2-2 5 5L18 3l2 2L7 18z" transform="translate(3, 0)"/>
+                                        </svg>
+                                    {% endif %}
+                                    {{ conv.last_message.content|truncatewords:8 }}
+                                </p>
+                                {% if conv.unread_count > 0 %}
+                                    <span class="flex-shrink-0 ml-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-full px-2.5 py-0.5 text-xs font-bold shadow-sm">
+                                        {{ conv.unread_count }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination or Load More (if needed) -->
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-500">Showing {{ conversations|length }} conversation{{ conversations|length|pluralize }}</p>
+        </div>
+    {% else %}
+        <!-- Empty State -->
+        <div class="bg-white rounded-xl shadow-sm p-12 text-center">
+            <div class="max-w-sm mx-auto">
+                <!-- Icon -->
+                <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                </div>
+                
+                <!-- Text -->
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">No messages yet</h3>
+                <p class="text-gray-600 mb-6">Start a conversation by visiting someone's profile and sending them a message.</p>
+                
+                <!-- Action Button -->
+                <a href="{% url 'network' %}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-medium rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all transform hover:scale-105 shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
+                    </svg>
+                    Find People to Connect
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    /* Smooth hover effects */
+    .conversation-item {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .conversation-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 3px;
+        background: linear-gradient(to bottom, #9333ea, #7c3aed);
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+    
+    .conversation-item:hover::before {
+        transform: scaleY(1);
+    }
+    
+    /* Search animation */
+    #search-messages:focus {
+        box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
+    }
+</style>
+
+<script>
+    // Search functionality
+    document.getElementById('search-messages').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const conversations = document.querySelectorAll('.conversation-item');
+        
+        conversations.forEach(conv => {
+            const username = conv.getAttribute('data-username');
+            const text = conv.textContent.toLowerCase();
+            
+            if (text.includes(searchTerm)) {
+                conv.style.display = 'block';
+            } else {
+                conv.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

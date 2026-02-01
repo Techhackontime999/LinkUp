@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/form-enhancements.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto pt-6">
+    <div class="premium-card p-1">
+        <div class="px-8 py-10">
+            <header class="mb-8">
+                <h1 class="text-2xl font-bold text-gray-800 mb-2">Create a Job Posting</h1>
+                <p class="text-gray-500">Reach thousands of talented professionals in our network.</p>
+            </header>
+
+            <form method="post" class="space-y-6 form-enhanced" id="job-form" data-ajax="false" role="form" aria-labelledby="form-title" novalidate>
+                {% csrf_token %}
+                
+                <div id="form-title" class="sr-only">Job posting creation form</div>
+
+                <!-- Form Progress Indicator -->
+                <div class="form-progress-indicator" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Form completion progress">
+                    <div class="form-progress-bar">
+                        <div class="form-progress-fill" style="width: 0%" id="form-progress"></div>
+                    </div>
+                    <div class="form-progress-text" id="progress-text">Complete all required fields</div>
+                </div>
+
+                <!-- Basic Information Group -->
+                <fieldset class="field-group-enhanced" role="group" aria-labelledby="basic-info-legend">
+                    <legend id="basic-info-legend">Basic Information</legend>
+                    <div class="field-group-grid">
+                        <div class="form-field-wrapper">
+                            <label for="id_title" class="block text-sm font-bold text-gray-700 field-required">Job Title</label>
+                            <input type="text" name="title" id="id_title" required 
+                                   placeholder="e.g. Senior Frontend Engineer"
+                                   class="form-field-enhanced"
+                                   data-validation='{"minLength": 3, "required": true}'
+                                   aria-describedby="id_title-help id_title-validation"
+                                   aria-required="true">
+                            <div id="id_title-help" class="field-help-text">Enter a clear, descriptive job title</div>
+                            <div class="field-validation-message" id="id_title-validation" role="alert" aria-live="polite"></div>
+                            <div class="field-status-indicator" id="id_title-status" aria-hidden="true"></div>
+                        </div>
+                        
+                        <div class="form-field-wrapper">
+                            <label for="id_company" class="block text-sm font-bold text-gray-700 field-required">Company Name</label>
+                            <input type="text" name="company" id="id_company" required 
+                                   placeholder="e.g. Google"
+                                   class="form-field-enhanced"
+                                   data-validation='{"minLength": 2, "required": true}'
+                                   aria-describedby="id_company-help id_company-validation"
+                                   aria-required="true">
+                            <div id="id_company-help" class="field-help-text">Enter your company or organization name</div>
+                            <div class="field-validation-message" id="id_company-validation" role="alert" aria-live="polite"></div>
+                            <div class="field-status-indicator" id="id_company-status" aria-hidden="true"></div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Location and Type Group -->
+                <fieldset class="field-group-enhanced" role="group" aria-labelledby="position-details-legend">
+                    <legend id="position-details-legend">Position Details</legend>
+                    <div class="field-group-grid field-group-three-columns">
+                        <div class="form-field-wrapper">
+                            <label for="id_location" class="block text-sm font-bold text-gray-700 field-required">Location</label>
+                            <input type="text" name="location" id="id_location" required 
+                                   placeholder="e.g. New York, NY"
+                                   class="form-field-enhanced"
+                                   data-validation='{"required": true}'
+                                   aria-describedby="id_location-help id_location-validation"
+                                   aria-required="true">
+                            <div id="id_location-help" class="field-help-text">City, state, or "Remote" for remote positions</div>
+                            <div class="field-validation-message" id="id_location-validation" role="alert" aria-live="polite"></div>
+                            <div class="field-status-indicator" id="id_location-status" aria-hidden="true"></div>
+                        </div>
+                        
+                        <div class="form-field-wrapper">
+                            <label for="id_workplace_type" class="block text-sm font-bold text-gray-700 field-required">Workplace Type</label>
+                            <select name="workplace_type" id="id_workplace_type" required
+                                    class="form-field-enhanced"
+                                    data-validation='{"required": true}'
+                                    aria-describedby="id_workplace_type-help id_workplace_type-validation"
+                                    aria-required="true">
+                                <option value="">Select workplace type</option>
+                                <option value="onsite">On-site</option>
+                                <option value="remote">Remote</option>
+                                <option value="hybrid">Hybrid</option>
+                            </select>
+                            <div id="id_workplace_type-help" class="field-help-text">Choose how employees will work</div>
+                            <div class="field-validation-message" id="id_workplace_type-validation" role="alert" aria-live="polite"></div>
+                            <div class="field-status-indicator" id="id_workplace_type-status" aria-hidden="true"></div>
+                        </div>
+                        
+                        <div class="form-field-wrapper">
+                            <label for="id_job_type" class="block text-sm font-bold text-gray-700 field-required">Job Type</label>
+                            <select name="job_type" id="id_job_type" required
+                                    class="form-field-enhanced"
+                                    data-validation='{"required": true}'
+                                    aria-describedby="id_job_type-help id_job_type-validation"
+                                    aria-required="true">
+                                <option value="">Select job type</option>
+                                <option value="full-time">Full-time</option>
+                                <option value="part-time">Part-time</option>
+                                <option value="contract">Contract</option>
+                                <option value="internship">Internship</option>
+                                <option value="temporary">Temporary</option>
+                            </select>
+                            <div id="id_job_type-help" class="field-help-text">Select the employment type</div>
+                            <div class="field-validation-message" id="id_job_type-validation" role="alert" aria-live="polite"></div>
+                            <div class="field-status-indicator" id="id_job_type-status" aria-hidden="true"></div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Compensation Group -->
+                <fieldset class="field-group-enhanced" role="group" aria-labelledby="compensation-legend">
+                    <legend id="compensation-legend">Compensation</legend>
+                    <div class="form-field-wrapper">
+                        <label for="id_salary_range" class="block text-sm font-bold text-gray-700 field-optional">Salary Range</label>
+                        <input type="text" name="salary_range" id="id_salary_range" 
+                               placeholder="e.g. $120k - $150k"
+                               class="form-field-enhanced"
+                               aria-describedby="id_salary_range-help id_salary_range-validation">
+                        <div id="id_salary_range-help" class="field-help-text">Providing salary information helps attract qualified candidates</div>
+                        <div class="field-validation-message" id="id_salary_range-validation" role="alert" aria-live="polite"></div>
+                        <div class="field-status-indicator" id="id_salary_range-status" aria-hidden="true"></div>
+                    </div>
+                </fieldset>
+
+                <!-- Job Details Group -->
+                <fieldset class="field-group-enhanced" role="group" aria-labelledby="job-details-legend">
+                    <legend id="job-details-legend">Job Details</legend>
+                    <div class="form-field-wrapper field-full-width">
+                        <label for="id_description" class="block text-sm font-bold text-gray-700 field-required">Job Description</label>
+                        <textarea name="description" id="id_description" rows="6" required 
+                                  placeholder="What will they do? What's the impact?"
+                                  class="form-field-enhanced"
+                                  data-validation='{"minLength": 50, "required": true}'
+                                  aria-describedby="id_description-help id_description-count id_description-validation"
+                                  aria-required="true"></textarea>
+                        <div id="id_description-help" class="field-help-text">Describe the role, responsibilities, and impact</div>
+                        <div class="field-character-count" id="id_description-count" aria-live="polite">0 / 2000 characters</div>
+                        <div class="field-validation-message" id="id_description-validation" role="alert" aria-live="polite"></div>
+                        <div class="field-status-indicator" id="id_description-status" aria-hidden="true"></div>
+                    </div>
+
+                    <div class="form-field-wrapper field-full-width">
+                        <label for="id_requirements" class="block text-sm font-bold text-gray-700 field-optional">Requirements</label>
+                        <textarea name="requirements" id="id_requirements" rows="4" 
+                                  placeholder="Skills, experience, etc."
+                                  class="form-field-enhanced"
+                                  aria-describedby="id_requirements-help id_requirements-count id_requirements-validation"></textarea>
+                        <div id="id_requirements-help" class="field-help-text">List the key skills, experience, and qualifications needed for this role</div>
+                        <div class="field-character-count" id="id_requirements-count" aria-live="polite">0 / 1000 characters</div>
+                        <div class="field-validation-message" id="id_requirements-validation" role="alert" aria-live="polite"></div>
+                        <div class="field-status-indicator" id="id_requirements-status" aria-hidden="true"></div>
+                    </div>
+                </fieldset>
+
+                <hr class="form-section-divider" role="separator">
+
+                <div class="flex items-center space-x-4 pt-4">
+                    <button type="submit" class="btn-premium px-10 py-3 text-lg w-full md:w-auto" id="submit-btn" aria-describedby="submit-help">
+                        Post Job
+                    </button>
+                    <div id="submit-help" class="sr-only">Submit the job posting for review and publication</div>
+                    <a href="{% url 'jobs:job_list' %}"
+                        class="text-gray-500 font-bold hover:text-gray-700 transition-colors focus:text-gray-700 focus:underline"
+                        aria-label="Cancel job creation and return to job list">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Character count functionality
+    function setupCharacterCount(textareaId, countId, maxLength) {
+        const textarea = document.getElementById(textareaId);
+        const counter = document.getElementById(countId);
+        
+        if (textarea && counter) {
+            function updateCount() {
+                const length = textarea.value.length;
+                counter.textContent = `${length} / ${maxLength} characters`;
+                
+                // Update styling based on length
+                counter.classList.remove('near-limit', 'over-limit');
+                if (length > maxLength * 0.9) {
+                    counter.classList.add('near-limit');
+                }
+                if (length > maxLength) {
+                    counter.classList.add('over-limit');
+                }
+                
+                // Announce when approaching or exceeding limit
+                if (length === Math.floor(maxLength * 0.9)) {
+                    window.a11y?.announceStatus(`Approaching character limit: ${length} of ${maxLength} characters used`);
+                } else if (length === maxLength) {
+                    window.a11y?.announceStatus(`Character limit reached: ${maxLength} characters`);
+                } else if (length > maxLength) {
+                    window.a11y?.announceStatus(`Character limit exceeded: ${length} of ${maxLength} characters`);
+                }
+            }
+            
+            textarea.addEventListener('input', updateCount);
+            updateCount(); // Initial count
+        }
+    }
+    
+    setupCharacterCount('id_description', 'id_description-count', 2000);
+    setupCharacterCount('id_requirements', 'id_requirements-count', 1000);
+    
+    // Form progress tracking
+    function updateFormProgress() {
+        const form = document.getElementById('job-form');
+        const requiredFields = form.querySelectorAll('[required]');
+        const progressBar = document.getElementById('form-progress');
+        const progressText = document.getElementById('progress-text');
+        const progressContainer = progressBar.closest('[role="progressbar"]');
+        
+        let completedFields = 0;
+        requiredFields.forEach(field => {
+            if (field.value.trim() !== '') {
+                completedFields++;
+            }
+        });
+        
+        const progress = (completedFields / requiredFields.length) * 100;
+        progressBar.style.width = `${progress}%`;
+        
+        // Update ARIA attributes
+        if (progressContainer) {
+            progressContainer.setAttribute('aria-valuenow', Math.round(progress));
+        }
+        
+        if (progress === 100) {
+            progressText.textContent = 'Ready to submit!';
+            window.a11y?.announceStatus('All required fields completed. Form is ready to submit.');
+        } else {
+            const remaining = requiredFields.length - completedFields;
+            progressText.textContent = `${remaining} required field${remaining !== 1 ? 's' : ''} remaining`;
+        }
+    }
+    
+    // Listen for field changes to update progress
+    document.addEventListener('field:input', updateFormProgress);
+    document.addEventListener('field:change', updateFormProgress);
+    
+    // Also listen for regular input events as fallback
+    document.addEventListener('input', function(e) {
+        if (e.target.closest('#job-form')) {
+            updateFormProgress();
+        }
+    });
+    
+    document.addEventListener('change', function(e) {
+        if (e.target.closest('#job-form')) {
+            updateFormProgress();
+        }
+    });
+    
+    // Initial progress update
+    updateFormProgress();
+    
+    // Form submission announcement
+    document.getElementById('job-form').addEventListener('submit', function() {
+        window.a11y?.announce('Submitting job posting. Please wait for confirmation.', 'assertive');
+    });
+});
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/form-enhancements.js' %}"></script>
+{% endblock %}

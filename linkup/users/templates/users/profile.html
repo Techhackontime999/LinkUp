@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-10">
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title text-2xl mb-6">Edit Profile</h2>
+
+            <div class="flex items-center space-x-6 mb-8">
+                <div class="avatar placeholder">
+                    {% if user.profile.avatar %}
+                    <div class="w-24 rounded-full">
+                        <img src="{{ user.profile.avatar.url }}" />
+                    </div>
+                    {% else %}
+                    <div class="bg-neutral-focus text-neutral-content rounded-full w-24">
+                        <span class="text-3xl">{{ user.username|slice:":2"|upper }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg">{{ user.username }}</h3>
+                    <p class="text-gray-500 text-sm">Update your personal details</p>
+                </div>
+            </div>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <h3 class="text-lg font-bold mb-4">Account Info</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="form-control w-full">
+                        <label class="label"><span class="label-text">Username</span></label>
+                        {{ u_form.username }}
+                        <div class="text-xs text-error mt-1">{{ u_form.username.errors.0 }}</div>
+                    </div>
+                    <div class="form-control w-full">
+                        <label class="label"><span class="label-text">Email</span></label>
+                        {{ u_form.email }}
+                        <div class="text-xs text-error mt-1">{{ u_form.email.errors.0 }}</div>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-bold mb-4">Profile Details</h3>
+                <div class="form-control w-full mb-4">
+                    <label class="label"><span class="label-text">Headline</span></label>
+                    {{ p_form.headline }}
+                    <div class="text-xs text-error mt-1">{{ p_form.headline.errors.0 }}</div>
+                </div>
+
+                <div class="form-control w-full mb-4">
+                    <label class="label"><span class="label-text">Bio</span></label>
+                    {{ p_form.bio }}
+                    <div class="text-xs text-error mt-1">{{ p_form.bio.errors.0 }}</div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="form-control w-full">
+                        <label class="label"><span class="label-text">Location</span></label>
+                        {{ p_form.location }}
+                        <div class="text-xs text-error mt-1">{{ p_form.location.errors.0 }}</div>
+                    </div>
+                    <div class="form-control w-full">
+                        <label class="label"><span class="label-text">Avatar</span></label>
+                        {{ p_form.avatar }}
+                        <div class="text-xs text-error mt-1">{{ p_form.avatar.errors.0 }}</div>
+                    </div>
+                </div>
+
+                <div class="card-actions justify-end mt-6">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a href="{% url 'public_profile' user.username %}" class="btn btn-ghost">View Public Profile</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Quick hacks for form styling if crispy is not present */
+    input[type="text"],
+    input[type="email"],
+    textarea {
+        @apply input input-bordered w-full;
+    }
+
+    /* Apply tailwind classes to raw django form inputs */
+    #id_username,
+    #id_email,
+    #id_headline,
+    #id_location {
+        border-radius: 0.5rem;
+        border-width: 1px;
+        --tw-border-opacity: 1;
+        border-color: hsl(var(--bc) / var(--tw-border-opacity));
+        padding: 0.75rem 1rem;
+        width: 100%;
+    }
+
+    #id_bio {
+        border-radius: 0.5rem;
+        border-width: 1px;
+        --tw-border-opacity: 1;
+        border-color: hsl(var(--bc) / var(--tw-border-opacity));
+        padding: 0.75rem 1rem;
+        width: 100%;
+    }
+</style>
+{% endblock %}

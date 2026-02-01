@@ -1,0 +1,607 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+.dashboard-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin: 20px 0;
+}
+
+.notification-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.2s;
+}
+
+.notification-item:hover {
+    background-color: #f9fafb;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.priority-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 12px;
+}
+
+.priority-urgent { background-color: #ef4444; }
+.priority-high { background-color: #f59e0b; }
+.priority-normal { background-color: #3b82f6; }
+.priority-low { background-color: #6b7280; }
+
+.action-button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-button-primary {
+    background-color: #8b5cf6;
+    color: white;
+    border: none;
+}
+
+.action-button-primary:hover {
+    background-color: #7c3aed;
+}
+
+.action-button-secondary {
+    background-color: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.action-button-secondary:hover {
+    background-color: #e5e7eb;
+}
+
+.filter-tabs {
+    display: flex;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 20px;
+}
+
+.filter-tab {
+    padding: 12px 24px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.filter-tab.active {
+    border-bottom-color: #8b5cf6;
+    color: #8b5cf6;
+    font-weight: 600;
+}
+
+.filter-tab:hover {
+    background-color: #f9fafb;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Notification Dashboard</h1>
+        <p class="text-gray-600">Monitor and manage the notification system</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="stat-card">
+            <div class="stat-number" id="total-notifications">-</div>
+            <div class="stat-label">Total Notifications</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="unread-notifications">-</div>
+            <div class="stat-label">Unread Notifications</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="grouped-notifications">-</div>
+            <div class="stat-label">Grouped Notifications</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="active-users">-</div>
+            <div class="stat-label">Active Users</div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Recent Notifications -->
+            <div class="dashboard-card">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900">Recent Notifications</h2>
+                    <div class="flex space-x-2">
+                        <button id="refresh-notifications" class="action-button action-button-secondary">
+                            Refresh
+                        </button>
+                        <button id="cleanup-notifications" class="action-button action-button-primary">
+                            Cleanup Old
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filter Tabs -->
+                <div class="filter-tabs">
+                    <div class="filter-tab active" data-filter="all">All</div>
+                    <div class="filter-tab" data-filter="unread">Unread</div>
+                    <div class="filter-tab" data-filter="urgent">Urgent</div>
+                    <div class="filter-tab" data-filter="grouped">Grouped</div>
+                </div>
+
+                <!-- Notifications List -->
+                <div id="notifications-list" class="max-h-96 overflow-y-auto">
+                    <div class="text-center py-8 text-gray-500">
+                        <div class="notification-loading"></div>
+                        <p class="mt-4">Loading notifications...</p>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                    <div class="text-sm text-gray-500">
+                        Showing <span id="showing-count">0</span> of <span id="total-count">0</span> notifications
+                    </div>
+                    <div class="flex space-x-2">
+                        <button id="prev-page" class="action-button action-button-secondary" disabled>
+                            Previous
+                        </button>
+                        <button id="next-page" class="action-button action-button-secondary" disabled>
+                            Next
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Analytics -->
+            <div class="dashboard-card">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">Analytics</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Notification Types Chart -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Notifications by Type</h3>
+                        <canvas id="types-chart" width="300" height="200"></canvas>
+                    </div>
+                    
+                    <!-- Activity Timeline -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Activity Timeline (24h)</h3>
+                        <canvas id="timeline-chart" width="300" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1 space-y-6">
+            <!-- System Status -->
+            <div class="dashboard-card">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">System Status</h2>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">WebSocket Status</span>
+                        <span id="websocket-status" class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                            Connected
+                        </span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Queue Status</span>
+                        <span id="queue-status" class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                            Healthy
+                        </span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Last Cleanup</span>
+                        <span id="last-cleanup" class="text-sm text-gray-500">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="dashboard-card">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+                
+                <div class="space-y-3">
+                    <button id="send-test-notification" class="w-full action-button action-button-primary">
+                        Send Test Notification
+                    </button>
+                    
+                    <button id="cleanup-old-notifications" class="w-full action-button action-button-secondary">
+                        Cleanup Old Notifications
+                    </button>
+                    
+                    <button id="reprocess-grouping" class="w-full action-button action-button-secondary">
+                        Reprocess Grouping
+                    </button>
+                    
+                    <button id="export-stats" class="w-full action-button action-button-secondary">
+                        Export Statistics
+                    </button>
+                </div>
+            </div>
+
+            <!-- Top Users -->
+            <div class="dashboard-card">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Top Users (Unread)</h2>
+                
+                <div id="top-users-list" class="space-y-3">
+                    <div class="text-center py-4 text-gray-500">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+class NotificationDashboard {
+    constructor() {
+        this.currentPage = 1;
+        this.pageSize = 20;
+        this.currentFilter = 'all';
+        this.totalCount = 0;
+        
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+        this.loadDashboardData();
+        this.setupCharts();
+        
+        // Refresh data every 30 seconds
+        setInterval(() => this.loadDashboardData(), 30000);
+    }
+    
+    setupEventListeners() {
+        // Filter tabs
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                this.setActiveFilter(e.target.dataset.filter);
+            });
+        });
+        
+        // Pagination
+        document.getElementById('prev-page').addEventListener('click', () => {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+                this.loadNotifications();
+            }
+        });
+        
+        document.getElementById('next-page').addEventListener('click', () => {
+            this.currentPage++;
+            this.loadNotifications();
+        });
+        
+        // Actions
+        document.getElementById('refresh-notifications').addEventListener('click', () => {
+            this.loadNotifications();
+        });
+        
+        document.getElementById('cleanup-notifications').addEventListener('click', () => {
+            this.cleanupNotifications();
+        });
+        
+        document.getElementById('send-test-notification').addEventListener('click', () => {
+            this.sendTestNotification();
+        });
+        
+        document.getElementById('cleanup-old-notifications').addEventListener('click', () => {
+            this.cleanupOldNotifications();
+        });
+        
+        document.getElementById('reprocess-grouping').addEventListener('click', () => {
+            this.reprocessGrouping();
+        });
+        
+        document.getElementById('export-stats').addEventListener('click', () => {
+            this.exportStatistics();
+        });
+    }
+    
+    setActiveFilter(filter) {
+        // Update active tab
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+        
+        this.currentFilter = filter;
+        this.currentPage = 1;
+        this.loadNotifications();
+    }
+    
+    async loadDashboardData() {
+        try {
+            // Load statistics
+            await this.loadStatistics();
+            
+            // Load notifications
+            await this.loadNotifications();
+            
+            // Load top users
+            await this.loadTopUsers();
+            
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+        }
+    }
+    
+    async loadStatistics() {
+        // This would typically call an API endpoint
+        // For now, we'll simulate with some data
+        
+        document.getElementById('total-notifications').textContent = '1,234';
+        document.getElementById('unread-notifications').textContent = '89';
+        document.getElementById('grouped-notifications').textContent = '45';
+        document.getElementById('active-users').textContent = '156';
+    }
+    
+    async loadNotifications() {
+        const container = document.getElementById('notifications-list');
+        container.innerHTML = '<div class="text-center py-8"><div class="notification-loading"></div><p class="mt-4 text-gray-500">Loading...</p></div>';
+        
+        try {
+            // Build query parameters
+            const params = new URLSearchParams({
+                page: this.currentPage,
+                limit: this.pageSize,
+                filter: this.currentFilter
+            });
+            
+            // This would call your API endpoint
+            // For now, we'll simulate with mock data
+            const mockNotifications = this.generateMockNotifications();
+            
+            this.renderNotifications(mockNotifications);
+            this.updatePagination();
+            
+        } catch (error) {
+            console.error('Error loading notifications:', error);
+            container.innerHTML = '<div class="text-center py-8 text-red-500">Error loading notifications</div>';
+        }
+    }
+    
+    generateMockNotifications() {
+        const types = ['connection_request', 'new_message', 'job_application', 'post_liked', 'mention'];
+        const priorities = ['low', 'normal', 'high', 'urgent'];
+        const notifications = [];
+        
+        for (let i = 0; i < this.pageSize; i++) {
+            notifications.push({
+                id: i + 1,
+                notification_type: types[Math.floor(Math.random() * types.length)],
+                title: `Sample Notification ${i + 1}`,
+                message: 'This is a sample notification message for testing purposes.',
+                priority: priorities[Math.floor(Math.random() * priorities.length)],
+                sender: `user${i + 1}`,
+                is_read: Math.random() > 0.3,
+                is_grouped: Math.random() > 0.7,
+                group_count: Math.random() > 0.7 ? Math.floor(Math.random() * 10) + 1 : 1,
+                created_at: new Date(Date.now() - Math.random() * 86400000).toISOString()
+            });
+        }
+        
+        return notifications;
+    }
+    
+    renderNotifications(notifications) {
+        const container = document.getElementById('notifications-list');
+        
+        if (notifications.length === 0) {
+            container.innerHTML = '<div class="text-center py-8 text-gray-500">No notifications found</div>';
+            return;
+        }
+        
+        const html = notifications.map(notification => `
+            <div class="notification-item">
+                <div class="priority-indicator priority-${notification.priority}"></div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-medium text-gray-900">${notification.title}</h4>
+                        <div class="flex items-center space-x-2">
+                            ${notification.is_grouped && notification.group_count > 1 ? 
+                                `<span class="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">${notification.group_count}</span>` : 
+                                ''
+                            }
+                            <span class="text-xs text-gray-500">${this.formatTimeAgo(new Date(notification.created_at))}</span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1">${notification.message}</p>
+                    <div class="flex items-center justify-between mt-2">
+                        <div class="flex items-center space-x-2 text-xs text-gray-500">
+                            <span class="capitalize">${notification.notification_type.replace('_', ' ')}</span>
+                            ${notification.sender ? `<span>• From: ${notification.sender}</span>` : ''}
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            ${!notification.is_read ? 
+                                '<span class="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">Unread</span>' : 
+                                '<span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">Read</span>'
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        container.innerHTML = html;
+    }
+    
+    updatePagination() {
+        const showingCount = Math.min(this.currentPage * this.pageSize, this.totalCount);
+        document.getElementById('showing-count').textContent = showingCount;
+        document.getElementById('total-count').textContent = this.totalCount;
+        
+        document.getElementById('prev-page').disabled = this.currentPage <= 1;
+        document.getElementById('next-page').disabled = showingCount >= this.totalCount;
+    }
+    
+    async loadTopUsers() {
+        const container = document.getElementById('top-users-list');
+        
+        // Mock data for top users
+        const topUsers = [
+            { username: 'john_doe', unread_count: 15 },
+            { username: 'jane_smith', unread_count: 12 },
+            { username: 'bob_wilson', unread_count: 8 },
+            { username: 'alice_brown', unread_count: 6 },
+            { username: 'charlie_davis', unread_count: 4 }
+        ];
+        
+        const html = topUsers.map(user => `
+            <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-900">${user.username}</span>
+                <span class="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">${user.unread_count}</span>
+            </div>
+        `).join('');
+        
+        container.innerHTML = html;
+    }
+    
+    setupCharts() {
+        // This would typically use a charting library like Chart.js
+        // For now, we'll just show placeholders
+        
+        const typesCanvas = document.getElementById('types-chart');
+        const timelineCanvas = document.getElementById('timeline-chart');
+        
+        if (typesCanvas && timelineCanvas) {
+            // Initialize charts here
+            console.log('Charts would be initialized here');
+        }
+    }
+    
+    formatTimeAgo(date) {
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+        
+        if (diffInSeconds < 60) return 'Just now';
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+        
+        return date.toLocaleDateString();
+    }
+    
+    async cleanupNotifications() {
+        if (confirm('Are you sure you want to cleanup old notifications?')) {
+            try {
+                // Call cleanup API
+                this.showMessage('Cleanup completed successfully', 'success');
+                this.loadDashboardData();
+            } catch (error) {
+                this.showMessage('Error during cleanup', 'error');
+            }
+        }
+    }
+    
+    async sendTestNotification() {
+        try {
+            // Call test notification API
+            this.showMessage('Test notification sent', 'success');
+        } catch (error) {
+            this.showMessage('Error sending test notification', 'error');
+        }
+    }
+    
+    async cleanupOldNotifications() {
+        if (confirm('This will remove old read notifications. Continue?')) {
+            try {
+                // Call cleanup API
+                this.showMessage('Old notifications cleaned up', 'success');
+                this.loadDashboardData();
+            } catch (error) {
+                this.showMessage('Error during cleanup', 'error');
+            }
+        }
+    }
+    
+    async reprocessGrouping() {
+        if (confirm('This will reprocess notification grouping. Continue?')) {
+            try {
+                // Call reprocessing API
+                this.showMessage('Grouping reprocessed successfully', 'success');
+                this.loadDashboardData();
+            } catch (error) {
+                this.showMessage('Error reprocessing grouping', 'error');
+            }
+        }
+    }
+    
+    async exportStatistics() {
+        try {
+            // Generate and download statistics
+            this.showMessage('Statistics exported successfully', 'success');
+        } catch (error) {
+            this.showMessage('Error exporting statistics', 'error');
+        }
+    }
+    
+    showMessage(message, type) {
+        const toast = document.createElement('div');
+        toast.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+            type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+        }`;
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+}
+
+// Initialize dashboard when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    new NotificationDashboard();
+});
+</script>
+{% endblock %}

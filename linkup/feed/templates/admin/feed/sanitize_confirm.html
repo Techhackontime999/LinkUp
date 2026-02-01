@@ -1,0 +1,54 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+  <div class="app-sanitize-confirm">
+    <h1>{{ title }}</h1>
+    <p>{% blocktrans count count=objects|length %}You are about to review {{ count }} post for sanitization.{% endblocktrans %}</p>
+
+    <form method="post" style="margin-top:1rem;">
+      {% csrf_token %}
+
+      <table class="adminlist" style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd">ID</th>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd">User</th>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd">Created</th>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd">Would change?</th>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd">Original (truncated)</th>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd">Sanitized (truncated)</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for obj in objects %}
+          <tr>
+            <td style="padding:8px; border-bottom:1px solid #eee">{{ obj.id }}</td>
+            <td style="padding:8px; border-bottom:1px solid #eee">{{ obj.user }}</td>
+            <td style="padding:8px; border-bottom:1px solid #eee">{{ obj.created }}</td>
+            <td style="padding:8px; border-bottom:1px solid #eee">{% if obj.changed %}<strong style="color:#c0392b">Yes</strong>{% else %}No{% endif %}</td>
+            <td style="padding:8px; border-bottom:1px solid #eee">{{ obj.original|striptags|truncatechars:120 }}</td>
+            <td style="padding:8px; border-bottom:1px solid #eee">{{ obj.cleaned|safe|truncatechars:120 }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+
+      {# include original selected ids so the action is re-applied on confirmation #}
+      {% for id in selected_ids %}
+        <input type="hidden" name="_selected_action" value="{{ id }}">
+      {% endfor %}
+
+      <p style="margin-top:1rem;">
+        <label>
+          <input type="checkbox" name="dry_run" checked> Dry run (preview only, do not save changes)
+        </label>
+      </p>
+
+      <div style="margin-top:1rem;">
+        <button type="submit" name="apply" value="yes" class="default">Apply</button>
+        <a href="{{ return_url }}" class="button">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

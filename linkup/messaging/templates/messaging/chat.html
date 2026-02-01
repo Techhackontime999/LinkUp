@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto py-4 px-4">
+    <!-- Back Button -->
+    <div class="mb-4">
+        <a href="{% url 'messaging:inbox' %}" class="inline-flex items-center text-gray-600 hover:text-purple-600 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+            </svg>
+            Back to Messages
+        </a>
+    </div>
+
+    <!-- Chat Container -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden" style="height: calc(100vh - 180px); min-height: 500px;">
+        <!-- Chat Header -->
+        <div class="bg-gradient-to-r from-purple-600 to-purple-700 p-4 border-b border-purple-800">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <!-- Avatar -->
+                    <div class="relative">
+                        <div class="w-12 h-12 rounded-full bg-white p-0.5">
+                            <div class="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-purple-400 to-purple-600 text-white font-bold text-lg">
+                                {{ target.username|slice:":1"|upper }}
+                            </div>
+                        </div>
+                        <!-- Online Status Indicator -->
+                        <span id="online-indicator" class="absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white {% if is_online %}bg-green-400 animate-pulse{% else %}bg-gray-400{% endif %}"></span>
+                    </div>
+                    
+                    <!-- User Info -->
+                    <div class="text-white">
+                        <h2 class="text-lg font-bold">{{ target.get_full_name|default:target.username }}</h2>
+                        <div class="flex items-center space-x-2 text-sm">
+                            <p id="user-status-text" class="text-purple-100">
+                                {% if is_online %}
+                                    <span class="flex items-center">
+                                        <span class="w-2 h-2 bg-green-400 rounded-full mr-1.5 animate-pulse"></span>
+                                        Online
+                                    </span>
+                                {% else %}
+                                    {% if last_seen %}
+                                        Last seen {{ last_seen|timesince }} ago
+                                    {% else %}
+                                        Offline
+                                    {% endif %}
+                                {% endif %}
+                            </p>
+                            <!-- Typing Indicator -->
+                            <p id="typing-indicator" class="text-purple-200 italic hidden flex items-center">
+                                <span class="typing-dots flex space-x-1 mr-2">
+                                    <span class="w-1.5 h-1.5 bg-purple-200 rounded-full animate-bounce" style="animation-delay: 0ms"></span>
+                                    <span class="w-1.5 h-1.5 bg-purple-200 rounded-full animate-bounce" style="animation-delay: 150ms"></span>
+                                    <span class="w-1.5 h-1.5 bg-purple-200 rounded-full animate-bounce" style="animation-delay: 300ms"></span>
+                                </span>
+                                typing
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Connection Status & Actions -->
+                <div class="flex items-center space-x-3">
+                    <span id="chat-status" class="text-xs px-3 py-1 rounded-full bg-white/20 text-white backdrop-blur-sm">Connecting...</span>
+                    <a href="{% url 'public_profile' target.username %}" class="text-white hover:text-purple-200 transition-colors" title="View Profile">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Messages Area -->
+        <div class="flex flex-col" style="height: calc(100% - 140px);">
+            <!-- Messages Container -->
+            <div id="chat-window" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gradient-to-b from-gray-50 to-white" aria-live="polite" style="scroll-behavior: smooth;">
+                <!-- Loading indicator -->
+                <div id="loading-messages" class="flex justify-center items-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                </div>
+                <!-- Messages will be appended here -->
+            </div>
+            
+            <!-- Message Input Area -->
+            <div class="border-t border-gray-200 bg-white p-4">
+                <form id="chat-form" class="flex items-end gap-3" onsubmit="return false;">
+                    <!-- Emoji Button (Optional) -->
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors pb-3" title="Emoji">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </button>
+                    
+                    <!-- Text Input -->
+                    <div class="flex-1">
+                        <textarea 
+                            id="chat-input" 
+                            rows="1"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none transition-all" 
+                            placeholder="Type a message..." 
+                            autocomplete="off"
+                            style="max-height: 120px;"
+                        ></textarea>
+                    </div>
+                    
+                    <!-- Send Button -->
+                    <button 
+                        id="chat-send" 
+                        type="button" 
+                        class="px-5 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-2xl hover:from-purple-700 hover:to-purple-800 transition-all transform hover:scale-105 active:scale-95 font-medium flex items-center gap-2 shadow-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                        </svg>
+                        <span class="hidden sm:inline">Send</span>
+                    </button>
+                </form>
+                
+                <!-- Character count or other info -->
+                <div class="mt-2 text-xs text-gray-400 text-right hidden" id="char-count">
+                    <span id="char-count-text">0</span> characters
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom scrollbar for chat window */
+    #chat-window::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    #chat-window::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    
+    #chat-window::-webkit-scrollbar-thumb {
+        background: #c4b5fd;
+        border-radius: 3px;
+    }
+    
+    #chat-window::-webkit-scrollbar-thumb:hover {
+        background: #a78bfa;
+    }
+    
+    /* Auto-resize textarea */
+    #chat-input {
+        overflow-y: hidden;
+    }
+    
+    /* Smooth animations */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .message-bubble {
+        animation: slideIn 0.3s ease-out;
+    }
+</style>
+
+<script>
+    window.CHAT_CONFIG = {
+        username: "{{ target.username }}",
+        currentUser: "{{ request.user.username }}",
+        fetchHistoryUrl: "{% url 'messaging:fetch_history' target.username %}",
+        loadOlderUrl: "{% url 'messaging:load_older_messages' target.username %}",
+        sendFallbackUrl: "{% url 'messaging:send_message_fallback' target.username %}",
+        queueUrl: "{% url 'messaging:queue_message' target.username %}",
+        isOnline: {{ is_online|yesno:"true,false" }}
+    };
+    
+    // Auto-resize textarea
+    const textarea = document.getElementById('chat-input');
+    textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+</script>
+<script src="{% static 'messaging/chat.js' %}"></script>
+{% endblock %}

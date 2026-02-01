@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto pt-8 pb-12">
+    <div class="premium-card p-1 shadow-2xl">
+        <div class="px-8 py-10">
+            <h1 class="text-3xl font-extrabold text-gray-900 mb-2">Post a New Opportunity</h1>
+            <p class="text-gray-500 mb-8">Reach the right talent in our professional network.</p>
+
+            <form action="" method="post" class="space-y-6">
+                {% csrf_token %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-bold text-gray-700">Job Title</label>
+                        <input type="text" name="title" required placeholder="e.g. Senior Frontend Engineer"
+                            class="w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-bold text-gray-700">Company Name</label>
+                        <input type="text" name="company" required placeholder="e.g. Google"
+                            class="w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-bold text-gray-700">Location</label>
+                        <input type="text" name="location" required placeholder="e.g. New York, NY"
+                            class="w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-bold text-gray-700">Workplace Type</label>
+                        <select name="workplace_type"
+                            class="w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white">
+                            <option value="on-site">On-site</option>
+                            <option value="remote">Remote</option>
+                            <option value="hybrid">Hybrid</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-bold text-gray-700">Job Type</label>
+                        <select name="job_type"
+                            class="w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white">
+                            <option value="full-time">Full-time</option>
+                            <option value="part-time">Part-time</option>
+                            <option value="contract">Contract</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-gray-700">Salary Range (Optional)</label>
+                    <input type="text" name="salary_range" placeholder="e.g. $120k - $150k"
+                        class="w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none">
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-gray-700">Job Description</label>
+                    <textarea name="description" rows="5" required placeholder="What will they do? What's the impact?"
+                        class="w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none resize-none"></textarea>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-gray-700">Requirements</label>
+                    <textarea name="requirements" rows="4" required placeholder="Skills, experience, etc."
+                        class="w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none resize-none"></textarea>
+                </div>
+
+                <div class="flex items-center justify-between pt-8 border-t border-gray-100">
+                    <a href="{% url 'jobs:job_list' %}"
+                        class="text-gray-500 font-bold hover:text-gray-700 transition-colors">Cancel</a>
+                    <button type="submit" class="btn-premium px-12 py-4 text-lg">Post Job</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

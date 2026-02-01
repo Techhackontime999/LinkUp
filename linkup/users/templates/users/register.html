@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/form-enhancements.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 site-container"
+    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="max-w-md w-full">
+        <div class="auth-card p-6 glass">
+            <div class="text-center mb-6">
+                <div class="brand-logo mx-auto mb-3">LU</div>
+                <h1 class="text-3xl font-bold text-gradient heading-display mb-1">LinkUp</h1>
+                <p class="text-gray-600">Create your account and start building your professional presence</p>
+            </div>
+
+            <form method="post" class="space-y-5 form-enhanced" id="registration-form" data-ajax="false">
+                {% csrf_token %}
+
+                {# non-field errors #}
+                {% if form.non_field_errors %}
+                <div class="alert-premium alert-error p-3 mb-3" role="alert" aria-live="assertive">
+                    {% for error in form.non_field_errors %}
+                        <div class="text-xs">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Account Information Group -->
+                <fieldset class="field-group-enhanced">
+                    <legend>Account Information</legend>
+                    
+                    {% for field in form %}
+                    <div class="form-field-wrapper">
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-bold text-gray-700 {% if field.field.required %}field-required{% else %}field-optional{% endif %}">
+                            {{ field.label }}
+                        </label>
+
+                        {# Render the field widget with enhanced classes #}
+                        {% if field.name == 'username' %}
+                            <input type="text" name="{{ field.name }}" id="{{ field.id_for_label }}" 
+                                   class="auth-input form-field-enhanced" 
+                                   placeholder="Choose a unique username"
+                                   data-validation='{"minLength": 3, "required": true}'
+                                   {% if field.value %}value="{{ field.value }}"{% endif %}>
+                        {% elif field.name == 'email' %}
+                            <input type="email" name="{{ field.name }}" id="{{ field.id_for_label }}" 
+                                   class="auth-input form-field-enhanced" 
+                                   placeholder="Enter your email address"
+                                   data-validation='{"type": "email", "required": true}'
+                                   {% if field.value %}value="{{ field.value }}"{% endif %}>
+                        {% elif field.name == 'password1' %}
+                            <input type="password" name="{{ field.name }}" id="{{ field.id_for_label }}" 
+                                   class="auth-input form-field-enhanced" 
+                                   placeholder="Create a secure password"
+                                   data-validation='{"minLength": 8, "required": true}'>
+                        {% elif field.name == 'password2' %}
+                            <input type="password" name="{{ field.name }}" id="{{ field.id_for_label }}" 
+                                   class="auth-input form-field-enhanced" 
+                                   placeholder="Confirm your password"
+                                   data-validation='{"required": true}'>
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
+
+                        {% if field.help_text %}
+                        <div class="field-help-text">{{ field.help_text|safe }}</div>
+                        {% endif %}
+
+                        <div class="field-validation-message" id="{{ field.id_for_label }}-validation">
+                            {% if field.errors %}
+                                {% for err in field.errors %}
+                                    {{ err }}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="field-status-indicator" id="{{ field.id_for_label }}-status"></div>
+                    </div>
+                    {% endfor %}
+                </fieldset>
+
+                <div class="auth-actions">
+                    <button type="submit" class="btn-primary-large" id="submit-btn">Create Account</button>
+                    <div class="auth-legal">By creating an account, you agree to our <a href="#" class="text-purple-600 hover:text-purple-700">Terms</a>.</div>
+                </div>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-gray-600">Already have an account?
+                    <a href="{% url 'login' %}" class="text-purple-600 hover:text-purple-700 font-semibold">Log in</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password confirmation validation
+    const password1 = document.getElementById('id_password1');
+    const password2 = document.getElementById('id_password2');
+    
+    if (password1 && password2) {
+        function validatePasswordMatch() {
+            const password1Value = password1.value;
+            const password2Value = password2.value;
+            const validationMessage = document.getElementById('id_password2-validation');
+            
+            if (password2Value && password1Value !== password2Value) {
+                validationMessage.textContent = 'Passwords do not match';
+                validationMessage.className = 'field-validation-message validation-error';
+                password2.classList.add('field-invalid');
+                password2.classList.remove('field-valid');
+            } else if (password2Value && password1Value === password2Value) {
+                validationMessage.textContent = 'Passwords match';
+                validationMessage.className = 'field-validation-message validation-success';
+                password2.classList.add('field-valid');
+                password2.classList.remove('field-invalid');
+            } else {
+                validationMessage.textContent = '';
+                validationMessage.className = 'field-validation-message';
+                password2.classList.remove('field-valid', 'field-invalid');
+            }
+        }
+        
+        password1.addEventListener('input', validatePasswordMatch);
+        password2.addEventListener('input', validatePasswordMatch);
+    }
+    
+    // Username availability check (simulated)
+    const usernameField = document.getElementById('id_username');
+    if (usernameField) {
+        let usernameTimeout;
+        usernameField.addEventListener('input', function() {
+            clearTimeout(usernameTimeout);
+            const validationMessage = document.getElementById('id_username-validation');
+            
+            if (this.value.length >= 3) {
+                usernameTimeout = setTimeout(() => {
+                    // Simulate username availability check
+                    // In a real implementation, this would be an AJAX call
+                    validationMessage.textContent = 'Username is available';
+                    validationMessage.className = 'field-validation-message validation-success';
+                    this.classList.add('field-valid');
+                    this.classList.remove('field-invalid');
+                }, 500);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/form-enhancements.js' %}"></script>
+{% endblock %}

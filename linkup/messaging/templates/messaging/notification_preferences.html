@@ -1,0 +1,462 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+.preference-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+}
+
+.preference-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.preference-item:last-child {
+    border-bottom: none;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background-color: #8b5cf6;
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(24px);
+}
+
+.delivery-method-select {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: white;
+    font-size: 14px;
+    min-width: 120px;
+}
+
+.time-input {
+    padding: 6px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 80px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Notification Preferences</h1>
+        <p class="text-gray-600">Customize how and when you receive notifications</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Preferences -->
+        <div class="lg:col-span-2">
+            <div class="preference-card">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">Notification Types</h2>
+                
+                <div id="preferences-container">
+                    <!-- Preferences will be loaded here -->
+                    <div class="text-center py-8">
+                        <div class="notification-loading"></div>
+                        <p class="text-gray-500 mt-4">Loading preferences...</p>
+                    </div>
+                </div>
+                
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <button id="save-preferences" class="btn-premium px-6 py-2 disabled:opacity-50" disabled>
+                        Save Changes
+                    </button>
+                    <button id="reset-preferences" class="ml-3 px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        Reset to Defaults
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiet Hours -->
+        <div class="lg:col-span-1">
+            <div class="preference-card">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">Quiet Hours</h2>
+                <p class="text-gray-600 text-sm mb-4">Set times when you don't want to receive notifications (except urgent ones)</p>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
+                        <input type="time" id="quiet-hours-start" class="time-input">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">End Time</label>
+                        <input type="time" id="quiet-hours-end" class="time-input">
+                    </div>
+                    
+                    <div class="pt-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="enable-quiet-hours" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                            <span class="ml-2 text-sm text-gray-700">Enable quiet hours</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Browser Notifications -->
+            <div class="preference-card mt-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Browser Notifications</h2>
+                <p class="text-gray-600 text-sm mb-4">Allow browser notifications for important updates</p>
+                
+                <div id="browser-notification-status" class="mb-4">
+                    <!-- Status will be updated by JavaScript -->
+                </div>
+                
+                <button id="request-notification-permission" class="w-full px-4 py-2 border border-purple-300 text-purple-700 rounded-lg hover:bg-purple-50">
+                    Enable Browser Notifications
+                </button>
+            </div>
+
+            <!-- Test Notification -->
+            <div class="preference-card mt-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Test Notifications</h2>
+                <p class="text-gray-600 text-sm mb-4">Send a test notification to verify your settings</p>
+                
+                <button id="send-test-notification" class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                    Send Test Notification
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+class NotificationPreferences {
+    constructor() {
+        this.preferences = [];
+        this.hasChanges = false;
+        this.init();
+    }
+    
+    init() {
+        this.loadPreferences();
+        this.setupEventListeners();
+        this.checkBrowserNotificationStatus();
+    }
+    
+    setupEventListeners() {
+        // Save preferences
+        document.getElementById('save-preferences').addEventListener('click', () => {
+            this.savePreferences();
+        });
+        
+        // Reset preferences
+        document.getElementById('reset-preferences').addEventListener('click', () => {
+            this.resetPreferences();
+        });
+        
+        // Request browser notification permission
+        document.getElementById('request-notification-permission').addEventListener('click', () => {
+            this.requestNotificationPermission();
+        });
+        
+        // Send test notification
+        document.getElementById('send-test-notification').addEventListener('click', () => {
+            this.sendTestNotification();
+        });
+        
+        // Quiet hours
+        document.getElementById('enable-quiet-hours').addEventListener('change', (e) => {
+            this.toggleQuietHours(e.target.checked);
+        });
+    }
+    
+    async loadPreferences() {
+        try {
+            const response = await fetch('/messages/notifications/preferences/', {
+                credentials: 'same-origin'
+            });
+            
+            if (!response.ok) throw new Error('Failed to load preferences');
+            
+            const data = await response.json();
+            this.preferences = data.preferences || [];
+            this.renderPreferences();
+            
+        } catch (error) {
+            console.error('Error loading preferences:', error);
+            this.showError('Failed to load notification preferences');
+        }
+    }
+    
+    renderPreferences() {
+        const container = document.getElementById('preferences-container');
+        
+        if (this.preferences.length === 0) {
+            container.innerHTML = '<p class="text-gray-500 text-center py-8">No preferences found</p>';
+            return;
+        }
+        
+        const html = this.preferences.map(pref => `
+            <div class="preference-item" data-type="${pref.notification_type}">
+                <div class="flex-1">
+                    <h3 class="font-medium text-gray-900">${pref.notification_type_display}</h3>
+                    <p class="text-sm text-gray-600 mt-1">Receive notifications for ${pref.notification_type_display.toLowerCase()}</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <select class="delivery-method-select" data-type="${pref.notification_type}">
+                        <option value="realtime" ${pref.delivery_method === 'realtime' ? 'selected' : ''}>Real-time</option>
+                        <option value="email" ${pref.delivery_method === 'email' ? 'selected' : ''}>Email</option>
+                        <option value="push" ${pref.delivery_method === 'push' ? 'selected' : ''}>Push</option>
+                        <option value="none" ${pref.delivery_method === 'none' ? 'selected' : ''}>Disabled</option>
+                    </select>
+                    <label class="toggle-switch">
+                        <input type="checkbox" ${pref.is_enabled ? 'checked' : ''} data-type="${pref.notification_type}">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        `).join('');
+        
+        container.innerHTML = html;
+        
+        // Add event listeners for changes
+        container.querySelectorAll('input, select').forEach(element => {
+            element.addEventListener('change', () => {
+                this.markAsChanged();
+            });
+        });
+    }
+    
+    markAsChanged() {
+        this.hasChanges = true;
+        document.getElementById('save-preferences').disabled = false;
+    }
+    
+    async savePreferences() {
+        try {
+            const updatedPreferences = [];
+            
+            document.querySelectorAll('.preference-item').forEach(item => {
+                const type = item.dataset.type;
+                const toggle = item.querySelector('input[type="checkbox"]');
+                const select = item.querySelector('select');
+                
+                updatedPreferences.push({
+                    notification_type: type,
+                    is_enabled: toggle.checked,
+                    delivery_method: select.value
+                });
+            });
+            
+            const response = await fetch('/messages/notifications/preferences/update/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken()
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    preferences: updatedPreferences
+                })
+            });
+            
+            if (!response.ok) throw new Error('Failed to save preferences');
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showSuccess('Preferences saved successfully');
+                this.hasChanges = false;
+                document.getElementById('save-preferences').disabled = true;
+            } else {
+                throw new Error('Server returned error');
+            }
+            
+        } catch (error) {
+            console.error('Error saving preferences:', error);
+            this.showError('Failed to save preferences');
+        }
+    }
+    
+    resetPreferences() {
+        if (confirm('Are you sure you want to reset all preferences to defaults?')) {
+            // Reset all toggles to enabled and delivery method to realtime
+            document.querySelectorAll('.preference-item').forEach(item => {
+                const toggle = item.querySelector('input[type="checkbox"]');
+                const select = item.querySelector('select');
+                
+                toggle.checked = true;
+                select.value = 'realtime';
+            });
+            
+            this.markAsChanged();
+        }
+    }
+    
+    checkBrowserNotificationStatus() {
+        const statusDiv = document.getElementById('browser-notification-status');
+        const button = document.getElementById('request-notification-permission');
+        
+        if (!('Notification' in window)) {
+            statusDiv.innerHTML = '<p class="text-red-600 text-sm">Browser notifications not supported</p>';
+            button.disabled = true;
+            return;
+        }
+        
+        switch (Notification.permission) {
+            case 'granted':
+                statusDiv.innerHTML = '<p class="text-green-600 text-sm">✓ Browser notifications enabled</p>';
+                button.textContent = 'Notifications Enabled';
+                button.disabled = true;
+                break;
+            case 'denied':
+                statusDiv.innerHTML = '<p class="text-red-600 text-sm">✗ Browser notifications blocked</p>';
+                button.textContent = 'Notifications Blocked';
+                button.disabled = true;
+                break;
+            default:
+                statusDiv.innerHTML = '<p class="text-yellow-600 text-sm">⚠ Browser notifications not enabled</p>';
+                break;
+        }
+    }
+    
+    async requestNotificationPermission() {
+        try {
+            const permission = await Notification.requestPermission();
+            this.checkBrowserNotificationStatus();
+            
+            if (permission === 'granted') {
+                this.showSuccess('Browser notifications enabled');
+            } else {
+                this.showError('Browser notifications permission denied');
+            }
+        } catch (error) {
+            console.error('Error requesting notification permission:', error);
+            this.showError('Failed to request notification permission');
+        }
+    }
+    
+    sendTestNotification() {
+        // Send via WebSocket if available
+        if (window.notificationSystem && window.notificationSystem.isConnected) {
+            // This would typically be sent from the server
+            window.notificationSystem.handleNewNotification({
+                id: 'test-' + Date.now(),
+                notification_type: 'system_announcement',
+                title: 'Test Notification',
+                message: 'This is a test notification to verify your settings are working correctly.',
+                priority: 'normal',
+                sender: null,
+                sender_avatar: null,
+                created_at: new Date().toISOString(),
+                action_url: null,
+                is_grouped: false,
+                group_count: 1,
+                unread_count: 1,
+                is_read: false
+            });
+        }
+        
+        // Also show browser notification
+        if (Notification.permission === 'granted') {
+            new Notification('Test Notification', {
+                body: 'Your notification settings are working correctly!',
+                icon: '/static/images/notification-icon.png'
+            });
+        }
+        
+        this.showSuccess('Test notification sent');
+    }
+    
+    toggleQuietHours(enabled) {
+        const startInput = document.getElementById('quiet-hours-start');
+        const endInput = document.getElementById('quiet-hours-end');
+        
+        startInput.disabled = !enabled;
+        endInput.disabled = !enabled;
+        
+        if (!enabled) {
+            startInput.value = '';
+            endInput.value = '';
+        }
+    }
+    
+    showSuccess(message) {
+        this.showMessage(message, 'success');
+    }
+    
+    showError(message) {
+        this.showMessage(message, 'error');
+    }
+    
+    showMessage(message, type) {
+        // Create toast notification
+        const toast = document.createElement('div');
+        toast.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+            type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+        }`;
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+    
+    getCSRFToken() {
+        const token = document.querySelector('[name=csrfmiddlewaretoken]');
+        return token ? token.value : '';
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    new NotificationPreferences();
+});
+</script>
+{% endblock %}

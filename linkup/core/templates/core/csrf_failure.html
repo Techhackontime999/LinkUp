@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Security Verification Failed{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div class="text-center">
+            <div class="mx-auto h-16 w-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                <svg class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">Security Verification Failed</h2>
+            <p class="text-gray-600 mb-6">{{ error_message }}</p>
+        </div>
+
+        <div class="bg-white shadow-lg rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">What happened?</h3>
+            <p class="text-gray-600 mb-4">
+                Our security system detected an issue with your request. This usually happens when:
+            </p>
+            <ul class="text-sm text-gray-600 space-y-2 mb-6">
+                <li class="flex items-start">
+                    <span class="text-purple-500 mr-2">•</span>
+                    Your session has expired
+                </li>
+                <li class="flex items-start">
+                    <span class="text-purple-500 mr-2">•</span>
+                    You've been inactive for too long
+                </li>
+                <li class="flex items-start">
+                    <span class="text-purple-500 mr-2">•</span>
+                    Your browser cookies are disabled
+                </li>
+                <li class="flex items-start">
+                    <span class="text-purple-500 mr-2">•</span>
+                    You opened the page in multiple tabs
+                </li>
+            </ul>
+
+            <div class="space-y-3">
+                {% if show_refresh_button %}
+                <button onclick="window.location.reload()" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Refresh Page
+                </button>
+                {% endif %}
+
+                <a href="{% url 'feed' %}" class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Go to Home
+                </a>
+
+                {% if show_clear_cookies %}
+                <button onclick="clearCookiesAndReload()" class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    Clear Cookies & Reload
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="text-center">
+            <p class="text-xs text-gray-500">
+                If the problem persists, please contact support.
+                <br>
+                Error Code: CSRF_{{ reason|default:"UNKNOWN" }}
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+function clearCookiesAndReload() {
+    // Clear all cookies for this domain
+    document.cookie.split(";").forEach(function(c) { 
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+    });
+    
+    // Clear localStorage and sessionStorage
+    if (typeof(Storage) !== "undefined") {
+        localStorage.clear();
+        sessionStorage.clear();
+    }
+    
+    // Reload the page
+    window.location.reload();
+}
+
+// Auto-refresh CSRF token every 30 minutes
+setInterval(function() {
+    fetch('{% url "csrf_token_refresh" %}', {
+        method: 'GET',
+        credentials: 'same-origin'
+    }).then(function(response) {
+        if (response.ok) {
+            return response.json();
+        }
+    }).then(function(data) {
+        if (data && data.csrf_token) {
+            // Update CSRF token in forms
+            document.querySelectorAll('input[name="csrfmiddlewaretoken"]').forEach(function(input) {
+                input.value = data.csrf_token;
+            });
+            
+            // Update CSRF token in AJAX headers
+            if (window.jQuery) {
+                $.ajaxSetup({
+                    beforeSend: function(xhr, settings) {
+                        if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                            xhr.setRequestHeader("X-CSRFToken", data.csrf_token);
+                        }
+                    }
+                });
+            }
+        }
+    }).catch(function(error) {
+        console.log('CSRF token refresh failed:', error);
+    });
+}, 30 * 60 * 1000); // 30 minutes
+</script>
+{% endblock %}

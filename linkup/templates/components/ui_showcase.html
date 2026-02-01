@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="site-container">
+    <!-- UI Showcase Header -->
+    <div class="site-hero animate-fade-in">
+        <div class="site-brand">
+            <div class="brand-logo">UI</div>
+            <div>
+                <h1 class="hero-title heading-display text-gradient-purple">Enhanced UI Components</h1>
+                <p class="hero-sub">Modern, responsive, and accessible design system</p>
+            </div>
+        </div>
+        <div class="cta-chip">Premium Design</div>
+    </div>
+
+    <!-- Responsive Grid Layout -->
+    <div class="responsive-grid mb-8">
+        <!-- Modern Card Variants -->
+        <div class="card-elevated p-6 animate-slide-in">
+            <h3 class="heading-tertiary">Elevated Card</h3>
+            <p class="text-body">Enhanced with backdrop blur and smooth hover animations.</p>
+            <button class="btn-premium mt-4 micro-bounce">Interact</button>
+        </div>
+
+        <div class="card-glass p-6 animate-slide-in-up">
+            <h3 class="heading-tertiary">Glass Card</h3>
+            <p class="text-body">Glassmorphism effect with backdrop filter.</p>
+            <button class="btn-premium-outline mt-4 micro-lift">Explore</button>
+        </div>
+
+        <div class="card-gradient p-6 animate-slide-in-left">
+            <h3 class="heading-tertiary">Gradient Card</h3>
+            <p class="text-body">Subtle gradient background with purple theme.</p>
+            <button class="btn-premium mt-4 micro-glow">Discover</button>
+        </div>
+
+        <div class="card-featured p-6 animate-fade-in">
+            <h3 class="heading-tertiary">Featured Card</h3>
+            <p class="text-body">Premium card with gradient border effect.</p>
+            <button class="btn-premium mt-4 micro-rotate">Premium</button>
+        </div>
+    </div>
+
+    <!-- Loading States Demo -->
+    <div class="premium-card p-8 mb-8 animate-fade-in">
+        <h2 class="heading-secondary mb-6">Loading States & Feedback</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Skeleton Screens -->
+            <div>
+                <h4 class="heading-tertiary mb-4">Skeleton Loading</h4>
+                <div class="skeleton-card">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="skeleton skeleton-avatar"></div>
+                        <div class="flex-1">
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-text"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text"></div>
+                </div>
+            </div>
+
+            <!-- Loading Spinners -->
+            <div>
+                <h4 class="heading-tertiary mb-4">Loading Spinners</h4>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-4">
+                        <div class="loading-spinner-sm"></div>
+                        <span class="text-caption">Small</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="loading-spinner"></div>
+                        <span class="text-caption">Default</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="loading-spinner-lg"></div>
+                        <span class="text-caption">Large</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Indicators -->
+            <div>
+                <h4 class="heading-tertiary mb-4">Progress Indicators</h4>
+                <div class="space-y-4">
+                    <div>
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill" style="width: 65%"></div>
+                        </div>
+                        <span class="text-small mt-1 block">65% Complete</span>
+                    </div>
+                    <div>
+                        <div class="progress-bar progress-bar-animated">
+                            <div class="progress-bar-fill" style="width: 40%"></div>
+                        </div>
+                        <span class="text-small mt-1 block">Processing...</span>
+                    </div>
+                    <div class="loading-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert System Demo -->
+    <div class="premium-card p-8 mb-8 animate-slide-in">
+        <h2 class="heading-secondary mb-6">Alert & Notification System</h2>
+        
+        <div class="space-y-4">
+            <div class="alert-premium alert-success">
+                <strong>Success!</strong> Your profile has been updated successfully.
+            </div>
+            
+            <div class="alert-premium alert-error">
+                <strong>Error!</strong> Please check your input and try again.
+            </div>
+            
+            <div class="alert-premium alert-warning">
+                <strong>Warning!</strong> This action cannot be undone.
+            </div>
+            
+            <div class="alert-premium alert-info">
+                <strong>Info!</strong> New features are now available.
+            </div>
+            
+            <div class="alert-premium alert-purple">
+                <strong>Premium!</strong> Upgrade to unlock advanced features.
+            </div>
+        </div>
+    </div>
+
+    <!-- Typography Showcase -->
+    <div class="premium-card p-8 mb-8 animate-slide-in-up">
+        <h2 class="heading-secondary mb-6">Typography System</h2>
+        
+        <div class="prose">
+            <h1 class="heading-primary">Primary Heading</h1>
+            <h2 class="heading-secondary">Secondary Heading</h2>
+            <h3 class="heading-tertiary">Tertiary Heading</h3>
+            
+            <p class="text-body-large">
+                This is large body text with enhanced readability and proper line spacing for optimal reading experience.
+            </p>
+            
+            <p class="text-body">
+                Regular body text with balanced typography. This text demonstrates the <a href="#">link styling</a> 
+                with purple theme integration and smooth hover effects.
+            </p>
+            
+            <p class="text-caption">
+                Caption text for additional information and metadata display.
+            </p>
+            
+            <p class="text-small">
+                Small text for fine print and secondary information.
+            </p>
+        </div>
+    </div>
+
+    <!-- Interactive Elements -->
+    <div class="premium-card p-8 mb-8 animate-fade-in">
+        <h2 class="heading-secondary mb-6">Interactive Elements</h2>
+        
+        <div class="flex-responsive mb-6">
+            <button class="btn-premium micro-bounce">Primary Button</button>
+            <button class="btn-premium-outline micro-lift">Outline Button</button>
+            <button class="btn-premium btn-loading">Loading Button</button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="touch-friendly premium-card p-4 text-center">
+                <h4 class="heading-tertiary mb-2">Touch Friendly</h4>
+                <p class="text-caption">Optimized for mobile interactions</p>
+            </div>
+            
+            <div class="hover-lift premium-card p-4 text-center">
+                <h4 class="heading-tertiary mb-2">Hover Effects</h4>
+                <p class="text-caption">Smooth animations on interaction</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Responsive Breakpoint Demo -->
+    <div class="premium-card p-8 animate-slide-in-left">
+        <h2 class="heading-secondary mb-6">Responsive Design</h2>
+        
+        <div class="space-y-4">
+            <div class="mobile-only alert-premium alert-info">
+                <strong>Mobile View:</strong> You're viewing this on a mobile device.
+            </div>
+            
+            <div class="tablet-up alert-premium alert-success">
+                <strong>Tablet+ View:</strong> Enhanced layout for larger screens.
+            </div>
+            
+            <div class="desktop-up alert-premium alert-purple">
+                <strong>Desktop View:</strong> Full desktop experience with all features.
+            </div>
+        </div>
+        
+        <div class="mt-6">
+            <p class="text-body">
+                The design system automatically adapts to different screen sizes using mobile-first responsive design principles.
+                Cards, typography, and spacing all scale appropriately for optimal user experience across all devices.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container for Demo -->
+<div class="toast-container" id="toast-container">
+    <!-- Toasts will be dynamically added here -->
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Demo toast notifications
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `
+            <div class="flex items-center gap-3">
+                <div class="flex-1">
+                    <p class="font-medium">${message}</p>
+                </div>
+                <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+            </div>
+        `;
+        
+        document.getElementById('toast-container').appendChild(toast);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.remove();
+            }
+        }, 5000);
+    }
+    
+    // Demo interactions
+    let toastCount = 0;
+    document.querySelectorAll('.btn-premium, .btn-premium-outline').forEach(btn => {
+        if (!btn.classList.contains('btn-loading')) {
+            btn.addEventListener('click', function() {
+                toastCount++;
+                const messages = [
+                    'Button clicked successfully!',
+                    'Action completed.',
+                    'Feature activated.',
+                    'Settings updated.',
+                    'Premium feature unlocked!'
+                ];
+                const types = ['success', 'info', 'success', 'info', 'success'];
+                showToast(messages[toastCount % messages.length], types[toastCount % types.length]);
+            });
+        }
+    });
+});
+</script>
+{% endblock %}
