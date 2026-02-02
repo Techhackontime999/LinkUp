@@ -15,8 +15,7 @@
                 <div class="avatar-gradient p-1 bg-white rounded-2xl shadow-xl">
                     <div class="avatar-inner w-32 h-32 md:w-40 md:h-40 rounded-xl overflow-hidden bg-white">
                         {% if profile_user.profile.avatar %}
-                        <img src="{{ profile_user.profile.avatar.url }}" class="avatar-img object-cover rounded-xl"
-                            alt="{{ profile_user.username }}'s avatar" />
+                        <img src="{{ profile_user.profile.avatar.url }}" class="avatar-img object-cover rounded-xl" alt="{{ profile_user.username }}'s avatar" />
                         {% else %}
                         <div
                             class="flex items-center justify-center w-40 h-40 bg-gradient-primary text-white text-5xl font-bold rounded-xl">
@@ -25,365 +24,303 @@
                         {% endif %}
                     </div>
 
-                    <div class="flex-1 mt-6 md:mt-0 mb-2 text-center md:text-left">
-                        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-                            <div>
-                                <h1 class="text-4xl font-extrabold text-gray-900 mb-1">{% if profile_user.get_full_name
-                                    %}{{ profile_user.get_full_name }}{% else %}{{ profile_user.username|capfirst }}{%
-                                    endif %}</h1>
-                                <p class="text-xl text-gray-600 font-medium">{{
-                                    profile_user.profile.headline|default:"Professional on LinkUp" }}</p>
-                                <div
-                                    class="flex items-center justify-center md:justify-start mt-2 gap-4 text-sm text-gray-500">
-                                    <span class="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple-500"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                        <span>{{ profile_user.profile.location|default:"Global" }}</span>
-                                    </span>
-                                    <span class="flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple-500"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                        </svg>
-                                        {% if profile_user.followers.count > 0 %}
-                                        <span>{{ profile_user.followers.count }} follower{{
-                                            profile_user.followers.count|pluralize }}</span>
-                                        {% else %}
+                <div class="flex-1 mt-6 md:mt-0 mb-2 text-center md:text-left">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                        <div>
+                            <h1 class="text-4xl font-extrabold text-gray-900 mb-1">{% if profile_user.get_full_name %}{{ profile_user.get_full_name }}{% else %}{{ profile_user.username|capfirst }}{% endif %}</h1>
+                            <p class="text-xl text-gray-600 font-medium">{{ profile_user.profile.headline|default:"Professional on LinkUp" }}</p>
+                            <div class="flex items-center justify-center md:justify-start mt-2 gap-4 text-sm text-gray-500">
+                                <span class="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <span>{{ profile_user.profile.location|default:"Global" }}</span>
+                                </span>
+                                <span class="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                    {% if profile_user.followers.count > 0 %}
+                                        <span>{{ profile_user.followers.count }} follower{{ profile_user.followers.count|pluralize }}</span>
+                                    {% else %}
                                         <span>No followers yet</span>
-                                        {% endif %}
-                                    </span>
-                                </div>
+                                    {% endif %}
+                                </span>
                             </div>
+                        </div>
 
-                            <div class="mt-6 md:mt-0 flex flex-wrap justify-center gap-3">
-                                {% if request.user == profile_user %}
-                                <a href="{% url 'profile' %}" class="btn-premium px-8 py-2.5"
-                                    aria-label="Edit your profile">Edit Profile</a>
-                                {% else %}
-                                <a href="{% url 'message_user' profile_user.username %}"
-                                    class="btn-primary-large px-4 py-2"
-                                    aria-label="Message {{ profile_user.username }}">Message</a>
-                                <form action="{% url 'report_user' profile_user.username %}" method="post"
-                                    class="inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn-premium-outline px-4 py-2"
-                                        aria-label="Report {{ profile_user.username }}">Report</button>
-                                </form>
-                                <form action="{% url 'block_user' profile_user.username %}" method="post"
-                                    class="inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn-premium-outline px-4 py-2 text-red-600"
-                                        aria-label="Block {{ profile_user.username }}">Block</button>
-                                </form>
-                                <button class="btn-connect-ajax btn-premium px-6 py-2.5"
-                                    data-user-id="{{ profile_user.id }}"
-                                    aria-label="Connect with {{ profile_user.username }}">
-                                    <span class="connect-text">Connect</span>
-                                </button>
-                                <button
-                                    class="btn-follow-ajax btn-premium-outline px-6 py-2.5 {% if is_following_profile_user %}bg-purple-50{% endif %}"
-                                    data-user-id="{{ profile_user.id }}"
-                                    aria-label="Follow {{ profile_user.username }}">
-                                    <span class="follow-text">{% if is_following_profile_user %}Following{% else
-                                        %}Follow{% endif %}</span>
-                                </button>
-                                {% endif %}
-                            </div>
+                        <div class="mt-6 md:mt-0 flex flex-wrap justify-center gap-3">
+                            {% if request.user == profile_user %}
+                            <a href="{% url 'profile' %}" class="btn-premium px-8 py-2.5" aria-label="Edit your profile">Edit Profile</a>
+                            {% else %}
+                            <a href="{% url 'message_user' profile_user.username %}" class="btn-primary-large px-4 py-2" aria-label="Message {{ profile_user.username }}">Message</a>
+                            <form action="{% url 'report_user' profile_user.username %}" method="post" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-premium-outline px-4 py-2" aria-label="Report {{ profile_user.username }}">Report</button>
+                            </form>
+                            <form action="{% url 'block_user' profile_user.username %}" method="post" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-premium-outline px-4 py-2 text-red-600" aria-label="Block {{ profile_user.username }}">Block</button>
+                            </form>
+                            <button class="btn-connect-ajax btn-premium px-6 py-2.5" data-user-id="{{ profile_user.id }}" aria-label="Connect with {{ profile_user.username }}">
+                                <span class="connect-text">Connect</span>
+                            </button>
+                            <button class="btn-follow-ajax btn-premium-outline px-6 py-2.5" data-user-id="{{ profile_user.id }}" aria-label="Follow {{ profile_user.username }}">
+                                <span class="follow-text">Follow</span>
+                            </button>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Details Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Left Column -->
-            <div class="md:col-span-2 space-y-6">
-                <!-- About -->
-                <div class="premium-card p-8">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">About</h3>
-                    <p class="text-gray-700 leading-relaxed whitespace-pre-line text-lg">
-                        {{ profile_user.profile.bio|default:"This professional hasn't shared their story yet." }}
-                    </p>
-                </div>
+    <!-- Details Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Left Column -->
+        <div class="md:col-span-2 space-y-6">
+            <!-- About -->
+            <div class="premium-card p-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">About</h3>
+                <p class="text-gray-700 leading-relaxed whitespace-pre-line text-lg">
+                    {{ profile_user.profile.bio|default:"This professional hasn't shared their story yet." }}
+                </p>
+            </div>
 
-                <!-- Experience -->
-                <div class="premium-card p-8">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-6 border-b border-gray-100 pb-2">Experience</h3>
-                    <div class="space-y-8">
-                        {% for exp in profile_user.experiences.all %}
-                        <div class="flex items-start space-x-4 group">
-                            <div
-                                class="w-12 h-12 rounded-lg bg-gray-100 flex-shrink-0 flex items-center justify-center group-hover:bg-purple-50 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="h-6 w-6 text-gray-400 group-hover:text-purple-500" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <h4 class="text-xl font-bold text-gray-800">{{ exp.title }}</h4>
-                                <p class="text-gray-600 font-medium">{{ exp.company }} · {{ exp.location }}</p>
-                                <p class="text-sm text-gray-500 mt-1">
-                                    {{ exp.start_date|date:"M Y" }} -
-                                    {% if exp.is_current %}Present{% else %}{{ exp.end_date|date:"M Y" }}{% endif %}
-                                </p>
-                                {% if exp.description %}
-                                <p class="mt-3 text-gray-600 leading-relaxed">{{ exp.description }}</p>
-                                {% endif %}
-                            </div>
+            <!-- Experience -->
+            <div class="premium-card p-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 border-b border-gray-100 pb-2">Experience</h3>
+                <div class="space-y-8">
+                    {% for exp in profile_user.experiences.all %}
+                    <div class="flex items-start space-x-4 group">
+                        <div
+                            class="w-12 h-12 rounded-lg bg-gray-100 flex-shrink-0 flex items-center justify-center group-hover:bg-purple-50 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-6 w-6 text-gray-400 group-hover:text-purple-500" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
                         </div>
-                        {% empty %}
-                        <p class="text-gray-500 italic">No experience added yet.</p>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <!-- Education -->
-                <div class="premium-card p-8">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-6 border-b border-gray-100 pb-2">Education</h3>
-                    <div class="space-y-8">
-                        {% for edu in profile_user.educations.all %}
-                        <div class="flex items-start space-x-4 group">
-                            <div
-                                class="w-12 h-12 rounded-lg bg-gray-100 flex-shrink-0 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="h-6 w-6 text-gray-400 group-hover:text-blue-500" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path d="M12 14l9-5-9-5-9 5 9 5z" />
-                                    <path
-                                        d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <h4 class="text-xl font-bold text-gray-800">{{ edu.school }}</h4>
-                                <p class="text-gray-600 font-medium">{{ edu.degree }} · {{ edu.field_of_study }}</p>
-                                <p class="text-sm text-gray-500 mt-1">
-                                    {{ edu.start_date|date:"Y" }} - {{ edu.end_date|date:"Y"|default:"Present" }}
-                                </p>
-                            </div>
+                        <div class="flex-1">
+                            <h4 class="text-xl font-bold text-gray-800">{{ exp.title }}</h4>
+                            <p class="text-gray-600 font-medium">{{ exp.company }} · {{ exp.location }}</p>
+                            <p class="text-sm text-gray-500 mt-1">
+                                {{ exp.start_date|date:"M Y" }} -
+                                {% if exp.is_current %}Present{% else %}{{ exp.end_date|date:"M Y" }}{% endif %}
+                            </p>
+                            {% if exp.description %}
+                            <p class="mt-3 text-gray-600 leading-relaxed">{{ exp.description }}</p>
+                            {% endif %}
                         </div>
-                        {% empty %}
-                        <p class="text-gray-500 italic">No education details added yet.</p>
-                        {% endfor %}
                     </div>
+                    {% empty %}
+                    <p class="text-gray-500 italic">No experience added yet.</p>
+                    {% endfor %}
                 </div>
             </div>
 
-            <!-- Right Column -->
-            <div class="md:col-span-1 space-y-6">
-                {% if profile_user.email %}
-                <div class="premium-card p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">Contact Information</h3>
-                    <div class="space-y-4">
-                        <div class="flex items-center space-x-3 text-gray-600">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-500" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
+            <!-- Education -->
+            <div class="premium-card p-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 border-b border-gray-100 pb-2">Education</h3>
+                <div class="space-y-8">
+                    {% for edu in profile_user.educations.all %}
+                    <div class="flex items-start space-x-4 group">
+                        <div
+                            class="w-12 h-12 rounded-lg bg-gray-100 flex-shrink-0 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-6 w-6 text-gray-400 group-hover:text-blue-500" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path d="M12 14l9-5-9-5-9 5 9 5z" />
+                                <path
+                                    d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
                             </svg>
-                            <span class="text-sm">{{ profile_user.email }}</span>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-xl font-bold text-gray-800">{{ edu.school }}</h4>
+                            <p class="text-gray-600 font-medium">{{ edu.degree }} · {{ edu.field_of_study }}</p>
+                            <p class="text-sm text-gray-500 mt-1">
+                                {{ edu.start_date|date:"Y" }} - {{ edu.end_date|date:"Y"|default:"Present" }}
+                            </p>
                         </div>
                     </div>
+                    {% empty %}
+                    <p class="text-gray-500 italic">No education details added yet.</p>
+                    {% endfor %}
                 </div>
-                {% endif %}
+            </div>
+        </div>
 
-                {% if mutual_connections %}
-                <div class="premium-card p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-2">Mutual Connections <span
-                            class="text-sm text-gray-500">· {{ mutual_connections|length }}</span></h3>
-                    <div class="flex -space-x-2 overflow-hidden items-center mb-3">
-                        {% for m in mutual_connections|slice:":6" %}
-                        <a href="{% url 'public_profile' m.username %}"
-                            title="{{ m.get_full_name|default:m.username }} — {{ m.profile.headline|default:"" }}"
-                            class="inline-block h-10 w-10 rounded-full border-2 border-white overflow-hidden"
-                            aria-label="{{ m.get_full_name|default:m.username }}">
+        <!-- Right Column -->
+        <div class="md:col-span-1 space-y-6">
+            {% if profile_user.email %}
+            <div class="premium-card p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Contact Information</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-3 text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-500" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        <span class="text-sm">{{ profile_user.email }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if mutual_connections %}
+            <div class="premium-card p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Mutual Connections <span class="text-sm text-gray-500">· {{ mutual_connections|length }}</span></h3>
+                <div class="flex -space-x-2 overflow-hidden items-center mb-3">
+                    {% for m in mutual_connections|slice:":6" %}
+                        <a href="{% url 'public_profile' m.username %}" title="{{ m.get_full_name|default:m.username }} — {{ m.profile.headline|default:"" }}" class="inline-block h-10 w-10 rounded-full border-2 border-white overflow-hidden" aria-label="{{ m.get_full_name|default:m.username }}">
                             {% if m.profile.avatar %}
-                            <img src="{{ m.profile.avatar.url }}"
-                                alt="{{ m.get_full_name|default:m.username }}'s avatar"
-                                class="avatar-img object-cover" />
+                                <img src="{{ m.profile.avatar.url }}" alt="{{ m.get_full_name|default:m.username }}'s avatar" class="avatar-img object-cover" />
                             {% else %}
-                            <div
-                                class="h-10 w-10 flex items-center justify-center bg-gradient-primary text-white font-bold">
-                                {{ m.username|slice:":2"|upper }}</div>
+                                <div class="h-10 w-10 flex items-center justify-center bg-gradient-primary text-white font-bold">{{ m.username|slice:":2"|upper }}</div>
                             {% endif %}
                         </a>
-                        {% endfor %}
-                        {% if mutual_connections|length > 6 %}
-                        <div
-                            class="inline-block h-10 w-10 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-gray-500 font-bold text-xs">
-                            +{{ mutual_connections|length|add:"-6" }}</div>
-                        {% endif %}
-                    </div>
-                    <p class="text-sm text-gray-600">You and <strong>{{
-                            profile_user.get_full_name|default:profile_user.username }}</strong> share {{
-                        mutual_connections|length }} connection{{ mutual_connections|length|pluralize }}.</p>
-                </div>
-                {% endif %}
-
-                <div class="premium-card p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">Connections</h3>
-                    {% if profile_connections %}
-                    <div class="space-y-4">
-                        {% for p in profile_connections|slice:":6" %}
-                        <div class="connection-card">
-                            <a href="{% url 'public_profile' p.user.username %}"
-                                class="flex items-center space-x-4 no-underline text-current"
-                                aria-label="View {{ p.user.get_full_name|default:p.user.username }}'s profile">
-                                <div class="post-avatar w-12 h-12 rounded-full overflow-hidden">
-                                    {% if p.user.profile.avatar %}
-                                    <img src="{{ p.user.profile.avatar.url }}"
-                                        alt="{{ p.user.get_full_name|default:p.user.username }}'s avatar"
-                                        class="avatar-img object-cover" />
-                                    {% else %}
-                                    {{ p.user.username|slice:":2"|upper }}
-                                    {% endif %}
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-gray-800">{{ p.user.get_full_name|default:p.user.username
-                                        }}</h4>
-                                    <p class="text-sm text-gray-600">@{{ p.user.username }}</p>
-                                    <p class="text-xs text-gray-500 mt-1">Connected {{ p.created_at|date:"M Y" }}</p>
-                                </div>
-                            </a>
-                            <div class="ml-auto">
-                                <a href="{% url 'message_user' p.user.username %}"
-                                    class="btn-primary-small px-3 py-1 text-sm">Message</a>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <p class="text-gray-500 italic">No connections yet.</p>
+                    {% endfor %}
+                    {% if mutual_connections|length > 6 %}
+                        <div class="inline-block h-10 w-10 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-gray-500 font-bold text-xs">+{{ mutual_connections|length|add:"-6" }}</div>
                     {% endif %}
                 </div>
+                <p class="text-sm text-gray-600">You and <strong>{{ profile_user.get_full_name|default:profile_user.username }}</strong> share {{ mutual_connections|length }} connection{{ mutual_connections|length|pluralize }}.</p>
+            </div>
+            {% endif %}
 
-                <div class="premium-card p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">People you may know</h3>
-                    <div class="grid grid-cols-1 gap-4">
-                        {% if suggestions %}
+            <div class="premium-card p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Connections</h3>
+                {% if profile_connections %}
+                <div class="space-y-4">
+                    {% for p in profile_connections|slice:":6" %}
+                    <div class="connection-card">
+                        <a href="{% url 'public_profile' p.user.username %}" class="flex items-center space-x-4 no-underline text-current" aria-label="View {{ p.user.get_full_name|default:p.user.username }}'s profile">
+                            <div class="post-avatar w-12 h-12 rounded-full overflow-hidden">
+                                {% if p.user.profile.avatar %}
+                                    <img src="{{ p.user.profile.avatar.url }}" alt="{{ p.user.get_full_name|default:p.user.username }}'s avatar" class="avatar-img object-cover" />
+                                {% else %}
+                                    {{ p.user.username|slice:":2"|upper }}
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">{{ p.user.get_full_name|default:p.user.username }}</h4>
+                                <p class="text-sm text-gray-600">@{{ p.user.username }}</p>
+                                <p class="text-xs text-gray-500 mt-1">Connected {{ p.created_at|date:"M Y" }}</p>
+                            </div>
+                        </a>
+                        <div class="ml-auto">
+                            <a href="{% url 'message_user' p.user.username %}" class="btn-primary-small px-3 py-1 text-sm">Message</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                    <p class="text-gray-500 italic">No connections yet.</p>
+                {% endif %}
+            </div>
+
+            <div class="premium-card p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">People you may know</h3>
+                <div class="grid grid-cols-1 gap-4">
+                    {% if suggestions %}
                         {% for s in suggestions %}
                         <div class="connection-card flex items-center">
-                            <a href="{% url 'public_profile' s.username %}"
-                                class="flex items-center space-x-4 no-underline text-current"
-                                aria-label="View {{ s.get_full_name|default:s.username }}'s profile">
+                            <a href="{% url 'public_profile' s.username %}" class="flex items-center space-x-4 no-underline text-current" aria-label="View {{ s.get_full_name|default:s.username }}'s profile">
                                 <div class="post-avatar w-12 h-12 rounded-full overflow-hidden">
                                     {% if s.profile.avatar %}
-                                    <img src="{{ s.profile.avatar.url }}"
-                                        alt="{{ s.get_full_name|default:s.username }}'s avatar"
-                                        class="w-12 h-12 object-cover" />
+                                        <img src="{{ s.profile.avatar.url }}" alt="{{ s.get_full_name|default:s.username }}'s avatar" class="w-12 h-12 object-cover" />
                                     {% else %}
-                                    {{ s.username|slice:":2"|upper }}
+                                        {{ s.username|slice:":2"|upper }}
                                     {% endif %}
                                 </div>
                                 <div>
                                     <h4 class="font-bold text-gray-800">{{ s.get_full_name|default:s.username }}</h4>
                                     <p class="text-sm text-gray-600">@{{ s.username }}</p>
-                                    <p class="text-xs text-gray-500 mt-1">{{ s.profile.headline|default:"Professional on
-                                        LinkUp" }}</p>
+                                    <p class="text-xs text-gray-500 mt-1">{{ s.profile.headline|default:"Professional on LinkUp" }}</p>
                                 </div>
                             </a>
-                            <div class="ml-auto w-24 flex justify-end">
-                                <button class="btn-connect-ajax btn-premium px-3 py-1 text-sm mr-2"
-                                    data-user-id="{{ s.id }}"><span class="connect-text">Connect</span></button>
-
-                                <button
-                                    class="btn-follow-ajax btn-premium-outline px-3 py-1 text-sm {% if s.is_followed %}bg-purple-50{% endif %}"
-                                    data-user-id="{{ s.id }}" title="Follow">
-                                    <span class="follow-text">{% if s.is_followed %}Following{% else %}Follow{% endif
-                                        %}</span>
-                                </button>
+                            <div class="ml-auto">
+                                <button class="btn-connect-ajax btn-premium px-3 py-1 text-sm" data-user-id="{{ s.id }}"><span class="connect-text">Connect</span></button>
                             </div>
                         </div>
-                    </div>
-                    {% endfor %}
+                        {% endfor %}
                     {% else %}
-                    <p class="text-gray-500 italic">No suggestions right now.</p>
+                        <p class="text-gray-500 italic">No suggestions right now.</p>
                     {% endif %}
+                </div>
+            </div>
 
-                    <div class="premium-card p-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4">Followers</h3>
-                        <div class="flex -space-x-2 overflow-hidden items-center">
-                            {% if follower_users %}
-                            {% for u in follower_users|slice:":8" %}
-                            <a href="{% url 'public_profile' u.username %}"
-                                title="{{ u.get_full_name|default:u.username }}"
-                                class="inline-block h-10 w-10 rounded-full border-2 border-white overflow-hidden"
-                                aria-label="{{ u.get_full_name|default:u.username }}">
+            <div class="premium-card p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Followers</h3>
+                <div class="flex -space-x-2 overflow-hidden items-center">
+                    {% if follower_users %}
+                        {% for u in follower_users|slice:":8" %}
+                            <a href="{% url 'public_profile' u.username %}" title="{{ u.get_full_name|default:u.username }}" class="inline-block h-10 w-10 rounded-full border-2 border-white overflow-hidden" aria-label="{{ u.get_full_name|default:u.username }}">
                                 {% if u.profile.avatar %}
-                                <img src="{{ u.profile.avatar.url }}"
-                                    alt="{{ u.get_full_name|default:u.username }}'s avatar"
-                                    class="avatar-img object-cover" />
+                                    <img src="{{ u.profile.avatar.url }}" alt="{{ u.get_full_name|default:u.username }}'s avatar" class="avatar-img object-cover" />
                                 {% else %}
-                                <div
-                                    class="h-10 w-10 flex items-center justify-center bg-gradient-primary text-white font-bold">
-                                    {{ u.username|slice:":2"|upper }}</div>
+                                    <div class="h-10 w-10 flex items-center justify-center bg-gradient-primary text-white font-bold">{{ u.username|slice:":2"|upper }}</div>
                                 {% endif %}
                             </a>
-                            {% endfor %}
-                            {% if follower_users|length > 8 %}
-                            <div
-                                class="inline-block h-10 w-10 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-gray-500 font-bold text-xs">
-                                +{{ follower_users|length|add:"-8" }}</div>
-                            {% endif %}
-                            {% else %}
-                            <p class="text-gray-500 italic">No followers yet.</p>
-                            {% endif %}
-                        </div>
-                    </div>
+                        {% endfor %}
+                        {% if follower_users|length > 8 %}
+                            <div class="inline-block h-10 w-10 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-gray-500 font-bold text-xs">+{{ follower_users|length|add:"-8" }}</div>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-gray-500 italic">No followers yet.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const connectBtn = document.querySelector('.btn-connect-ajax');
-                const followBtn = document.querySelector('.btn-follow-ajax');
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const connectBtn = document.querySelector('.btn-connect-ajax');
+        const followBtn = document.querySelector('.btn-follow-ajax');
 
-                if (connectBtn) {
-                    connectBtn.addEventListener('click', function () {
-                        const userId = this.dataset.userId;
-                        const textSpan = this.querySelector('.connect-text');
-                        fetch(`/network/connect-toggle/${userId}/`)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.status === 'pending') {
-                                    textSpan.textContent = 'Pending';
-                                    this.classList.replace('btn-premium', 'bg-gray-200');
-                                } else {
-                                    textSpan.textContent = 'Connect';
-                                    this.classList.replace('bg-gray-200', 'btn-premium');
-                                }
-                            });
+        if (connectBtn) {
+            connectBtn.addEventListener('click', function () {
+                const userId = this.dataset.userId;
+                const textSpan = this.querySelector('.connect-text');
+                fetch(`/network/connect-toggle/${userId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'pending') {
+                            textSpan.textContent = 'Pending';
+                            this.classList.replace('btn-premium', 'bg-gray-200');
+                        } else {
+                            textSpan.textContent = 'Connect';
+                            this.classList.replace('bg-gray-200', 'btn-premium');
+                        }
                     });
-                }
-
-                if (followBtn) {
-                    followBtn.addEventListener('click', function () {
-                        const userId = this.dataset.userId;
-                        const textSpan = this.querySelector('.follow-text');
-                        fetch(`/network/follow/${userId}/?ajax=1`)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.is_following) {
-                                    textSpan.textContent = 'Following';
-                                    this.classList.add('bg-purple-50');
-                                } else {
-                                    textSpan.textContent = 'Follow';
-                                    this.classList.remove('bg-purple-50');
-                                }
-                            });
-                    });
-                }
             });
-        </script>
-        {% endblock %}
+        }
+
+        if (followBtn) {
+            followBtn.addEventListener('click', function () {
+                const userId = this.dataset.userId;
+                const textSpan = this.querySelector('.follow-text');
+                fetch(`/network/follow/${userId}/?ajax=1`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.is_following) {
+                            textSpan.textContent = 'Following';
+                            this.classList.add('bg-purple-50');
+                        } else {
+                            textSpan.textContent = 'Follow';
+                            this.classList.remove('bg-purple-50');
+                        }
+                    });
+            });
+        }
+    });
+</script>
+{% endblock %}

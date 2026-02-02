@@ -89,11 +89,6 @@ def network_view(request):
     connections_paginator = Paginator(connections, 20)  # 20 connections per page
     page_number = request.GET.get('page')
     connections_page_obj = connections_paginator.get_page(page_number)
-    
-    # Check who the current user is following
-    following_ids = set(Follow.objects.filter(follower=request.user).values_list('followed_id', flat=True))
-    for user in suggestions:
-        user.is_followed = user.id in following_ids
 
     return render(request, 'network/index.html', {
         'sent_requests': sent_requests,
