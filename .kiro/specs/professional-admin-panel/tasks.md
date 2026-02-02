@@ -240,7 +240,7 @@ This implementation plan breaks down the professional admin panel enhancement in
     - **Property 11: Engagement Metrics Calculation**
     - **Validates: Requirements 8.3**
 
-- [~] 9. Enhance Messaging admin interfaces
+- [ ] 9. Enhance Messaging admin interfaces
   - [x] 9.1 Enhance MessageAdmin class in messaging/admin.py
     - Update list_display with sender, recipient, preview, timestamp, is_read
     - Update list_filter for is_read and timestamp
@@ -275,7 +275,7 @@ This implementation plan breaks down the professional admin panel enhancement in
     - Add readonly_fields for last_updated
     - _Requirements: 9.8_
 
-- [~] 10. Implement query optimization
+- [ ] 10. Implement query optimization
   - [x] 10.1 Add get_queryset() optimization to UserAdmin
     - Use select_related('profile') for list display
     - Use prefetch_related('experience_set', 'education_set') for detail view
@@ -304,7 +304,7 @@ This implementation plan breaks down the professional admin panel enhancement in
     - **Property 20: Query Optimization with prefetch_related**
     - **Validates: Requirements 14.2**
 
-- [~] 11. Implement dashboard with statistics
+- [ ] 11. Implement dashboard with statistics
   - [x] 11.1 Create DashboardStats service class in linkup/admin_dashboard.py
     - Implement get_user_stats() method
     - Implement get_content_stats() method
@@ -391,7 +391,7 @@ This implementation plan breaks down the professional admin panel enhancement in
     - **Property 23: Admin Action Logging**
     - **Validates: Requirements 15.3**
 
-- [~] 16. Add pagination and performance configuration
+- [ ] 16. Add pagination and performance configuration
   - [x] 16.1 Set list_per_page to 100 for all admin classes
     - Update each ModelAdmin with list_per_page = 100
     - _Requirements: 14.3_
@@ -400,7 +400,7 @@ This implementation plan breaks down the professional admin panel enhancement in
     - Test that pagination appears for large datasets
     - _Requirements: 14.4_
 
-- [~] 17. Implement security and permission checks
+- [ ] 17. Implement security and permission checks
   - [x] 17.1 Verify authentication requirements
     - Test that non-authenticated users are redirected
     - Test that non-staff users cannot access admin
@@ -414,7 +414,7 @@ This implementation plan breaks down the professional admin panel enhancement in
     - Mark audit trail fields as readonly across all admins
     - _Requirements: 13.4, 15.4_
 
-- [~] 18. Final integration and testing
+- [ ] 18. Final integration and testing
   - [x] 18.1 Register all admin classes with LinkUpAdminSite
     - Update each app's admin.py to use custom admin site
     - Verify all models are accessible

@@ -5,32 +5,29 @@
     <!-- Enhanced Search Header -->
     <div class="mb-8">
         <h1 class="text-3xl font-bold mb-4">Search</h1>
-        
+
         <!-- Search Form with Real-time Features -->
         <div class="bg-white rounded-lg shadow-lg p-6">
             <form id="search-form" method="GET" class="space-y-4">
                 <div class="relative">
-                    <input 
-                        type="text" 
-                        name="q" 
-                        id="search-input"
-                        value="{{ query }}" 
+                    <input type="text" name="q" id="search-input" value="{{ query }}"
                         placeholder="Search for people, jobs, posts, or companies..."
                         class="w-full px-4 py-3 pl-12 pr-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        autocomplete="off"
-                    >
+                        autocomplete="off">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </div>
-                    
+
                     <!-- Search Suggestions Dropdown -->
-                    <div id="search-suggestions" class="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 hidden">
+                    <div id="search-suggestions"
+                        class="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 hidden">
                         <!-- Suggestions will be populated by JavaScript -->
                     </div>
                 </div>
-                
+
                 <!-- Search Type Filters -->
                 <div class="flex flex-wrap gap-2">
                     <button type="button" class="search-filter-btn active" data-type="all">
@@ -53,236 +50,267 @@
     <!-- Search Results -->
     <div id="search-results">
         {% if query %}
-            {% if has_results %}
-                <!-- Results Summary -->
-                <div class="mb-6 text-gray-600">
-                    <p>Search results for "<strong>{{ query }}</strong>"</p>
-                    <p class="text-sm">
-                        Found {{ total_users }} people, {{ total_jobs }} jobs, {{ total_posts }} posts
-                    </p>
-                </div>
+        {% if has_results %}
+        <!-- Results Summary -->
+        <div class="mb-6 text-gray-600">
+            <p>Search results for "<strong>{{ query }}</strong>"</p>
+            <p class="text-sm">
+                Found {{ total_users }} people, {{ total_jobs }} jobs, {{ total_posts }} posts
+            </p>
+        </div>
 
-                <!-- People Results -->
-                {% if users and search_type in 'all,people' %}
-                <div class="mb-8" id="people-results">
-                    <h2 class="text-2xl font-bold mb-4 flex items-center">
-                        <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                        </svg>
-                        People ({{ total_users }})
-                    </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {% for user in users %}
-                        <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition duration-200 border border-gray-100">
-                            <div class="flex items-start space-x-4">
-                                <div class="flex-shrink-0">
-                                    {% if user.avatar_url %}
-                                        <img src="{{ user.avatar_url }}" alt="{{ user.username }}" class="w-12 h-12 rounded-full object-cover">
-                                    {% else %}
-                                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                                            <span class="text-purple-600 font-bold text-lg">{{ user.username|slice:":1"|upper }}</span>
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <a href="{{ user.profile_url }}" class="text-lg font-bold text-purple-600 hover:underline block truncate">
-                                        {% if user.highlighted_fields.full_name %}
-                                            {{ user.highlighted_fields.full_name|safe }}
-                                        {% elif user.full_name %}
-                                            {{ user.full_name }}
-                                        {% else %}
-                                            {% if user.highlighted_fields.username %}
-                                                {{ user.highlighted_fields.username|safe }}
-                                            {% else %}
-                                                {{ user.username }}
-                                            {% endif %}
-                                        {% endif %}
-                                    </a>
-                                    
-                                    {% if user.highlighted_fields.headline %}
-                                        <p class="text-gray-600 text-sm mt-1">{{ user.highlighted_fields.headline|safe }}</p>
-                                    {% elif user.headline %}
-                                        <p class="text-gray-600 text-sm mt-1">{{ user.headline }}</p>
-                                    {% endif %}
-                                    
-                                    {% if user.current_position and user.current_company %}
-                                        <p class="text-gray-500 text-xs mt-1">
-                                            {% if user.highlighted_fields.experience %}
-                                                {{ user.highlighted_fields.experience|safe }}
-                                            {% else %}
-                                                {{ user.current_position }} at {{ user.current_company }}
-                                            {% endif %}
-                                        </p>
-                                    {% endif %}
-                                    
-                                    {% if user.location %}
-                                        <p class="text-gray-400 text-xs mt-1 flex items-center">
-                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            </svg>
-                                            {% if user.highlighted_fields.location %}
-                                                {{ user.highlighted_fields.location|safe }}
-                                            {% else %}
-                                                {{ user.location }}
-                                            {% endif %}
-                                        </p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Jobs Results -->
-                {% if jobs and search_type in 'all,jobs' %}
-                <div class="mb-8" id="jobs-results">
-                    <h2 class="text-2xl font-bold mb-4 flex items-center">
-                        <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6z"></path>
-                        </svg>
-                        Jobs ({{ total_jobs }})
-                    </h2>
-                    <div class="space-y-4">
-                        {% for job in jobs %}
-                        <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition duration-200 border border-gray-100">
-                            <div class="flex justify-between items-start">
-                                <div class="flex-1">
-                                    <a href="{{ job.job_url }}" class="text-xl font-bold text-purple-600 hover:underline">
-                                        {% if job.highlighted_fields.title %}
-                                            {{ job.highlighted_fields.title|safe }}
-                                        {% else %}
-                                            {{ job.title }}
-                                        {% endif %}
-                                    </a>
-                                    <p class="text-lg text-gray-700 mt-1">
-                                        {% if job.highlighted_fields.company %}
-                                            {{ job.highlighted_fields.company|safe }}
-                                        {% else %}
-                                            {{ job.company }}
-                                        {% endif %}
-                                    </p>
-                                    <div class="flex flex-wrap gap-2 mt-2">
-                                        <span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">{{ job.job_type }}</span>
-                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">{{ job.workplace_type }}</span>
-                                        <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">{{ job.location }}</span>
-                                        {% if job.salary_range %}
-                                            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">{{ job.salary_range }}</span>
-                                        {% endif %}
-                                    </div>
-                                    <p class="text-gray-600 mt-3">
-                                        {% if job.highlighted_fields.description %}
-                                            {{ job.highlighted_fields.description|safe }}
-                                        {% else %}
-                                            {{ job.description }}
-                                        {% endif %}
-                                    </p>
-                                </div>
-                                <div class="text-right text-sm text-gray-500 ml-4">
-                                    <p>Posted by {{ job.posted_by }}</p>
-                                    <p>{{ job.created_at|date:"M d, Y" }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Posts Results -->
-                {% if posts and search_type in 'all,posts' %}
-                <div class="mb-8" id="posts-results">
-                    <h2 class="text-2xl font-bold mb-4 flex items-center">
-                        <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-1l-4 4z"></path>
-                        </svg>
-                        Posts ({{ total_posts }})
-                    </h2>
-                    <div class="space-y-4">
-                        {% for post in posts %}
-                        <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition duration-200 border border-gray-100">
-                            <div class="flex items-start space-x-4">
-                                <div class="flex-shrink-0">
-                                    {% if post.author_avatar %}
-                                        <img src="{{ post.author_avatar }}" alt="{{ post.author }}" class="w-10 h-10 rounded-full object-cover">
-                                    {% else %}
-                                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                            <span class="text-purple-600 font-bold text-sm">{{ post.author|slice:":1"|upper }}</span>
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                <div class="flex-1">
-                                    <div class="flex items-center space-x-2 mb-2">
-                                        <a href="/users/{{ post.author }}/" class="font-semibold text-purple-600 hover:underline">
-                                            {{ post.author_name|default:post.author }}
-                                        </a>
-                                        <span class="text-gray-500 text-sm">•</span>
-                                        <span class="text-gray-500 text-sm">{{ post.created_at|date:"M d, Y" }}</span>
-                                    </div>
-                                    <div class="text-gray-800">
-                                        {% if post.highlighted_content %}
-                                            {{ post.highlighted_content|safe }}
-                                        {% else %}
-                                            {{ post.content }}
-                                        {% endif %}
-                                    </div>
-                                    <div class="flex items-center mt-3 text-sm text-gray-500">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                                        </svg>
-                                        {{ post.likes_count }} likes
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-            {% else %}
-                <!-- No Results -->
-                <div class="bg-white rounded-lg shadow p-8 text-center">
-                    <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">No results found</h3>
-                    <p class="text-gray-600 mb-4">We couldn't find anything matching "{{ query }}"</p>
-                    
-                    {% if suggestions %}
-                    <div class="mt-6">
-                        <p class="text-sm text-gray-500 mb-3">Try searching for:</p>
-                        <div class="flex flex-wrap justify-center gap-2">
-                            {% for suggestion in suggestions %}
-                            <button class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm hover:bg-purple-200 transition duration-200 suggestion-btn" data-suggestion="{{ suggestion }}">
-                                {{ suggestion }}
-                            </button>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-            {% endif %}
-        {% else %}
-            <!-- Initial State -->
-            <div class="bg-white rounded-lg shadow p-8 text-center">
-                <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        <!-- People Results -->
+        {% if users and search_type in 'all,people' %}
+        <div class="mb-8" id="people-results">
+            <h2 class="text-2xl font-bold mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z">
+                    </path>
                 </svg>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">Search the network</h3>
-                <p class="text-gray-600">Find people, jobs, posts, and companies in your professional network</p>
+                People ({{ total_users }})
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for user in users %}
+                <a href="{{ user.profile_url }}"
+                    class="block bg-white p-6 rounded-lg shadow hover:shadow-lg transition duration-200 border border-gray-100 cursor-pointer hover:border-purple-200">
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                            {% if user.avatar_url %}
+                            <img src="{{ user.avatar_url }}" alt="{{ user.username }}"
+                                class="w-12 h-12 rounded-full object-cover">
+                            {% else %}
+                            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                                <span class="text-purple-600 font-bold text-lg">{{ user.username|slice:":1"|upper
+                                    }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-lg font-bold text-purple-600 hover:underline block truncate">
+                                {% if user.highlighted_fields.full_name %}
+                                {{ user.highlighted_fields.full_name|safe }}
+                                {% elif user.full_name %}
+                                {{ user.full_name }}
+                                {% else %}
+                                {% if user.highlighted_fields.username %}
+                                {{ user.highlighted_fields.username|safe }}
+                                {% else %}
+                                {{ user.username }}
+                                {% endif %}
+                                {% endif %}
+                            </span>
+
+                            {% if user.highlighted_fields.headline %}
+                            <p class="text-gray-600 text-sm mt-1">{{ user.highlighted_fields.headline|safe }}</p>
+                            {% elif user.headline %}
+                            <p class="text-gray-600 text-sm mt-1">{{ user.headline }}</p>
+                            {% endif %}
+
+                            {% if user.current_position and user.current_company %}
+                            <p class="text-gray-500 text-xs mt-1">
+                                {% if user.highlighted_fields.experience %}
+                                {{ user.highlighted_fields.experience|safe }}
+                                {% else %}
+                                {{ user.current_position }} at {{ user.current_company }}
+                                {% endif %}
+                            </p>
+                            {% endif %}
+
+                            {% if user.location %}
+                            <p class="text-gray-400 text-xs mt-1 flex items-center">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                    </path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                {% if user.highlighted_fields.location %}
+                                {{ user.highlighted_fields.location|safe }}
+                                {% else %}
+                                {{ user.location }}
+                                {% endif %}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
             </div>
+        </div>
+        {% endif %}
+
+        <!-- Jobs Results -->
+        {% if jobs and search_type in 'all,jobs' %}
+        <div class="mb-8" id="jobs-results">
+            <h2 class="text-2xl font-bold mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6z">
+                    </path>
+                </svg>
+                Jobs ({{ total_jobs }})
+            </h2>
+            <div class="space-y-4">
+                {% for job in jobs %}
+                <a href="{{ job.job_url }}"
+                    class="block bg-white p-6 rounded-lg shadow hover:shadow-lg transition duration-200 border border-gray-100 cursor-pointer hover:border-purple-200">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <span class="text-xl font-bold text-purple-600 hover:underline">
+                                {% if job.highlighted_fields.title %}
+                                {{ job.highlighted_fields.title|safe }}
+                                {% else %}
+                                {{ job.title }}
+                                {% endif %}
+                            </span>
+                            <p class="text-lg text-gray-700 mt-1">
+                                {% if job.highlighted_fields.company %}
+                                {{ job.highlighted_fields.company|safe }}
+                                {% else %}
+                                {{ job.company }}
+                                {% endif %}
+                            </p>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                <span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">{{
+                                    job.job_type }}</span>
+                                <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">{{
+                                    job.workplace_type }}</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">{{ job.location
+                                    }}</span>
+                                {% if job.salary_range %}
+                                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">{{
+                                    job.salary_range }}</span>
+                                {% endif %}
+                            </div>
+                            <p class="text-gray-600 mt-3">
+                                {% if job.highlighted_fields.description %}
+                                {{ job.highlighted_fields.description|safe }}
+                                {% else %}
+                                {{ job.description }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="text-right text-sm text-gray-500 ml-4">
+                            <p>Posted by {{ job.posted_by }}</p>
+                            <p>{{ job.created_at|date:"M d, Y" }}</p>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Posts Results -->
+        {% if posts and search_type in 'all,posts' %}
+        <div class="mb-8" id="posts-results">
+            <h2 class="text-2xl font-bold mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-1l-4 4z">
+                    </path>
+                </svg>
+                Posts ({{ total_posts }})
+            </h2>
+            <div class="space-y-4">
+                {% for post in posts %}
+                <a href="{{ post.post_url }}"
+                    class="block bg-white p-6 rounded-lg shadow hover:shadow-lg transition duration-200 border border-gray-100 cursor-pointer hover:border-purple-200">
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                            {% if post.author_avatar %}
+                            <img src="{{ post.author_avatar }}" alt="{{ post.author }}"
+                                class="w-10 h-10 rounded-full object-cover">
+                            {% else %}
+                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                <span class="text-purple-600 font-bold text-sm">{{ post.author|slice:":1"|upper
+                                    }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="font-semibold text-purple-600 hover:underline"
+                                    onclick="event.preventDefault(); event.stopPropagation(); window.location.href='/users/{{ post.author }}/';">
+                                    {{ post.author_name|default:post.author }}
+                                </span>
+                                <span class="text-gray-500 text-sm">•</span>
+                                <span class="text-gray-500 text-sm">{{ post.created_at|date:"M d, Y" }}</span>
+                            </div>
+                            <div class="text-gray-800">
+                                {% if post.highlighted_content %}
+                                {{ post.highlighted_content|safe }}
+                                {% else %}
+                                {{ post.content }}
+                                {% endif %}
+                            </div>
+                            <div class="flex items-center mt-3 text-sm text-gray-500">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                                    </path>
+                                </svg>
+                                {{ post.likes_count }} likes
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <!-- No Results -->
+        <div class="bg-white rounded-lg shadow p-8 text-center">
+            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">No results found</h3>
+            <p class="text-gray-600 mb-4">We couldn't find anything matching "{{ query }}"</p>
+
+            {% if suggestions %}
+            <div class="mt-6">
+                <p class="text-sm text-gray-500 mb-3">Try searching for:</p>
+                <div class="flex flex-wrap justify-center gap-2">
+                    {% for suggestion in suggestions %}
+                    <button
+                        class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm hover:bg-purple-200 transition duration-200 suggestion-btn"
+                        data-suggestion="{{ suggestion }}">
+                        {{ suggestion }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% else %}
+        <!-- Initial State -->
+        <div class="bg-white rounded-lg shadow p-8 text-center">
+            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Search the network</h3>
+            <p class="text-gray-600">Find people, jobs, posts, and companies in your professional network</p>
+        </div>
         {% endif %}
     </div>
 
     <!-- Loading Indicator -->
     <div id="search-loading" class="hidden text-center py-8">
-        <div class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-purple-500 bg-white transition ease-in-out duration-150">
-            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <div
+            class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-purple-500 bg-white transition ease-in-out duration-150">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
             </svg>
             Searching...
         </div>
@@ -291,121 +319,121 @@
 
 <!-- Enhanced Search JavaScript -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('search-input');
-    const searchForm = document.getElementById('search-form');
-    const searchResults = document.getElementById('search-results');
-    const searchLoading = document.getElementById('search-loading');
-    const searchSuggestions = document.getElementById('search-suggestions');
-    const filterButtons = document.querySelectorAll('.search-filter-btn');
-    
-    let searchTimeout;
-    let currentSearchType = 'all';
-    
-    // Search filter functionality
-    filterButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            // Update active state
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            
-            currentSearchType = this.dataset.type;
-            
-            // Trigger search if there's a query
-            if (searchInput.value.trim()) {
-                performSearch(searchInput.value.trim(), currentSearchType);
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('search-input');
+        const searchForm = document.getElementById('search-form');
+        const searchResults = document.getElementById('search-results');
+        const searchLoading = document.getElementById('search-loading');
+        const searchSuggestions = document.getElementById('search-suggestions');
+        const filterButtons = document.querySelectorAll('.search-filter-btn');
+
+        let searchTimeout;
+        let currentSearchType = 'all';
+
+        // Search filter functionality
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                // Update active state
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+
+                currentSearchType = this.dataset.type;
+
+                // Trigger search if there's a query
+                if (searchInput.value.trim()) {
+                    performSearch(searchInput.value.trim(), currentSearchType);
+                }
+            });
+        });
+
+        // Real-time search suggestions
+        searchInput.addEventListener('input', function () {
+            const query = this.value.trim();
+
+            clearTimeout(searchTimeout);
+
+            if (query.length >= 2) {
+                searchTimeout = setTimeout(() => {
+                    fetchSearchSuggestions(query);
+                }, 300);
+            } else {
+                hideSuggestions();
             }
         });
-    });
-    
-    // Real-time search suggestions
-    searchInput.addEventListener('input', function() {
-        const query = this.value.trim();
-        
-        clearTimeout(searchTimeout);
-        
-        if (query.length >= 2) {
-            searchTimeout = setTimeout(() => {
-                fetchSearchSuggestions(query);
-            }, 300);
-        } else {
-            hideSuggestions();
-        }
-    });
-    
-    // Handle search form submission
-    searchForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const query = searchInput.value.trim();
-        if (query) {
-            performSearch(query, currentSearchType);
-            hideSuggestions();
-        }
-    });
-    
-    // Hide suggestions when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!searchInput.contains(e.target) && !searchSuggestions.contains(e.target)) {
-            hideSuggestions();
-        }
-    });
-    
-    // Handle suggestion clicks
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('suggestion-btn')) {
-            const suggestion = e.target.dataset.suggestion;
-            searchInput.value = suggestion;
-            performSearch(suggestion, currentSearchType);
-        }
-    });
-    
-    function performSearch(query, type) {
-        showLoading();
-        
-        const url = new URL('/search/', window.location.origin);
-        url.searchParams.set('q', query);
-        url.searchParams.set('type', type);
-        
-        fetch(url, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+
+        // Handle search form submission
+        searchForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const query = searchInput.value.trim();
+            if (query) {
+                performSearch(query, currentSearchType);
+                hideSuggestions();
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            updateSearchResults(data);
-            hideLoading();
-            
-            // Update URL without page reload
-            const newUrl = new URL(window.location);
-            newUrl.searchParams.set('q', query);
-            newUrl.searchParams.set('type', type);
-            window.history.pushState({}, '', newUrl);
-        })
-        .catch(error => {
-            console.error('Search error:', error);
-            hideLoading();
         });
-    }
-    
-    function fetchSearchSuggestions(query) {
-        fetch(`/search/suggestions/?q=${encodeURIComponent(query)}`)
-        .then(response => response.json())
-        .then(data => {
-            showSuggestions(data.suggestions);
-        })
-        .catch(error => {
-            console.error('Suggestions error:', error);
+
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!searchInput.contains(e.target) && !searchSuggestions.contains(e.target)) {
+                hideSuggestions();
+            }
         });
-    }
-    
-    function showSuggestions(suggestions) {
-        if (suggestions.length === 0) {
-            hideSuggestions();
-            return;
+
+        // Handle suggestion clicks
+        document.addEventListener('click', function (e) {
+            if (e.target.classList.contains('suggestion-btn')) {
+                const suggestion = e.target.dataset.suggestion;
+                searchInput.value = suggestion;
+                performSearch(suggestion, currentSearchType);
+            }
+        });
+
+        function performSearch(query, type) {
+            showLoading();
+
+            const url = new URL('/search/', window.location.origin);
+            url.searchParams.set('q', query);
+            url.searchParams.set('type', type);
+
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    updateSearchResults(data);
+                    hideLoading();
+
+                    // Update URL without page reload
+                    const newUrl = new URL(window.location);
+                    newUrl.searchParams.set('q', query);
+                    newUrl.searchParams.set('type', type);
+                    window.history.pushState({}, '', newUrl);
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                    hideLoading();
+                });
         }
-        
-        const html = suggestions.map(suggestion => `
+
+        function fetchSearchSuggestions(query) {
+            fetch(`/search/suggestions/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    showSuggestions(data.suggestions);
+                })
+                .catch(error => {
+                    console.error('Suggestions error:', error);
+                });
+        }
+
+        function showSuggestions(suggestions) {
+            if (suggestions.length === 0) {
+                hideSuggestions();
+                return;
+            }
+
+            const html = suggestions.map(suggestion => `
             <div class="px-4 py-2 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0" onclick="selectSuggestion('${suggestion.text}', '${suggestion.url}')">
                 <div class="flex items-center space-x-3">
                     <div class="flex-shrink-0">
@@ -418,70 +446,70 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         `).join('');
-        
-        searchSuggestions.innerHTML = html;
-        searchSuggestions.classList.remove('hidden');
-    }
-    
-    function hideSuggestions() {
-        searchSuggestions.classList.add('hidden');
-    }
-    
-    function getSuggestionIcon(type) {
-        const icons = {
-            person: '<svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>',
-            job: '<svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6z"></path></svg>',
-            company: '<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>'
-        };
-        return icons[type] || icons.person;
-    }
-    
-    function showLoading() {
-        searchLoading.classList.remove('hidden');
-        searchResults.style.opacity = '0.5';
-    }
-    
-    function hideLoading() {
-        searchLoading.classList.add('hidden');
-        searchResults.style.opacity = '1';
-    }
-    
-    function updateSearchResults(data) {
-        // This would update the results dynamically
-        // For now, we'll reload the page with new results
-        const url = new URL('/search/', window.location.origin);
-        url.searchParams.set('q', data.query);
-        url.searchParams.set('type', data.search_type);
-        window.location.href = url.toString();
-    }
-    
-    // Global function for suggestion selection
-    window.selectSuggestion = function(text, url) {
-        if (url.startsWith('/search/')) {
-            searchInput.value = text;
-            performSearch(text, currentSearchType);
-        } else {
-            window.location.href = url;
+
+            searchSuggestions.innerHTML = html;
+            searchSuggestions.classList.remove('hidden');
         }
-        hideSuggestions();
-    };
-});
+
+        function hideSuggestions() {
+            searchSuggestions.classList.add('hidden');
+        }
+
+        function getSuggestionIcon(type) {
+            const icons = {
+                person: '<svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>',
+                job: '<svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6z"></path></svg>',
+                company: '<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>'
+            };
+            return icons[type] || icons.person;
+        }
+
+        function showLoading() {
+            searchLoading.classList.remove('hidden');
+            searchResults.style.opacity = '0.5';
+        }
+
+        function hideLoading() {
+            searchLoading.classList.add('hidden');
+            searchResults.style.opacity = '1';
+        }
+
+        function updateSearchResults(data) {
+            // This would update the results dynamically
+            // For now, we'll reload the page with new results
+            const url = new URL('/search/', window.location.origin);
+            url.searchParams.set('q', data.query);
+            url.searchParams.set('type', data.search_type);
+            window.location.href = url.toString();
+        }
+
+        // Global function for suggestion selection
+        window.selectSuggestion = function (text, url) {
+            if (url.startsWith('/search/')) {
+                searchInput.value = text;
+                performSearch(text, currentSearchType);
+            } else {
+                window.location.href = url;
+            }
+            hideSuggestions();
+        };
+    });
 </script>
 
 <style>
-.search-filter-btn {
-    @apply px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200;
-}
+    .search-filter-btn {
+        @apply px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200;
+    }
 
-.search-filter-btn.active {
-    @apply bg-purple-600 text-white border-purple-600 hover:bg-purple-700;
-}
+    .search-filter-btn.active {
+        @apply bg-purple-600 text-white border-purple-600 hover:bg-purple-700;
+    }
 
-mark {
-    background-color: #fef3c7;
-    padding: 0.125rem 0.25rem;
-    border-radius: 0.25rem;
-    font-weight: 500;
-}
+    mark {
+        background-color: #fef3c7;
+        padding: 0.125rem 0.25rem;
+        border-radius: 0.25rem;
+        font-weight: 500;
+    }
 </style>
 {% endblock %}

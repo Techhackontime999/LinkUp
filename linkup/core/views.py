@@ -245,7 +245,7 @@ def _format_post_results(posts, query):
             'likes_count': post.likes.count(),
             'highlighted_content': _highlight_text(clean_content, query),
             'author_avatar': post.user.profile.avatar.url if hasattr(post.user, 'profile') and post.user.profile.avatar else None,
-            'post_url': f'/feed/#post-{post.id}',
+            'post_url': f'/feed/post/{post.id}/',
         }
         results.append(result)
     
