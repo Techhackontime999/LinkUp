@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     # Channels for real-time features
     'channels',
     # Local apps
+    'linkup',  # Admin customization
     'core',
     'users',
     'feed',

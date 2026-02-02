@@ -2,27 +2,63 @@ from django.contrib import admin, messages
 from django.utils.html import format_html, strip_tags
 from django.utils.text import Truncator
 from django.utils.translation import ngettext
+from django.shortcuts import render
 import bleach
 from .models import Post, Comment
+import sys
+import os
+
+# Add parent directory to path to import admin_utils
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from linkup.admin_utils import ExportCSVMixin, truncate_html
+from linkup.admin import admin_site
 
 
-@admin.register(Post)
-class PostAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'short_content', 'image_preview', 'created_at', 'total_likes_count', 'total_comments_count')
+# Inline admin for Comments
+class CommentInline(admin.TabularInline):
+    model = Comment
+    extra = 0
+    fields = ('user', 'content_preview', 'created_at')
+    readonly_fields = ('content_preview', 'created_at')
+    can_delete = True
+    
+    def content_preview(self, obj):
+        """Return truncated comment content"""
+        return Truncator(obj.content).chars(50)
+    content_preview.short_description = 'Comment'
+
+
+class PostAdmin(admin.ModelAdmin, ExportCSVMixin):
+    list_display = ('id', 'user', 'short_content', 'image_preview', 'created_at', 
+                   'total_likes_count', 'total_comments_count')
     list_select_related = ('user',)
-    readonly_fields = ('image_preview', 'content_rendered')
-    search_fields = ('user__username', 'content')
+    readonly_fields = ('image_preview', 'content_rendered', 'created_at', 'updated_at',
+                      'total_likes_count', 'total_comments_count')
+    search_fields = ('user__username', 'user__email', 'user__first_name', 'user__last_name', 'content')
     list_filter = ('created_at',)
-    actions = ['sanitize_selected_content']
+    date_hierarchy = 'created_at'
+    actions = ['sanitize_selected_content', 'export_as_csv']
+    inlines = [CommentInline]
+    list_per_page = 100
+    
     fieldsets = (
-        (None, {
-            'fields': ('user', 'content', 'content_rendered', 'image', 'image_preview', 'likes', 'created_at', 'updated_at')
+        ('Post Information', {
+            'fields': ('user', 'content', 'content_rendered', 'image', 'image_preview')
+        }),
+        ('Engagement', {
+            'fields': ('likes', 'total_likes_count', 'total_comments_count'),
+            'classes': ('collapse',)
+        }),
+        ('Metadata', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
         }),
     )
 
     # Allowed tags/attributes for sanitization (conservative set)
     ALLOWED_TAGS = [
-        'p', 'br', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'blockquote', 'code', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'img'
+        'p', 'br', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'blockquote', 'code', 'pre', 
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'img'
     ]
     ALLOWED_ATTRIBUTES = {
         'a': ['href', 'title', 'rel', 'target'],
@@ -35,8 +71,15 @@ class PostAdmin(admin.ModelAdmin):
     short_content.short_description = 'Content Preview'
 
     def image_preview(self, obj):
+        """Display image thumbnail"""
         if obj.image:
-            return format_html('<img src="{}" style="max-width:150px; height:auto; border-radius:6px;" />', obj.image.url)
+            try:
+                return format_html(
+                    '<img src="{}" style="max-width:150px; height:auto; border-radius:6px;" />',
+                    obj.image.url
+                )
+            except Exception:
+                return '-'
         return '-'
     image_preview.short_description = 'Image'
 
@@ -53,11 +96,7 @@ class PostAdmin(admin.ModelAdmin):
     total_comments_count.short_description = 'Comments'
 
     def sanitize_selected_content(self, request, queryset):
-        """Admin action that sanitizes HTML content of selected posts.
-
-        - First step: show a confirmation page with a preview of original vs cleaned HTML (dry-run by default).
-        - If the admin confirms (posts back with `apply`), we either perform a dry-run (no save) or save cleaned content.
-        """
+        """Admin action that sanitizes HTML content of selected posts."""
         selected = request.POST.getlist('_selected_action') or [str(o.pk) for o in queryset]
 
         # Build preview data
@@ -109,7 +148,6 @@ class PostAdmin(admin.ModelAdmin):
                     '%d posts sanitized.',
                     sanitized
                 ) % sanitized, messages.SUCCESS if sanitized else messages.INFO)
-            # Return None to redirect back to changelist
             return None
 
         # Otherwise render confirmation page
@@ -126,20 +164,49 @@ class PostAdmin(admin.ModelAdmin):
         }
         return render(request, 'admin/feed/sanitize_confirm.html', context)
     sanitize_selected_content.short_description = 'Sanitize HTML content of selected posts (preview & dry-run)'
+    
+    def get_queryset(self, request):
+        """Optimize queryset with select_related and prefetch_related"""
+        qs = super().get_queryset(request)
+        return qs.select_related('user').prefetch_related('comments', 'likes')
 
 
-@admin.register(Comment)
-class CommentAdmin(admin.ModelAdmin):
+class CommentAdmin(admin.ModelAdmin, ExportCSVMixin):
     list_display = ('id', 'user', 'post_link', 'short_content', 'created_at')
     list_select_related = ('user', 'post')
-    search_fields = ('user__username', 'content', 'post__content')
+    search_fields = ('user__username', 'user__email', 'user__first_name', 'user__last_name',
+                    'content', 'post__content', 'post__user__username')
     list_filter = ('created_at',)
+    date_hierarchy = 'created_at'
     readonly_fields = ('created_at', 'updated_at')
+    actions = ['export_as_csv']
+    list_per_page = 100
+    
+    fieldsets = (
+        ('Comment Information', {
+            'fields': ('post', 'user', 'content')
+        }),
+        ('Metadata', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
     
     def short_content(self, obj):
         return Truncator(obj.content).chars(100)
     short_content.short_description = 'Comment'
     
     def post_link(self, obj):
-        return format_html('<a href="/admin/feed/post/{}/change/">Post #{}</a>', obj.post.id, obj.post.id)
+        return format_html(
+            '<a href="/admin/feed/post/{}/change/">Post #{}</a>',
+            obj.post.id, obj.post.id
+        )
     post_link.short_description = 'Post'
+    
+    def get_queryset(self, request):
+        """Optimize queryset with select_related"""
+        qs = super().get_queryset(request)
+        return qs.select_related('user', 'post')
+# Register all models with custom admin site
+admin_site.register(Post, PostAdmin)
+admin_site.register(Comment, CommentAdmin)
