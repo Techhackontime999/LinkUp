@@ -85,12 +85,21 @@ def public_profile(request, username):
     connected_users_ids = [c.friend.id for c in Connection.objects.filter(user=request.user)] + [c.user.id for c in Connection.objects.filter(friend=request.user)] + [request.user.id]
     suggestions = UserModel.objects.exclude(id__in=connected_users_ids)[:5]
 
+    # Check follow status
+    from network.models import Follow
+    following_ids = set(Follow.objects.filter(follower=request.user).values_list('followed_id', flat=True))
+    
+    is_following_profile_user = profile_user.id in following_ids
+    for user in suggestions:
+        user.is_followed = user.id in following_ids
+
     return render(request, 'users/public_profile.html', {
         'profile_user': profile_user,
         'mutual_connections': mutual_connections,
         'follower_users': follower_users,
         'profile_connections': profile_connections,
         'suggestions': suggestions,
+        'is_following_profile_user': is_following_profile_user,
     })
 
 
