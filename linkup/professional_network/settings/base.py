@@ -13,6 +13,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # Application definition
 
 INSTALLED_APPS = [
+    # Local apps
+    'linkup',  # Admin customization (Must be first to override template)
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -26,8 +28,6 @@ INSTALLED_APPS = [
     'ckeditor_uploader',
     # Channels for real-time features
     'channels',
-    # Local apps
-    'linkup',  # Admin customization
     'core',
     'users',
     'feed',
