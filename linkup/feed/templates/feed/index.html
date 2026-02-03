@@ -444,35 +444,6 @@
     <div class="hidden lg:block lg:col-span-3">
         <div class="premium-card p-5 animate-fade-in">
 
-            <h3 class="text-lg font-bold text-gray-800 mb-4">Trending Topics</h3>
-            <div class="space-y-4">
-                <div class="hover-lift cursor-pointer p-3 rounded-lg transition-all">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-gray-500 text-xs">#WebDevelopment</span>
-                        <span class="text-xs font-semibold text-purple-600">2.4k posts</span>
-                    </div>
-                    <p class="text-sm font-medium text-gray-700">Latest trends in web development</p>
-                </div>
-                <!-- ... -->
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Edit Post Modal -->
-<div id="editPostModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div class="p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-gray-800">Edit Post</h3>
-                <button id="closeEditModal" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
 
             <form id="editPostForm" enctype="multipart/form-data">
                 {% csrf_token %}
