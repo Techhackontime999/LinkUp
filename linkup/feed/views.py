@@ -136,7 +136,10 @@ def get_post_for_edit(request, post_id):
         'post': {
             'id': post.id,
             'content': post.content,
-            'image': post.image.url if post.image else None
+            'image': post.image.url if post.image else None,
+            'video': post.video.url if post.video else None,
+            'audio': post.audio.url if post.audio else None,
+            'pdf': post.pdf.url if post.pdf else None
         }
     })
 
@@ -158,18 +161,44 @@ def update_post(request, post_id):
                 content = f'<p>{content}</p>'
             post.content = content
         
-        # Handle image removal
+        # Handle multimedia removals
         if request.POST.get('remove_image') == 'true':
             if post.image:
                 post.image.delete()
                 post.image = None
+        if request.POST.get('remove_video') == 'true':
+            if post.video:
+                post.video.delete()
+                post.video = None
+        if request.POST.get('remove_audio') == 'true':
+            if post.audio:
+                post.audio.delete()
+                post.audio = None
+        if request.POST.get('remove_pdf') == 'true':
+            if post.pdf:
+                post.pdf.delete()
+                post.pdf = None
         
-        # Handle new image upload
+        # Handle new multimedia uploads
         if 'image' in request.FILES:
-            # Delete old image if exists
             if post.image:
                 post.image.delete()
             post.image = request.FILES['image']
+        
+        if 'video' in request.FILES:
+            if post.video:
+                post.video.delete()
+            post.video = request.FILES['video']
+
+        if 'audio' in request.FILES:
+            if post.audio:
+                post.audio.delete()
+            post.audio = request.FILES['audio']
+
+        if 'pdf' in request.FILES:
+            if post.pdf:
+                post.pdf.delete()
+            post.pdf = request.FILES['pdf']
         
         post.save()
         
@@ -179,7 +208,10 @@ def update_post(request, post_id):
             'post': {
                 'id': post.id,
                 'content': post.content,
-                'image': post.image.url if post.image else None
+                'image': post.image.url if post.image else None,
+                'video': post.video.url if post.video else None,
+                'audio': post.audio.url if post.audio else None,
+                'pdf': post.pdf.url if post.pdf else None
             }
         })
     

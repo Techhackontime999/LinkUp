@@ -45,7 +45,8 @@
                     <div class="flex items-center gap-4">
                         <div class="avatar-gradient">
                             <div class="avatar-inner">
-                                <div class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-primary text-white font-semibold">
+                                <div
+                                    class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-primary text-white font-semibold">
                                     {{ user.username|slice:":2"|upper }}
                                 </div>
                             </div>
@@ -69,208 +70,300 @@
                     <img src="#" alt="preview" id="preview-img" style="width:100%; height:auto;" />
                 </div>
 
-                <div class="flex items-center justify-between mt-3">
-                    <div class="flex items-center space-x-4">
-                        <label class="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <span class="text-sm font-medium text-gray-700">Photo</span>
-                            <input type="file" name="image" class="hidden" accept="image/*" id="composer-image-input">
-                        </label>
-                    </div>
-                    <button type="submit" class="btn-primary-large">Share Post</button>
+                <div class="flex items-center space-x-4">
+                    <label
+                        class="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                        title="Add Photo">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span class="text-sm font-medium text-gray-700">Photo</span>
+                        <input type="file" name="image" class="hidden composer-file-input" accept="image/*"
+                            id="composer-image-input">
+                    </label>
+                    <label
+                        class="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                        title="Add Video">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        <span class="text-sm font-medium text-gray-700">Video</span>
+                        <input type="file" name="video" class="hidden composer-file-input" accept="video/*"
+                            id="composer-video-input">
+                    </label>
+                    <label
+                        class="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                        title="Add Audio">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                        </svg>
+                        <span class="text-sm font-medium text-gray-700">Audio</span>
+                        <input type="file" name="audio" class="hidden composer-file-input" accept="audio/*"
+                            id="composer-audio-input">
+                    </label>
+                    <label
+                        class="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                        title="Add PDF">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        <span class="text-sm font-medium text-gray-700">PDF</span>
+                        <input type="file" name="pdf" class="hidden composer-file-input" accept="application/pdf"
+                            id="composer-pdf-input">
+                    </label>
                 </div>
-            </form>
+                <button type="submit" class="btn-primary-large">Share Post</button>
         </div>
+        </form>
+    </div>
 
-        <!-- Posts Feed -->
-        {% for post in page_obj %}
-        <div class="post-card animate-fade-in">
-            <div class="post-author">
-                <div class="post-avatar">
-                    {{ post.user.username|slice:":2"|upper }}
-                </div>
-                <div class="flex-1">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="font-bold text-gray-800 hover:text-purple-600 transition-colors">
-                                <a href="{% url 'public_profile' post.user.username %}">{{ post.user.username }}</a>
-                            </h3>
-                            <p class="text-xs text-gray-500">{{ post.created_at|timesince }} ago</p>
-                        </div>
-                        {% if post.user != request.user %}
-                        <button
-                            class="btn-follow {% if post.user in request.user.following.all %}following{% else %}not-following{% endif %} px-4 py-1.5 text-xs"
-                            data-user-id="{{ post.user.id }}">
-                            <span class="follow-text">{% if post.user in request.user.following.all %}Following{% else
-                                %}Follow{% endif %}</span>
-                        </button>
-                        {% endif %}
+    <!-- Posts Feed -->
+    {% for post in page_obj %}
+    <div class="post-card animate-fade-in">
+        <div class="post-author">
+            <div class="post-avatar">
+                {{ post.user.username|slice:":2"|upper }}
+            </div>
+            <div class="flex-1">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-gray-800 hover:text-purple-600 transition-colors">
+                            <a href="{% url 'public_profile' post.user.username %}">{{ post.user.username }}</a>
+                        </h3>
+                        <p class="text-xs text-gray-500">{{ post.created_at|timesince }} ago</p>
                     </div>
+                    {% if post.user != request.user %}
+                    <button
+                        class="btn-follow {% if post.user in request.user.following.all %}following{% else %}not-following{% endif %} px-4 py-1.5 text-xs"
+                        data-user-id="{{ post.user.id }}">
+                        <span class="follow-text">{% if post.user in request.user.following.all %}Following{% else
+                            %}Follow{% endif %}</span>
+                    </button>
+                    {% endif %}
                 </div>
-                {% if post.user == request.user %}
-                <div class="relative post-menu-container">
-                    <button class="text-gray-400 hover:text-gray-600 transition-colors post-menu-btn" data-post-id="{{ post.id }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+            </div>
+            {% if post.user == request.user %}
+            <div class="relative post-menu-container">
+                <button class="text-gray-400 hover:text-gray-600 transition-colors post-menu-btn"
+                    data-post-id="{{ post.id }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                    </svg>
+                </button>
+                <!-- Dropdown Menu -->
+                <div class="post-menu hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10"
+                    data-post-id="{{ post.id }}">
+                    <button
+                        class="edit-post-btn w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 flex items-center space-x-2 border-b border-gray-100"
+                        data-post-id="{{ post.id }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
+                        <span>Edit Post</span>
                     </button>
-                    <!-- Dropdown Menu -->
-                    <div class="post-menu hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10" data-post-id="{{ post.id }}">
-                        <button class="edit-post-btn w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 flex items-center space-x-2 border-b border-gray-100" data-post-id="{{ post.id }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                            <span>Edit Post</span>
-                        </button>
-                        <button class="delete-post-btn w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-lg flex items-center space-x-2" data-post-id="{{ post.id }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                            <span>Delete Post</span>
-                        </button>
-                    </div>
+                    <button
+                        class="delete-post-btn w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-lg flex items-center space-x-2"
+                        data-post-id="{{ post.id }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        <span>Delete Post</span>
+                    </button>
                 </div>
-                {% endif %}
             </div>
+            {% endif %}
+        </div>
 
-            <div class="post-content">{{ post.content|safe }}</div>
+        <div class="post-content">{{ post.content|safe }}</div>
 
+        <div class="post-media-container space-y-4">
             {% if post.image %}
             <div class="post-image">
-                <img src="{{ post.image.url }}" alt="Post image" class="w-full h-auto" />
+                <img src="{{ post.image.url }}" alt="Post image" class="w-full h-auto rounded-lg" />
             </div>
             {% endif %}
 
-            <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                <button class="like-btn {% if request.user in post.likes.all %}liked{% endif %}"
-                    data-post-id="{{ post.id }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
-                        fill="{% if request.user in post.likes.all %}currentColor{% else %}none{% endif %}"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                    </svg>
-                    <span class="like-count font-medium">{{ post.total_likes }}</span>
-                </button>
-                <button class="comment-btn flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600"
-                    data-post-id="{{ post.id }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    <span class="text-sm font-medium">Comment</span>
-                    <span class="comment-count text-xs">{{ post.total_comments }}</span>
-                </button>
-                <button class="share-btn flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600"
-                    data-post-id="{{ post.id }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                    </svg>
-                    <span class="text-sm font-medium">Share</span>
-                </button>
+            {% if post.video %}
+            <div class="post-video">
+                <video controls class="w-full h-auto rounded-lg shadow-inner bg-black">
+                    <source src="{{ post.video.url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
             </div>
+            {% endif %}
 
-            <!-- Comments Section -->
-            <div class="comments-section hidden border-t border-gray-100 pt-3 mt-3" data-post-id="{{ post.id }}">
-                <!-- Comments List -->
-                <div class="comments-list space-y-3 mb-3 max-h-96 overflow-y-auto">
-                    <!-- Comments will be loaded here dynamically -->
-                </div>
-                
-                <!-- Add Comment Form -->
-                <div class="flex items-start space-x-3">
-                    <div class="flex-shrink-0">
-                        <div class="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-primary text-white font-semibold text-sm">
-                            {{ request.user.username|slice:":2"|upper }}
-                        </div>
-                    </div>
-                    <div class="flex-1">
-                        <form class="comment-form" data-post-id="{{ post.id }}">
-                            {% csrf_token %}
-                            <textarea name="content" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                                rows="2" 
-                                placeholder="Write a comment..." 
-                                maxlength="500"
-                                required></textarea>
-                            <div class="flex justify-end mt-2">
-                                <button type="submit" class="btn-primary text-sm">Post Comment</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+            {% if post.audio %}
+            <div class="post-audio p-4 bg-gray-50 rounded-lg">
+                <audio controls class="w-full">
+                    <source src="{{ post.audio.url }}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
             </div>
+            {% endif %}
+
+            {% if post.pdf %}
+            <div class="post-pdf p-4 bg-white border border-gray-200 rounded-lg flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-gray-800">Document (PDF)</p>
+                        <p class="text-xs text-gray-500">{{ post.pdf.name|truncatechars:30 }}</p>
+                    </div>
+                </div>
+                <a href="{{ post.pdf.url }}" target="_blank"
+                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors">
+                    View / Download
+                </a>
+            </div>
+            {% endif %}
         </div>
-        {% empty %}
-        <div class="premium-card p-12 text-center animate-fade-in">
-            <div class="mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300" fill="none"
+
+        <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+            <button class="like-btn {% if request.user in post.likes.all %}liked{% endif %}"
+                data-post-id="{{ post.id }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                    fill="{% if request.user in post.likes.all %}currentColor{% else %}none{% endif %}"
                     viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                        d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
                 </svg>
-            </div>
-            <h3 class="text-lg font-semibold text-gray-700 mb-2">No posts yet</h3>
-            <p class="text-gray-500">Be the first to share something amazing!</p>
+                <span class="like-count font-medium">{{ post.total_likes }}</span>
+            </button>
+            <button
+                class="comment-btn flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600"
+                data-post-id="{{ post.id }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <span class="text-sm font-medium">Comment</span>
+                <span class="comment-count text-xs">{{ post.total_comments }}</span>
+            </button>
+            <button
+                class="share-btn flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600"
+                data-post-id="{{ post.id }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+                <span class="text-sm font-medium">Share</span>
+            </button>
         </div>
-        {% endfor %}
 
-        <!-- Pagination Controls -->
-        {% if page_obj.has_other_pages %}
-        <div class="premium-card p-4 animate-fade-in">
-            <div class="flex items-center justify-between">
-                <div>
-                    {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}" class="btn-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                        Previous
-                    </a>
-                    {% endif %}
-                </div>
-                <div class="text-sm text-gray-600">
-                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                </div>
-                <div>
-                    {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}" class="btn-primary">
-                        Next
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                    {% endif %}
-                </div>
+        <!-- Comments Section -->
+        <div class="comments-section hidden border-t border-gray-100 pt-3 mt-3" data-post-id="{{ post.id }}">
+            <!-- Comments List -->
+            <div class="comments-list space-y-3 mb-3 max-h-96 overflow-y-auto">
+                <!-- Comments will be loaded here dynamically -->
             </div>
-        </div>
-        {% endif %}
-    </div>
 
-    <!-- Right Sidebar -->
-    <div class="hidden lg:block lg:col-span-3">
-        <div class="premium-card p-5 animate-fade-in">
-
-            <h3 class="text-lg font-bold text-gray-800 mb-4">Trending Topics</h3>
-            <div class="space-y-4">
-                <div class="hover-lift cursor-pointer p-3 rounded-lg transition-all">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-gray-500 text-xs">#WebDevelopment</span>
-                        <span class="text-xs font-semibold text-purple-600">2.4k posts</span>
+            <!-- Add Comment Form -->
+            <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0">
+                    <div
+                        class="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-primary text-white font-semibold text-sm">
+                        {{ request.user.username|slice:":2"|upper }}
                     </div>
-                    <p class="text-sm font-medium text-gray-700">Latest trends in web development</p>
                 </div>
-                <!-- ... -->
+                <div class="flex-1">
+                    <form class="comment-form" data-post-id="{{ post.id }}">
+                        {% csrf_token %}
+                        <textarea name="content"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                            rows="2" placeholder="Write a comment..." maxlength="500" required></textarea>
+                        <div class="flex justify-end mt-2">
+                            <button type="submit" class="btn-primary text-sm">Post Comment</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
+    {% empty %}
+    <div class="premium-card p-12 text-center animate-fade-in">
+        <div class="mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+            </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-700 mb-2">No posts yet</h3>
+        <p class="text-gray-500">Be the first to share something amazing!</p>
+    </div>
+    {% endfor %}
+
+    <!-- Pagination Controls -->
+    {% if page_obj.has_other_pages %}
+    <div class="premium-card p-4 animate-fade-in">
+        <div class="flex items-center justify-between">
+            <div>
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Previous
+                </a>
+                {% endif %}
+            </div>
+            <div class="text-sm text-gray-600">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </div>
+            <div>
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="btn-primary">
+                    Next
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Right Sidebar -->
+<div class="hidden lg:block lg:col-span-3">
+    <div class="premium-card p-5 animate-fade-in">
+
+        <h3 class="text-lg font-bold text-gray-800 mb-4">Trending Topics</h3>
+        <div class="space-y-4">
+            <div class="hover-lift cursor-pointer p-3 rounded-lg transition-all">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-gray-500 text-xs">#WebDevelopment</span>
+                    <span class="text-xs font-semibold text-purple-600">2.4k posts</span>
+                </div>
+                <p class="text-sm font-medium text-gray-700">Latest trends in web development</p>
+            </div>
+            <!-- ... -->
+        </div>
+    </div>
+</div>
 </div>
 
 <!-- Edit Post Modal -->
@@ -280,38 +373,73 @@
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xl font-bold text-gray-800">Edit Post</h3>
                 <button id="closeEditModal" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
-            
+
             <form id="editPostForm" enctype="multipart/form-data">
                 {% csrf_token %}
                 <input type="hidden" id="editPostId" name="post_id">
-                
+
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Content</label>
-                    <textarea id="editPostContent" name="content" 
+                    <textarea id="editPostContent" name="content"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                        rows="6" 
-                        required></textarea>
+                        rows="6" required></textarea>
                 </div>
-                
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Image (optional)</label>
-                    <div id="currentImagePreview" class="mb-2 hidden">
-                        <img id="currentImage" src="" alt="Current image" class="max-w-xs rounded-lg">
-                        <button type="button" id="removeCurrentImage" class="text-red-600 text-sm mt-2 hover:underline">Remove image</button>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Image (optional)</label>
+                        <div id="currentImagePreview" class="mb-2 hidden">
+                            <img id="currentImage" src="" alt="Current image" class="max-w-xs rounded-lg">
+                            <button type="button" id="removeCurrentImage"
+                                class="text-red-600 text-sm mt-2 hover:underline">Remove image</button>
+                        </div>
+                        <input type="file" id="editPostImage" name="image" accept="image/*" class="w-full text-sm">
                     </div>
-                    <input type="file" id="editPostImage" name="image" accept="image/*" class="w-full">
-                    <div id="newImagePreview" class="mt-2 hidden">
-                        <img id="newImage" src="" alt="New image" class="max-w-xs rounded-lg">
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Video (optional)</label>
+                        <div id="currentVideoPreview" class="mb-2 hidden">
+                            <p class="text-sm text-gray-600 mb-1">Current video file: <span id="currentVideoName"
+                                    class="font-medium"></span></p>
+                            <button type="button" id="removeCurrentVideo"
+                                class="text-red-600 text-sm hover:underline">Remove video</button>
+                        </div>
+                        <input type="file" id="editPostVideo" name="video" accept="video/*" class="w-full text-sm">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Audio (optional)</label>
+                        <div id="currentAudioPreview" class="mb-2 hidden">
+                            <p class="text-sm text-gray-600 mb-1">Current audio file: <span id="currentAudioName"
+                                    class="font-medium"></span></p>
+                            <button type="button" id="removeCurrentAudio"
+                                class="text-red-600 text-sm hover:underline">Remove audio</button>
+                        </div>
+                        <input type="file" id="editPostAudio" name="audio" accept="audio/*" class="w-full text-sm">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">PDF (optional)</label>
+                        <div id="currentPdfPreview" class="mb-2 hidden">
+                            <p class="text-sm text-gray-600 mb-1">Current PDF: <span id="currentPdfName"
+                                    class="font-medium"></span></p>
+                            <button type="button" id="removeCurrentPdf"
+                                class="text-red-600 text-sm hover:underline">Remove PDF</button>
+                        </div>
+                        <input type="file" id="editPostPdf" name="pdf" accept="application/pdf" class="w-full text-sm">
                     </div>
                 </div>
-                
+
                 <div class="flex justify-end space-x-3">
-                    <button type="button" id="cancelEdit" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                    <button type="button" id="cancelEdit"
+                        class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
                         Cancel
                     </button>
                     <button type="submit" class="btn-primary">
@@ -326,7 +454,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         console.log('✓ Feed page JavaScript loaded');
-        
+
         const likeBtns = document.querySelectorAll('.like-btn');
         console.log(`Found ${likeBtns.length} like buttons`);
         likeBtns.forEach(btn => {
@@ -383,12 +511,12 @@
                 e.stopPropagation();
                 const postId = this.dataset.postId;
                 const menu = document.querySelector(`.post-menu[data-post-id="${postId}"]`);
-                
+
                 // Close all other menus
                 document.querySelectorAll('.post-menu').forEach(m => {
                     if (m !== menu) m.classList.add('hidden');
                 });
-                
+
                 // Toggle this menu
                 menu.classList.toggle('hidden');
             });
@@ -409,12 +537,12 @@
         deletePostBtns.forEach(btn => {
             btn.addEventListener('click', function () {
                 const postId = this.dataset.postId;
-                
+
                 // Confirm deletion
                 if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
                     return;
                 }
-                
+
                 fetch(`/post/${postId}/delete/`, {
                     method: 'POST',
                     headers: {
@@ -430,16 +558,16 @@
                             postCard.style.opacity = '0';
                             postCard.style.transform = 'scale(0.95)';
                             postCard.style.transition = 'all 0.3s ease';
-                            
+
                             setTimeout(() => {
                                 postCard.remove();
-                                
+
                                 // Show success message
                                 const message = document.createElement('div');
                                 message.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
                                 message.textContent = 'Post deleted successfully';
                                 document.body.appendChild(message);
-                                
+
                                 setTimeout(() => {
                                     message.remove();
                                 }, 3000);
@@ -470,15 +598,18 @@
         const newImagePreview = document.getElementById('newImagePreview');
         const newImage = document.getElementById('newImage');
         const removeCurrentImage = document.getElementById('removeCurrentImage');
-        
+
         let currentPostData = null;
         let removeImage = false;
+        let removeVideo = false;
+        let removeAudio = false;
+        let removePdf = false;
         let editCKEditor = null; // Store CKEditor instance for edit modal
 
         editPostBtns.forEach(btn => {
             btn.addEventListener('click', function () {
                 const postId = this.dataset.postId;
-                
+
                 // Fetch post data
                 fetch(`/post/${postId}/edit/`)
                     .then(response => response.json())
@@ -486,7 +617,7 @@
                         if (data.success) {
                             currentPostData = data.post;
                             editPostId.value = postId;
-                            
+
                             // Initialize CKEditor if not already initialized
                             if (!editCKEditor) {
                                 editCKEditor = CKEDITOR.replace('editPostContent', {
@@ -503,26 +634,53 @@
                                     resize_enabled: false
                                 });
                             }
-                            
+
                             // Set content in CKEditor
                             editCKEditor.setData(data.post.content);
-                            
-                            // Show current image if exists
+
+                            // Show current files if they exist
                             if (data.post.image) {
                                 currentImage.src = data.post.image;
                                 currentImagePreview.classList.remove('hidden');
                             } else {
                                 currentImagePreview.classList.add('hidden');
                             }
-                            
-                            // Reset new image preview
-                            newImagePreview.classList.add('hidden');
+
+                            if (data.post.video) {
+                                document.getElementById('currentVideoName').textContent = data.post.video.split('/').pop();
+                                document.getElementById('currentVideoPreview').classList.remove('hidden');
+                            } else {
+                                document.getElementById('currentVideoPreview').classList.add('hidden');
+                            }
+
+                            if (data.post.audio) {
+                                document.getElementById('currentAudioName').textContent = data.post.audio.split('/').pop();
+                                document.getElementById('currentAudioPreview').classList.remove('hidden');
+                            } else {
+                                document.getElementById('currentAudioPreview').classList.add('hidden');
+                            }
+
+                            if (data.post.pdf) {
+                                document.getElementById('currentPdfName').textContent = data.post.pdf.split('/').pop();
+                                document.getElementById('currentPdfPreview').classList.remove('hidden');
+                            } else {
+                                document.getElementById('currentPdfPreview').classList.add('hidden');
+                            }
+
+                            // Reset file inputs and removal flags
                             editPostImage.value = '';
+                            document.getElementById('editPostVideo').value = '';
+                            document.getElementById('editPostAudio').value = '';
+                            document.getElementById('editPostPdf').value = '';
+
                             removeImage = false;
-                            
+                            removeVideo = false;
+                            removeAudio = false;
+                            removePdf = false;
+
                             // Show modal
                             editModal.classList.remove('hidden');
-                            
+
                             // Close the dropdown menu
                             document.querySelectorAll('.post-menu').forEach(menu => {
                                 menu.classList.add('hidden');
@@ -540,11 +698,11 @@
         closeEditModal.addEventListener('click', () => {
             editModal.classList.add('hidden');
         });
-        
+
         cancelEdit.addEventListener('click', () => {
             editModal.classList.add('hidden');
         });
-        
+
         // Close modal when clicking outside
         editModal.addEventListener('click', (e) => {
             if (e.target === editModal) {
@@ -552,10 +710,22 @@
             }
         });
 
-        // Remove current image
+        // Remove current files
         removeCurrentImage.addEventListener('click', () => {
             currentImagePreview.classList.add('hidden');
             removeImage = true;
+        });
+        document.getElementById('removeCurrentVideo').addEventListener('click', () => {
+            document.getElementById('currentVideoPreview').classList.add('hidden');
+            removeVideo = true;
+        });
+        document.getElementById('removeCurrentAudio').addEventListener('click', () => {
+            document.getElementById('currentAudioPreview').classList.add('hidden');
+            removeAudio = true;
+        });
+        document.getElementById('removeCurrentPdf').addEventListener('click', () => {
+            document.getElementById('currentPdfPreview').classList.add('hidden');
+            removePdf = true;
         });
 
         // Preview new image
@@ -576,23 +746,38 @@
         // Submit edit form
         editForm.addEventListener('submit', function (e) {
             e.preventDefault();
-            
+
             const postId = editPostId.value;
             const formData = new FormData();
-            
+
             // Get content from CKEditor
             const content = editCKEditor ? editCKEditor.getData() : editPostContent.value;
             formData.append('content', content);
             formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-            
-            // Handle image
-            if (removeImage) {
-                formData.append('remove_image', 'true');
-            }
+
+            // Handle file removals
+            if (removeImage) formData.append('remove_image', 'true');
+            if (removeVideo) formData.append('remove_video', 'true');
+            if (removeAudio) formData.append('remove_audio', 'true');
+            if (removePdf) formData.append('remove_pdf', 'true');
+
+            // Handle new file uploads
             if (editPostImage.files && editPostImage.files[0]) {
                 formData.append('image', editPostImage.files[0]);
             }
-            
+            const videoInput = document.getElementById('editPostVideo');
+            if (videoInput.files && videoInput.files[0]) {
+                formData.append('video', videoInput.files[0]);
+            }
+            const audioInput = document.getElementById('editPostAudio');
+            if (audioInput.files && audioInput.files[0]) {
+                formData.append('audio', audioInput.files[0]);
+            }
+            const pdfInput = document.getElementById('editPostPdf');
+            if (pdfInput.files && pdfInput.files[0]) {
+                formData.append('pdf', pdfInput.files[0]);
+            }
+
             fetch(`/post/${postId}/update/`, {
                 method: 'POST',
                 body: formData
@@ -619,7 +804,7 @@
             btn.addEventListener('click', function () {
                 const postId = this.dataset.postId;
                 const commentsSection = document.querySelector(`.comments-section[data-post-id="${postId}"]`);
-                
+
                 if (commentsSection.classList.contains('hidden')) {
                     // Load comments
                     loadComments(postId);
@@ -638,7 +823,7 @@
                     if (data.success) {
                         const commentsList = document.querySelector(`.comments-section[data-post-id="${postId}"] .comments-list`);
                         commentsList.innerHTML = '';
-                        
+
                         if (data.comments.length === 0) {
                             commentsList.innerHTML = '<p class="text-gray-500 text-sm text-center py-4">No comments yet. Be the first to comment!</p>';
                         } else {
@@ -679,13 +864,13 @@
                 const postId = this.dataset.postId;
                 const textarea = this.querySelector('textarea');
                 const content = textarea.value.trim();
-                
+
                 if (!content) return;
-                
+
                 const formData = new FormData();
                 formData.append('content', content);
                 formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-                
+
                 fetch(`/post/${postId}/comment/`, {
                     method: 'POST',
                     body: formData
@@ -695,23 +880,23 @@
                         if (data.success) {
                             // Add new comment to the list
                             const commentsList = document.querySelector(`.comments-section[data-post-id="${postId}"] .comments-list`);
-                            
+
                             // Remove "no comments" message if it exists
                             const noCommentsMsg = commentsList.querySelector('p');
                             if (noCommentsMsg) {
                                 noCommentsMsg.remove();
                             }
-                            
+
                             commentsList.appendChild(createCommentElement(data.comment));
-                            
+
                             // Update comment count
                             const commentBtn = document.querySelector(`.comment-btn[data-post-id="${postId}"]`);
                             const commentCount = commentBtn.querySelector('.comment-count');
                             commentCount.textContent = data.comments_count;
-                            
+
                             // Clear textarea
                             textarea.value = '';
-                            
+
                             // Scroll to new comment
                             commentsList.scrollTop = commentsList.scrollHeight;
                         }
@@ -729,7 +914,7 @@
         shareBtns.forEach(btn => {
             btn.addEventListener('click', function () {
                 const postId = this.dataset.postId;
-                
+
                 fetch(`/post/${postId}/link/`)
                     .then(response => response.json())
                     .then(data => {
@@ -740,7 +925,7 @@
                                 const originalText = this.querySelector('span').textContent;
                                 this.querySelector('span').textContent = 'Link Copied!';
                                 this.classList.add('text-green-600');
-                                
+
                                 setTimeout(() => {
                                     this.querySelector('span').textContent = originalText;
                                     this.classList.remove('text-green-600');
@@ -758,28 +943,32 @@
             });
         });
 
-        // Composer image preview and expand toggle
-        const imageInput = document.getElementById('composer-image-input');
-        const previewContainer = document.getElementById('image-preview');
-        const previewImg = document.getElementById('preview-img');
-        const composerToggle = document.getElementById('composer-toggle');
-        const composer = document.querySelector('.composer');
+        const fileInputs = document.querySelectorAll('.composer-file-input');
 
-        if (imageInput) {
-            imageInput.addEventListener('change', function (e) {
+        fileInputs.forEach(input => {
+            input.addEventListener('change', function (e) {
                 const file = this.files && this.files[0];
                 if (!file) {
-                    previewContainer.style.display = 'none';
+                    if (this.id === 'composer-image-input') previewContainer.style.display = 'none';
                     return;
                 }
-                const reader = new FileReader();
-                reader.onload = function (ev) {
-                    previewImg.src = ev.target.result;
-                    previewContainer.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
+
+                // Show feedback that file is selected
+                const label = this.parentElement;
+                const originalText = label.querySelector('span').textContent;
+                label.querySelector('span').textContent = 'Added!';
+                label.classList.add('bg-purple-50');
+
+                if (this.id === 'composer-image-input') {
+                    const reader = new FileReader();
+                    reader.onload = function (ev) {
+                        previewImg.src = ev.target.result;
+                        previewContainer.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
             });
-        }
+        });
 
         if (composerToggle && composer) {
             composerToggle.addEventListener('click', function () {
@@ -791,7 +980,7 @@
                 }
             });
         }
-        
+
         console.log('✓ All event listeners attached successfully!');
     });
 </script>

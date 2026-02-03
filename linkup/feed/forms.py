@@ -4,7 +4,7 @@ from .models import Post, Comment
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['content', 'image']
+        fields = ['content', 'image', 'video', 'audio', 'pdf']
         widgets = {
             'content': forms.Textarea(attrs={
                 'class': 'form-textarea form-field-enhanced',
@@ -16,12 +16,27 @@ class PostForm(forms.ModelForm):
                 'class': 'file-input file-input-bordered w-full max-w-xs form-field-enhanced',
                 'accept': 'image/*'
             }),
+            'video': forms.FileInput(attrs={
+                'class': 'file-input file-input-bordered w-full max-w-xs form-field-enhanced',
+                'accept': 'video/*'
+            }),
+            'audio': forms.FileInput(attrs={
+                'class': 'file-input file-input-bordered w-full max-w-xs form-field-enhanced',
+                'accept': 'audio/*'
+            }),
+            'pdf': forms.FileInput(attrs={
+                'class': 'file-input file-input-bordered w-full max-w-xs form-field-enhanced',
+                'accept': 'application/pdf'
+            }),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['content'].required = True
         self.fields['image'].required = False
+        self.fields['video'].required = False
+        self.fields['audio'].required = False
+        self.fields['pdf'].required = False
 
 
 class CommentForm(forms.ModelForm):

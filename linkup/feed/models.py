@@ -5,7 +5,10 @@ from ckeditor_uploader.fields import RichTextUploadingField
 class Post(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='posts')
     content = RichTextUploadingField(blank=True)
-    image = models.ImageField(upload_to='posts/', blank=True, null=True)
+    image = models.ImageField(upload_to='posts/images/', blank=True, null=True)
+    video = models.FileField(upload_to='posts/videos/', blank=True, null=True)
+    audio = models.FileField(upload_to='posts/audio/', blank=True, null=True)
+    pdf = models.FileField(upload_to='posts/pdfs/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
