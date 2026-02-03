@@ -198,7 +198,7 @@ def _format_user_results(users, query):
             'current_position': current_experience.title if current_experience else '',
             'current_company': current_experience.company if current_experience else '',
             'highlighted_fields': _highlight_user_matches(user, query),
-            'profile_url': f'/users/{user.username}/',
+            'profile_url': f'/users/profile/{user.username}/',
         }
         results.append(result)
     
@@ -245,7 +245,7 @@ def _format_post_results(posts, query):
             'likes_count': post.likes.count(),
             'highlighted_content': _highlight_text(clean_content, query),
             'author_avatar': post.user.profile.avatar.url if hasattr(post.user, 'profile') and post.user.profile.avatar else None,
-            'post_url': f'/feed/post/{post.id}/',
+            'post_url': f'/post/{post.id}/',
         }
         results.append(result)
     
