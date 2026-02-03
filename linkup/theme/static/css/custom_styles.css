@@ -237,7 +237,7 @@ h6 {
 
 /* Hero / Masthead */
 .site-hero {
-    background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(245,247,250,0.08));
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(245, 247, 250, 0.08));
     border-radius: calc(var(--radius-xl) + 0.5rem);
     padding: clamp(1rem, 4vw, 2.5rem);
     display: grid;
@@ -279,11 +279,11 @@ h6 {
 
 /* Composer (post creation) */
 .composer {
-    background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9));
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
     border-radius: var(--radius-xl);
     padding: var(--space-md);
     box-shadow: var(--shadow-md);
-    border: 1px solid rgba(0,0,0,0.04);
+    border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .composer-header {
@@ -305,10 +305,21 @@ h6 {
     border-radius: var(--radius-lg);
     font-weight: 700;
     box-shadow: var(--shadow-glow);
+    transition: all var(--transition-base);
 }
 
-.input-premium, .textarea-premium {
-    border: 1px solid rgba(0,0,0,0.06);
+.btn-primary-large:hover {
+    box-shadow: var(--shadow-glow-hover);
+    transform: translateY(-2px);
+}
+
+.btn-primary-large:active {
+    transform: translateY(0);
+}
+
+.input-premium,
+.textarea-premium {
+    border: 1px solid rgba(0, 0, 0, 0.06);
     box-shadow: none;
     padding: 0.75rem 1rem;
     border-radius: var(--radius-lg);
@@ -327,52 +338,63 @@ h6 {
     max-height: 280px;
 }
 
+.composer-preview-area video,
+.composer-preview-area img {
+    box-shadow: var(--shadow-md);
+    transition: transform var(--transition-base);
+}
+
+.composer-preview-area video:hover {
+    transform: scale(1.01);
+}
+
 /* CTA and minor UI tweaks */
 .cta-chip {
-    background: linear-gradient(90deg, rgba(102,126,234,0.14), rgba(240, 149, 153, 0.09));
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.14), rgba(240, 149, 153, 0.09));
     padding: 0.25rem 0.75rem;
     border-radius: var(--radius-full);
     font-weight: 600;
     color: var(--accent-purple);
-    box-shadow: 0 6px 18px rgba(102,126,234,0.06);
+    box-shadow: 0 6px 18px rgba(102, 126, 234, 0.06);
 }
 
 /* Register / Auth pages */
 .auth-card {
-    background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(245,247,250,0.9));
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 247, 250, 0.9));
     border-radius: var(--radius-xl);
     padding: clamp(1rem, 4vw, 2rem);
     box-shadow: var(--shadow-2xl);
-    border: 1px solid rgba(0,0,0,0.04);
+    border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .auth-input {
     width: 100%;
     padding: 0.75rem 1rem;
     border-radius: var(--radius-md);
-    border: 1px solid rgba(0,0,0,0.06);
+    border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .auth-actions {
-    display:flex;
-    gap:0.5rem;
-    align-items:center;
-    justify-content:space-between;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .auth-legal {
-    font-size:0.85rem;
-    color:var(--text-muted);
+    font-size: 0.85rem;
+    color: var(--text-muted);
 }
 
 /* Enhance cards */
 .premium-card {
     transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
 }
+
 .premium-card:hover {
     transform: translateY(-6px);
     box-shadow: var(--shadow-2xl);
-    border-color: rgba(102,126,234,0.18);
+    border-color: rgba(102, 126, 234, 0.18);
 }
 
 /* ============================================
@@ -666,6 +688,7 @@ nav.premium-nav a.active::after {
         width: 40px;
         height: 40px;
     }
+
     /* keep large avatar reasonable on small screens */
     .post-avatar.w-24 {
         width: 64px;
@@ -880,10 +903,13 @@ nav.premium-nav a.active::after {
    ============================================ */
 
 /* Global responsive container used across templates (safe to use alongside Tailwind's container) */
-.container, .container-responsive, .site-container {
+.container,
+.container-responsive,
+.site-container {
     max-width: 1200px;
     margin-inline: auto;
-    padding-inline: clamp(1rem, 4vw, 2rem); /* left/right gutters scale with viewport */
+    padding-inline: clamp(1rem, 4vw, 2rem);
+    /* left/right gutters scale with viewport */
     padding-block-start: clamp(1rem, 3vw, 2rem);
     padding-block-end: clamp(1rem, 3vw, 2rem);
     box-sizing: border-box;
@@ -896,12 +922,21 @@ nav.premium-nav a.active::after {
 }
 
 /* Horizontal gutter helpers */
-.gutter-sm { padding-inline: var(--space-md); }
-.gutter-md { padding-inline: var(--space-lg); }
-.gutter-lg { padding-inline: var(--space-2xl); }
+.gutter-sm {
+    padding-inline: var(--space-md);
+}
+
+.gutter-md {
+    padding-inline: var(--space-lg);
+}
+
+.gutter-lg {
+    padding-inline: var(--space-2xl);
+}
 
 /* Header / nav spacing consistency */
-.header, nav.premium-nav {
+.header,
+nav.premium-nav {
     padding-inline: clamp(0.5rem, 3vw, 1.25rem);
     padding-block: 0.75rem;
 }
@@ -972,6 +1007,7 @@ nav.premium-nav a.active::after {
 .hover-lift {
     transition: transform var(--transition-base), box-shadow var(--transition-base);
 }
+
 .hover-lift:hover,
 .btn-hover-lift:hover,
 .btn-premium:hover,
@@ -1006,6 +1042,7 @@ nav.premium-nav a.active::after {
     white-space: nowrap !important;
     border: 0 !important;
 }
+
 .sr-only:focus,
 .sr-only:active {
     position: static !important;

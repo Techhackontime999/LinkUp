@@ -66,61 +66,121 @@
                     {{ form.content }}
                 </div>
 
-                <div class="composer-image-preview" id="image-preview" style="display:none;">
-                    <img src="#" alt="preview" id="preview-img" style="width:100%; height:auto;" />
+                <div class="composer-preview-area mt-4 mb-4" id="composer-preview" style="display:none;">
+                    <div class="relative rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
+                        <button type="button" id="remove-preview"
+                            class="absolute top-2 right-2 z-10 p-1.5 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        <!-- Image Preview -->
+                        <div id="image-preview" style="display:none;">
+                            <img src="#" alt="preview" id="preview-img"
+                                class="w-full h-auto max-h-[400px] object-contain" />
+                        </div>
+
+                        <!-- Video Preview -->
+                        <div id="video-preview" style="display:none;" class="p-4">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                                <span class="text-sm font-medium text-gray-700" id="video-filename">Video
+                                    selected</span>
+                            </div>
+                            <video id="preview-video" controls class="w-full rounded-lg bg-black max-h-[300px]"></video>
+                        </div>
+
+                        <!-- Audio Preview -->
+                        <div id="audio-preview" style="display:none;" class="p-4">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                </svg>
+                                <span class="text-sm font-medium text-gray-700" id="audio-filename">Audio
+                                    selected</span>
+                            </div>
+                            <audio id="preview-audio" controls class="w-full"></audio>
+                        </div>
+
+                        <!-- PDF Preview -->
+                        <div id="pdf-preview" style="display:none;" class="p-4">
+                            <div class="flex items-center space-x-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-500" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-800" id="pdf-filename">PDF Document</p>
+                                    <p class="text-xs text-gray-500">Document will be uploaded with your post</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="flex items-center space-x-4">
-                    <label
-                        class="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                        title="Add Photo">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span class="text-sm font-medium text-gray-700">Photo</span>
-                        <input type="file" name="image" class="hidden composer-file-input" accept="image/*"
-                            id="composer-image-input">
-                    </label>
-                    <label
-                        class="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                        title="Add Video">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        <span class="text-sm font-medium text-gray-700">Video</span>
-                        <input type="file" name="video" class="hidden composer-file-input" accept="video/*"
-                            id="composer-video-input">
-                    </label>
-                    <label
-                        class="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                        title="Add Audio">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                        </svg>
-                        <span class="text-sm font-medium text-gray-700">Audio</span>
-                        <input type="file" name="audio" class="hidden composer-file-input" accept="audio/*"
-                            id="composer-audio-input">
-                    </label>
-                    <label
-                        class="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                        title="Add PDF">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                        <span class="text-sm font-medium text-gray-700">PDF</span>
-                        <input type="file" name="pdf" class="hidden composer-file-input" accept="application/pdf"
-                            id="composer-pdf-input">
-                    </label>
+                <div class="flex flex-wrap items-center justify-between gap-4 mt-3">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <label
+                            class="flex items-center space-x-2 px-3 py-1.5 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-transparent hover:border-gray-200"
+                            title="Add Photo">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span class="text-sm font-medium text-gray-700">Photo</span>
+                            <input type="file" name="image" class="hidden composer-file-input" accept="image/*"
+                                id="composer-image-input">
+                        </label>
+                        <label
+                            class="flex items-center space-x-2 px-3 py-1.5 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-transparent hover:border-gray-200"
+                            title="Add Video">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            <span class="text-sm font-medium text-gray-700">Video</span>
+                            <input type="file" name="video" class="hidden composer-file-input" accept="video/*"
+                                id="composer-video-input">
+                        </label>
+                        <label
+                            class="flex items-center space-x-2 px-3 py-1.5 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-transparent hover:border-gray-200"
+                            title="Add Audio">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                            </svg>
+                            <span class="text-sm font-medium text-gray-700">Audio</span>
+                            <input type="file" name="audio" class="hidden composer-file-input" accept="audio/*"
+                                id="composer-audio-input">
+                        </label>
+                        <label
+                            class="flex items-center space-x-2 px-3 py-1.5 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-transparent hover:border-gray-200"
+                            title="Add PDF">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            <span class="text-sm font-medium text-gray-700">PDF</span>
+                            <input type="file" name="pdf" class="hidden composer-file-input" accept="application/pdf"
+                                id="composer-pdf-input">
+                        </label>
+                    </div>
+                    <button type="submit" class="btn-primary-large">Share Post</button>
                 </div>
-                <button type="submit" class="btn-primary-large">Share Post</button>
         </div>
         </form>
     </div>
@@ -400,6 +460,11 @@
                             <button type="button" id="removeCurrentImage"
                                 class="text-red-600 text-sm mt-2 hover:underline">Remove image</button>
                         </div>
+                        <div id="newImagePreview" class="mb-2 hidden">
+                            <p class="text-xs text-blue-600 mb-1">New image selected:</p>
+                            <img id="newImage" src="" alt="New image"
+                                class="max-w-xs rounded-lg border-2 border-blue-200">
+                        </div>
                         <input type="file" id="editPostImage" name="image" accept="image/*" class="w-full text-sm">
                     </div>
 
@@ -410,6 +475,11 @@
                                     class="font-medium"></span></p>
                             <button type="button" id="removeCurrentVideo"
                                 class="text-red-600 text-sm hover:underline">Remove video</button>
+                        </div>
+                        <div id="newVideoPreview" class="mb-2 hidden">
+                            <p class="text-xs text-blue-600 mb-1">New video selected:</p>
+                            <video id="newVideo" controls
+                                class="max-w-xs rounded-lg border-2 border-blue-200 bg-black"></video>
                         </div>
                         <input type="file" id="editPostVideo" name="video" accept="video/*" class="w-full text-sm">
                     </div>
@@ -422,6 +492,10 @@
                             <button type="button" id="removeCurrentAudio"
                                 class="text-red-600 text-sm hover:underline">Remove audio</button>
                         </div>
+                        <div id="newAudioPreview" class="mb-2 hidden">
+                            <p class="text-xs text-blue-600 mb-1">New audio selected:</p>
+                            <audio id="newAudio" controls class="max-w-xs"></audio>
+                        </div>
                         <input type="file" id="editPostAudio" name="audio" accept="audio/*" class="w-full text-sm">
                     </div>
 
@@ -432,6 +506,17 @@
                                     class="font-medium"></span></p>
                             <button type="button" id="removeCurrentPdf"
                                 class="text-red-600 text-sm hover:underline">Remove PDF</button>
+                        </div>
+                        <div id="newPdfPreview" class="mb-2 hidden">
+                            <p class="text-xs text-blue-600 mb-1">New PDF selected:</p>
+                            <div class="flex items-center space-x-2 p-2 bg-blue-50 rounded border border-blue-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                <span id="newPdfName" class="text-xs font-medium text-blue-700"></span>
+                            </div>
                         </div>
                         <input type="file" id="editPostPdf" name="pdf" accept="application/pdf" class="w-full text-sm">
                     </div>
@@ -673,6 +758,11 @@
                             document.getElementById('editPostAudio').value = '';
                             document.getElementById('editPostPdf').value = '';
 
+                            document.getElementById('newImagePreview').classList.add('hidden');
+                            document.getElementById('newVideoPreview').classList.add('hidden');
+                            document.getElementById('newAudioPreview').classList.add('hidden');
+                            document.getElementById('newPdfPreview').classList.add('hidden');
+
                             removeImage = false;
                             removeVideo = false;
                             removeAudio = false;
@@ -728,18 +818,78 @@
             removePdf = true;
         });
 
-        // Preview new image
+        // Preview new files in edit modal
+        const editFileInputs = [
+            editPostImage,
+            document.getElementById('editPostVideo'),
+            document.getElementById('editPostAudio'),
+            document.getElementById('editPostPdf')
+        ];
+
+        function hideAllNewPreviews() {
+            document.getElementById('newImagePreview').classList.add('hidden');
+            document.getElementById('newVideoPreview').classList.add('hidden');
+            document.getElementById('newAudioPreview').classList.add('hidden');
+            document.getElementById('newPdfPreview').classList.add('hidden');
+        }
+
         editPostImage.addEventListener('change', function (e) {
             const file = this.files && this.files[0];
             if (file) {
+                hideAllNewPreviews();
+                editFileInputs.forEach(inp => { if (inp !== this) inp.value = ''; });
                 const reader = new FileReader();
                 reader.onload = function (ev) {
                     newImage.src = ev.target.result;
-                    newImagePreview.classList.remove('hidden');
+                    document.getElementById('newImagePreview').classList.remove('hidden');
                 };
                 reader.readAsDataURL(file);
             } else {
-                newImagePreview.classList.add('hidden');
+                document.getElementById('newImagePreview').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('editPostVideo').addEventListener('change', function (e) {
+            const file = this.files && this.files[0];
+            if (file) {
+                hideAllNewPreviews();
+                editFileInputs.forEach(inp => { if (inp !== this) inp.value = ''; });
+                const reader = new FileReader();
+                reader.onload = function (ev) {
+                    document.getElementById('newVideo').src = ev.target.result;
+                    document.getElementById('newVideoPreview').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                document.getElementById('newVideoPreview').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('editPostAudio').addEventListener('change', function (e) {
+            const file = this.files && this.files[0];
+            if (file) {
+                hideAllNewPreviews();
+                editFileInputs.forEach(inp => { if (inp !== this) inp.value = ''; });
+                const reader = new FileReader();
+                reader.onload = function (ev) {
+                    document.getElementById('newAudio').src = ev.target.result;
+                    document.getElementById('newAudioPreview').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                document.getElementById('newAudioPreview').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('editPostPdf').addEventListener('change', function (e) {
+            const file = this.files && this.files[0];
+            if (file) {
+                hideAllNewPreviews();
+                editFileInputs.forEach(inp => { if (inp !== this) inp.value = ''; });
+                document.getElementById('newPdfName').textContent = file.name;
+                document.getElementById('newPdfPreview').classList.remove('hidden');
+            } else {
+                document.getElementById('newPdfPreview').classList.add('hidden');
             }
         });
 
@@ -944,31 +1094,83 @@
         });
 
         const fileInputs = document.querySelectorAll('.composer-file-input');
+        const composerPreview = document.getElementById('composer-preview');
+        const imgPreview = document.getElementById('image-preview');
+        const vidPreview = document.getElementById('video-preview');
+        const audPreview = document.getElementById('audio-preview');
+        const pdfPreview = document.getElementById('pdf-preview');
+        const removePreviewBtn = document.getElementById('remove-preview');
+
+        function hideAllPreviews() {
+            imgPreview.style.display = 'none';
+            vidPreview.style.display = 'none';
+            audPreview.style.display = 'none';
+            pdfPreview.style.display = 'none';
+            composerPreview.style.display = 'none';
+        }
 
         fileInputs.forEach(input => {
             input.addEventListener('change', function (e) {
                 const file = this.files && this.files[0];
-                if (!file) {
-                    if (this.id === 'composer-image-input') previewContainer.style.display = 'none';
-                    return;
-                }
+                if (!file) return;
 
-                // Show feedback that file is selected
-                const label = this.parentElement;
-                const originalText = label.querySelector('span').textContent;
-                label.querySelector('span').textContent = 'Added!';
-                label.classList.add('bg-purple-50');
+                hideAllPreviews();
+
+                // Clear other inputs
+                fileInputs.forEach(inp => {
+                    if (inp !== this) inp.value = '';
+                });
+
+                composerPreview.style.display = 'block';
 
                 if (this.id === 'composer-image-input') {
                     const reader = new FileReader();
                     reader.onload = function (ev) {
-                        previewImg.src = ev.target.result;
-                        previewContainer.style.display = 'block';
+                        document.getElementById('preview-img').src = ev.target.result;
+                        imgPreview.style.display = 'block';
                     };
                     reader.readAsDataURL(file);
+                } else if (this.id === 'composer-video-input') {
+                    const reader = new FileReader();
+                    reader.onload = function (ev) {
+                        const video = document.getElementById('preview-video');
+                        video.src = ev.target.result;
+                        document.getElementById('video-filename').textContent = file.name;
+                        vidPreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else if (this.id === 'composer-audio-input') {
+                    const reader = new FileReader();
+                    reader.onload = function (ev) {
+                        const audio = document.getElementById('preview-audio');
+                        audio.src = ev.target.result;
+                        document.getElementById('audio-filename').textContent = file.name;
+                        audPreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else if (this.id === 'composer-pdf-input') {
+                    document.getElementById('pdf-filename').textContent = file.name;
+                    pdfPreview.style.display = 'block';
                 }
+
+                // Visual feedback on labels
+                fileInputs.forEach(inp => {
+                    const label = inp.parentElement;
+                    label.classList.remove('bg-purple-50');
+                });
+                this.parentElement.classList.add('bg-purple-50');
             });
         });
+
+        if (removePreviewBtn) {
+            removePreviewBtn.addEventListener('click', function () {
+                hideAllPreviews();
+                fileInputs.forEach(input => {
+                    input.value = '';
+                    input.parentElement.classList.remove('bg-purple-50');
+                });
+            });
+        }
 
         if (composerToggle && composer) {
             composerToggle.addEventListener('click', function () {
