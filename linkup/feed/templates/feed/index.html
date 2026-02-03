@@ -261,18 +261,19 @@
                 {% endif %}
             </div>
 
-            <div class="post-content">{{ post.content|safe }}</div>
+            <div class="post-content mb-4">{{ post.content|safe }}</div>
 
-            <div class="post-media-container space-y-4">
+            {% if post.image or post.video or post.audio or post.pdf %}
+            <div class="post-media-container mt-4 mb-4">
                 {% if post.image %}
-                <div class="post-image">
-                    <img src="{{ post.image.url }}" alt="Post image" class="w-full h-auto rounded-lg" />
+                <div class="post-image overflow-hidden rounded-lg">
+                    <img src="{{ post.image.url }}" alt="Post image" class="w-full h-auto max-h-[600px] object-cover rounded-lg" loading="lazy" />
                 </div>
                 {% endif %}
 
                 {% if post.video %}
-                <div class="post-video">
-                    <video controls class="w-full h-auto rounded-lg shadow-inner bg-black">
+                <div class="post-video overflow-hidden rounded-lg bg-black">
+                    <video controls class="w-full h-auto max-h-[600px] rounded-lg" preload="metadata">
                         <source src="{{ post.video.url }}" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
@@ -280,8 +281,8 @@
                 {% endif %}
 
                 {% if post.audio %}
-                <div class="post-audio p-4 bg-gray-50 rounded-lg">
-                    <audio controls class="w-full">
+                <div class="post-audio p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <audio controls class="w-full" preload="metadata">
                         <source src="{{ post.audio.url }}" type="audio/mpeg">
                         Your browser does not support the audio element.
                     </audio>
@@ -289,25 +290,28 @@
                 {% endif %}
 
                 {% if post.pdf %}
-                <div class="post-pdf p-4 bg-white border border-gray-200 rounded-lg flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                        <div>
-                            <p class="text-sm font-medium text-gray-800">Document (PDF)</p>
-                            <p class="text-xs text-gray-500">{{ post.pdf.name|truncatechars:30 }}</p>
+                <div class="post-pdf p-4 bg-white border border-gray-200 rounded-lg">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div class="flex items-center space-x-3 min-w-0 flex-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            <div class="min-w-0">
+                                <p class="text-sm font-medium text-gray-800 truncate">Document (PDF)</p>
+                                <p class="text-xs text-gray-500 truncate">{{ post.pdf.name|truncatechars:40 }}</p>
+                            </div>
                         </div>
+                        <a href="{{ post.pdf.url }}" target="_blank" rel="noopener noreferrer"
+                            class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
+                            View / Download
+                        </a>
                     </div>
-                    <a href="{{ post.pdf.url }}" target="_blank"
-                        class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors">
-                        View / Download
-                    </a>
                 </div>
                 {% endif %}
             </div>
+            {% endif %}
 
             <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                 <button class="like-btn {% if request.user in post.likes.all %}liked{% endif %}"
