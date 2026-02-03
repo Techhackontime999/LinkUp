@@ -197,6 +197,24 @@
         </form>
     </div>
 
+    <!-- Right Sidebar -->
+    <div class="hidden lg:block lg:col-span-3">
+        <div class="premium-card p-5 animate-fade-in">
+
+            <h3 class="text-lg font-bold text-gray-800 mb-4">Trending Topics</h3>
+            <div class="space-y-4">
+                <div class="hover-lift cursor-pointer p-3 rounded-lg transition-all">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-gray-500 text-xs">#WebDevelopment</span>
+                        <span class="text-xs font-semibold text-purple-600">2.4k posts</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-700">Latest trends in web development</p>
+                </div>
+                <!-- ... -->
+            </div>
+        </div>
+    </div>
+
     <!-- Posts Feed -->
     <div class="space-y-6">
         {% for post in page_obj %}
