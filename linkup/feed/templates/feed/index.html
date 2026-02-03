@@ -419,6 +419,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
 
     <!-- Right Sidebar -->
@@ -441,6 +442,21 @@
 </div>
 
 <!-- Edit Post Modal -->
+<div id="editPostModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Edit Post</h3>
+                <button id="closeEditModal" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form id="editPostForm" enctype="multipart/form-data">
                 {% csrf_token %}
                 <input type="hidden" id="editPostId" name="post_id">
 
