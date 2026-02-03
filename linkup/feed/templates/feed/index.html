@@ -128,58 +128,70 @@
                     </div>
                 </div>
 
-                <div class="flex flex-wrap items-center justify-between gap-4 mt-3">
-                    <div class="flex flex-wrap items-center gap-2">
+                <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+                    <div class="flex items-center space-x-1 sm:space-x-2">
                         <label
-                            class="flex items-center space-x-2 px-3 py-1.5 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-transparent hover:border-gray-200"
+                            class="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-blue-50 cursor-pointer transition-all border border-transparent hover:border-blue-100 group"
                             title="Add Photo">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none"
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5 text-blue-500 group-hover:scale-110 transition-transform" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                            <span class="text-sm font-medium text-gray-700">Photo</span>
+                            <span
+                                class="text-xs sm:text-sm font-medium text-gray-600 group-hover:text-blue-600 hidden sm:inline">Photo</span>
                             <input type="file" name="image" class="hidden composer-file-input" accept="image/*"
                                 id="composer-image-input">
                         </label>
                         <label
-                            class="flex items-center space-x-2 px-3 py-1.5 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-transparent hover:border-gray-200"
+                            class="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-green-50 cursor-pointer transition-all border border-transparent hover:border-green-100 group"
                             title="Add Video">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none"
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5 text-green-500 group-hover:scale-110 transition-transform" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                             </svg>
-                            <span class="text-sm font-medium text-gray-700">Video</span>
+                            <span
+                                class="text-xs sm:text-sm font-medium text-gray-600 group-hover:text-green-600 hidden sm:inline">Video</span>
                             <input type="file" name="video" class="hidden composer-file-input" accept="video/*"
                                 id="composer-video-input">
                         </label>
                         <label
-                            class="flex items-center space-x-2 px-3 py-1.5 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-transparent hover:border-gray-200"
+                            class="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-yellow-50 cursor-pointer transition-all border border-transparent hover:border-yellow-100 group"
                             title="Add Audio">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" fill="none"
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5 text-yellow-500 group-hover:scale-110 transition-transform" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                             </svg>
-                            <span class="text-sm font-medium text-gray-700">Audio</span>
+                            <span
+                                class="text-xs sm:text-sm font-medium text-gray-600 group-hover:text-yellow-600 hidden sm:inline">Audio</span>
                             <input type="file" name="audio" class="hidden composer-file-input" accept="audio/*"
                                 id="composer-audio-input">
                         </label>
                         <label
-                            class="flex items-center space-x-2 px-3 py-1.5 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-transparent hover:border-gray-200"
+                            class="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-red-50 cursor-pointer transition-all border border-transparent hover:border-red-100 group"
                             title="Add PDF">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none"
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5 text-red-500 group-hover:scale-110 transition-transform" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 0 002 2z" />
                             </svg>
-                            <span class="text-sm font-medium text-gray-700">PDF</span>
+                            <span
+                                class="text-xs sm:text-sm font-medium text-gray-600 group-hover:text-red-600 hidden sm:inline">PDF</span>
                             <input type="file" name="pdf" class="hidden composer-file-input" accept="application/pdf"
                                 id="composer-pdf-input">
                         </label>
                     </div>
-                    <button type="submit" class="btn-primary-large">Share Post</button>
+                    <div>
+                        <button type="submit" class="btn-primary-large px-6 py-2.5">
+                            Post
+                        </button>
+                    </div>
                 </div>
         </div>
         </form>
