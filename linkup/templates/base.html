@@ -18,13 +18,16 @@
 
     <!-- Skip Links for Keyboard Navigation -->
     <a href="#main"
-        class="skip-link sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[100] focus:bg-white focus:p-4">Skip
+        class="skip-link sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[100] focus:bg-white focus:p-4"
+        style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;">Skip
         to main content</a>
     <a href="#navigation"
-        class="skip-link sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[100] focus:bg-white focus:p-4">Skip
+        class="skip-link sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[100] focus:bg-white focus:p-4"
+        style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;">Skip
         to navigation</a>
     <a href="#search"
-        class="skip-link sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[100] focus:bg-white focus:p-4">Skip
+        class="skip-link sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[100] focus:bg-white focus:p-4"
+        style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;">Skip
         to search</a>
 
     <!-- Navbar -->
@@ -67,8 +70,7 @@
                         aria-label="Main navigation menu">
                         <a href="{% url 'feed' %}"
                             class="nav-link-premium {% if request.resolver_match.url_name == 'feed' %}active{% endif %}"
-                            role="menuitem" {% if request.resolver_match.url_name=='feed' %}aria-current="page" {% endif
-                            %}>
+                            role="menuitem" {% if request.resolver_match.url_name == 'feed' %}aria-current="page"{% endif %}>
                             <span class="hidden lg:inline">Home</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 lg:hidden" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -79,8 +81,7 @@
                         </a>
                         <a href="{% url 'network' %}"
                             class="nav-link-premium {% if request.resolver_match.url_name == 'network' %}active{% endif %}"
-                            role="menuitem" {% if request.resolver_match.url_name=='network' %}aria-current="page" {%
-                            endif %}>
+                            role="menuitem" {% if request.resolver_match.url_name == 'network' %}aria-current="page"{% endif %}>
                             <span class="hidden lg:inline">Network</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 lg:hidden" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -91,8 +92,7 @@
                         </a>
                         <a href="{% url 'jobs:job_list' %}"
                             class="nav-link-premium {% if 'jobs' in request.resolver_match.app_name %}active{% endif %}"
-                            role="menuitem" {% if 'jobs' in request.resolver_match.app_name %}aria-current="page" {%
-                            endif %}>
+                            role="menuitem" {% if 'jobs' in request.resolver_match.app_name %}aria-current="page"{% endif %}>
                             <span class="hidden lg:inline">Jobs</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 lg:hidden" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -103,8 +103,7 @@
                         </a>
                         <a href="{% url 'messaging:inbox' %}"
                             class="nav-link-premium {% if 'messaging' in request.resolver_match.app_name %}active{% endif %} relative"
-                            role="menuitem" {% if 'messaging' in request.resolver_match.app_name %}aria-current="page"
-                            {% endif %}>
+                            role="menuitem" {% if 'messaging' in request.resolver_match.app_name %}aria-current="page"{% endif %}>
                             <span class="hidden lg:inline">Messages</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 lg:hidden" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
