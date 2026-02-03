@@ -10,7 +10,7 @@
                 <div
                     class="flex justify-between items-center p-3 rounded-lg hover:bg-purple-50 transition-colors cursor-pointer">
                     <span class="text-gray-700 font-medium">Connections</span>
-                    <span class="badge-premium">{{ connections.count }}</span>
+                    <span class="badge-premium">{{ total_connections }}</span>
                 </div>
             </div>
         </div>
@@ -60,16 +60,21 @@
                 {% with connection_user=conn.friend %}
                 <div class="connection-card">
                     <div class="flex items-center space-x-4">
-                        <a href="{% url 'public_profile' connection_user.username %}" class="flex items-center space-x-4 flex-1 no-underline text-current" aria-label="View {{ connection_user.get_full_name|default:connection_user.username }}'s profile">
+                        <a href="{% url 'public_profile' connection_user.username %}"
+                            class="flex items-center space-x-4 flex-1 no-underline text-current"
+                            aria-label="View {{ connection_user.get_full_name|default:connection_user.username }}'s profile">
                             <div class="post-avatar w-14 h-14 text-lg rounded-full overflow-hidden">
                                 {% if connection_user.profile.avatar %}
-                                    <img src="{{ connection_user.profile.avatar.url }}" alt="{{ connection_user.get_full_name|default:connection_user.username }}'s avatar" class="avatar-img object-cover" />
+                                <img src="{{ connection_user.profile.avatar.url }}"
+                                    alt="{{ connection_user.get_full_name|default:connection_user.username }}'s avatar"
+                                    class="avatar-img object-cover" />
                                 {% else %}
-                                    {{ connection_user.username|slice:":2"|upper }}
+                                {{ connection_user.username|slice:":2"|upper }}
                                 {% endif %}
                             </div>
                             <div>
-                                <h3 class="font-bold text-gray-800">{{ connection_user.get_full_name|default:connection_user.username }}</h3>
+                                <h3 class="font-bold text-gray-800">{{
+                                    connection_user.get_full_name|default:connection_user.username }}</h3>
                                 <p class="text-sm text-gray-600">@{{ connection_user.username }}</p>
                                 <p class="text-xs text-gray-500 mt-1">Connected {{ conn.created_at|date:"M Y" }}</p>
                             </div>
@@ -88,16 +93,21 @@
                 {% with connection_user=conn.user %}
                 <div class="connection-card">
                     <div class="flex items-center space-x-4">
-                        <a href="{% url 'public_profile' connection_user.username %}" class="flex items-center space-x-4 flex-1 no-underline text-current" aria-label="View {{ connection_user.get_full_name|default:connection_user.username }}'s profile">
+                        <a href="{% url 'public_profile' connection_user.username %}"
+                            class="flex items-center space-x-4 flex-1 no-underline text-current"
+                            aria-label="View {{ connection_user.get_full_name|default:connection_user.username }}'s profile">
                             <div class="post-avatar w-14 h-14 text-lg rounded-full overflow-hidden">
                                 {% if connection_user.profile.avatar %}
-                                    <img src="{{ connection_user.profile.avatar.url }}" alt="{{ connection_user.get_full_name|default:connection_user.username }}'s avatar" class="avatar-img object-cover" />
+                                <img src="{{ connection_user.profile.avatar.url }}"
+                                    alt="{{ connection_user.get_full_name|default:connection_user.username }}'s avatar"
+                                    class="avatar-img object-cover" />
                                 {% else %}
-                                    {{ connection_user.username|slice:":2"|upper }}
+                                {{ connection_user.username|slice:":2"|upper }}
                                 {% endif %}
                             </div>
                             <div>
-                                <h3 class="font-bold text-gray-800">{{ connection_user.get_full_name|default:connection_user.username }}</h3>
+                                <h3 class="font-bold text-gray-800">{{
+                                    connection_user.get_full_name|default:connection_user.username }}</h3>
                                 <p class="text-sm text-gray-600">@{{ connection_user.username }}</p>
                                 <p class="text-xs text-gray-500 mt-1">Connected {{ conn.created_at|date:"M Y" }}</p>
                             </div>
@@ -124,18 +134,24 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {% for user in suggestions %}
                 <div class="connection-card text-center animate-fade-in group">
-                    <a href="{% url 'public_profile' user.username %}" class="no-underline text-current" aria-label="View {{ user.get_full_name|default:user.username }}'s profile">
+                    <a href="{% url 'public_profile' user.username %}" class="no-underline text-current"
+                        aria-label="View {{ user.get_full_name|default:user.username }}'s profile">
                         <div class="mb-4 relative">
-                            <div class="post-avatar w-24 h-24 text-3xl mx-auto shadow-lg group-hover:shadow-glow transition-all rounded-full overflow-hidden">
+                            <div
+                                class="post-avatar w-24 h-24 text-3xl mx-auto shadow-lg group-hover:shadow-glow transition-all rounded-full overflow-hidden">
                                 {% if user.profile.avatar %}
-                                    <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}'s avatar" class="avatar-img object-cover mx-auto" />
+                                <img src="{{ user.profile.avatar.url }}"
+                                    alt="{{ user.get_full_name|default:user.username }}'s avatar"
+                                    class="avatar-img object-cover mx-auto" />
                                 {% else %}
-                                    {{ user.username|slice:":2"|upper }}
+                                {{ user.username|slice:":2"|upper }}
                                 {% endif %}
                             </div>
                         </div>
-                        <h3 class="font-bold text-gray-800 text-lg mb-1">{{ user.get_full_name|default:user.username }}</h3>
-                        <p class="text-sm text-gray-600 mb-6 h-10 overflow-hidden">{{ user.profile.headline|default:"Professional on LinkUp" }}</p>
+                        <h3 class="font-bold text-gray-800 text-lg mb-1">{{ user.get_full_name|default:user.username }}
+                        </h3>
+                        <p class="text-sm text-gray-600 mb-6 h-10 overflow-hidden">{{
+                            user.profile.headline|default:"Professional on LinkUp" }}</p>
                     </a>
 
                     <div class="space-y-3">
