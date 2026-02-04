@@ -721,7 +721,7 @@
         }
         
         // Track oldest message for infinite scroll (only use real message IDs, not temp client IDs)
-        if (m.id && typeof m.id === 'number' && (!oldestMessageId || m.id < oldestMessageId)) {
+        if (m.id && typeof m.id === 'number' && m.id > 0 && (!oldestMessageId || m.id < oldestMessageId)) {
             oldestMessageId = m.id;
         }
         
@@ -766,7 +766,13 @@
 
     // Enhanced infinite scroll with improved performance
     function loadOlderMessages() {
-        if (isLoadingOlder || !hasMoreMessages || !oldestMessageId || typeof oldestMessageId !== 'number') {
+        if (isLoadingOlder || !hasMoreMessages || !oldestMessageId || typeof oldestMessageId !== 'number' || oldestMessageId <= 0) {
+            console.log('Cannot load older messages:', {
+                isLoadingOlder,
+                hasMoreMessages,
+                oldestMessageId,
+                oldestMessageIdType: typeof oldestMessageId
+            });
             return;
         }
         
@@ -1394,8 +1400,22 @@
             token = formInput ? formInput.value : null;
         }
         
+        // Final fallback - try to get from Django's built-in CSRF cookie
+        if (!token && name === 'csrftoken') {
+            // Try alternative cookie names
+            const altCookie = document.cookie.match('(^|;) ?csrfmiddlewaretoken=([^;]*)(;|$)');
+            token = altCookie ? altCookie[2] : null;
+        }
+        
         if (name === 'csrftoken') {
             csrfToken = token;
+            
+            // Log for debugging if token is still not found
+            if (!token) {
+                console.warn('CSRF token not found. Available cookies:', document.cookie);
+                console.warn('Meta tag content:', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'));
+                console.warn('Form input value:', document.querySelector('input[name="csrfmiddlewaretoken"]')?.value);
+            }
         }
         
         return token;

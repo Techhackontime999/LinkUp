@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction, IntegrityError
 from django.utils import timezone
 from django.conf import settings
-from .models import Message, UserStatus, Notification
+from .models import Message, UserStatus, Notification, QueuedMessage
 from .notification_service import NotificationService
 from .message_persistence_manager import message_persistence_manager
 from core.performance import (
@@ -558,10 +558,14 @@ def load_older_messages(request, username):
         if not before_id:
             return JsonResponse({'error': 'before_id parameter is required'}, status=400)
         
+        # Validate before_id - must be a positive integer (real message ID)
         try:
             before_id = int(before_id)
-        except ValueError:
-            return JsonResponse({'error': 'Invalid before_id format'}, status=400)
+            if before_id <= 0:
+                raise ValueError("before_id must be positive")
+        except (ValueError, TypeError):
+            logger.warning(f"Invalid before_id format: {before_id}")
+            return JsonResponse({'error': 'Invalid before_id format - must be a positive integer'}, status=400)
         
         # Use persistence manager for optimized message loading
         try:
@@ -795,13 +799,44 @@ def queue_message(request, username):
 
         # Create the actual message immediately instead of just queuing
         try:
+            import uuid
+            
             with transaction.atomic():
+                # Get client_id from request or generate one
+                client_id = data.get('client_id')
+                if not client_id:
+                    client_id = f"server_{int(timezone.now().timestamp() * 1000)}_{uuid.uuid4().hex[:8]}"
+                
+                # Check for existing message with same client_id to prevent duplicates
+                existing_message = Message.objects.filter(
+                    sender=request.user,
+                    client_id=client_id
+                ).first()
+                
+                if existing_message:
+                    # Return existing message instead of creating duplicate
+                    logger.info(f"Returning existing message with client_id {client_id}")
+                    return JsonResponse({
+                        'id': existing_message.id,
+                        'sender': request.user.username,
+                        'recipient': target.username,
+                        'content': existing_message.content,
+                        'status': existing_message.status,
+                        'client_id': existing_message.client_id,
+                        'created_at': existing_message.created_at.isoformat(),
+                        'sent_at': existing_message.sent_at.isoformat() if existing_message.sent_at else None,
+                        'queued': False,
+                        'duplicate': True
+                    })
+                
                 # Create the actual message
                 message = Message.objects.create(
                     sender=request.user,
                     recipient=target,
                     content=text,
-                    status='sent'
+                    status='sent',
+                    client_id=client_id,
+                    sent_at=timezone.now()
                 )
                 
                 # Also create a queued message for backup/tracking
@@ -819,6 +854,7 @@ def queue_message(request, username):
                     'recipient': target.username,
                     'content': text,
                     'status': message.status,
+                    'client_id': message.client_id,
                     'created_at': message.created_at.isoformat(),
                     'sent_at': message.sent_at.isoformat() if message.sent_at else None,
                     'queued': False,  # Not queued anymore, it's a real message
