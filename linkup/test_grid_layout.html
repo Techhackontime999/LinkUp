@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Layout Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f3f2ef;
+        }
+        
+        .info {
+            background: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .info h2 {
+            margin-bottom: 10px;
+            color: #0a66c2;
+        }
+        
+        .viewport-size {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+        
+        .status.good {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.bad {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* Test Grid */
+        .test-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        @media (min-width: 1024px) {
+            .test-grid {
+                grid-template-columns: repeat(12, minmax(0, 1fr));
+            }
+            
+            .left-sidebar {
+                grid-column: span 3 / span 3;
+            }
+            
+            .main-content {
+                grid-column: span 6 / span 6;
+            }
+            
+            .right-sidebar {
+                grid-column: span 3 / span 3;
+            }
+        }
+        
+        .box {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-height: 200px;
+        }
+        
+        .left-sidebar {
+            background: #e3f2fd;
+        }
+        
+        .main-content {
+            background: #fff3e0;
+        }
+        
+        .right-sidebar {
+            background: #f3e5f5;
+        }
+        
+        .box h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .box p {
+            color: #666;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h2>Grid Layout Test Page</h2>
+        <p>This page tests if the 3-column grid layout works on your browser.</p>
+        <div class="viewport-size">
+            Viewport Width: <span id="width">0</span>px
+            <span id="status" class="status">Checking...</span>
+        </div>
+        <p style="margin-top: 10px;">
+            <strong>Expected:</strong> On screens wider than 1024px, you should see 3 columns side by side.
+        </p>
+    </div>
+    
+    <div class="test-grid">
+        <div class="box left-sidebar">
+            <h3>Left Sidebar</h3>
+            <p>This should be on the LEFT (3 columns wide)</p>
+            <p>Profile card would go here</p>
+        </div>
+        
+        <div class="box main-content">
+            <h3>Main Content</h3>
+            <p>This should be in the CENTER (6 columns wide)</p>
+            <p>Post composer and feed would go here</p>
+        </div>
+        
+        <div class="box right-sidebar">
+            <h3>Right Sidebar</h3>
+            <p>This should be on the RIGHT (3 columns wide)</p>
+            <p>Trending topics would go here</p>
+        </div>
+    </div>
+    
+    <div class="info" style="margin-top: 20px;">
+        <h3>What You Should See:</h3>
+        <ul style="margin-left: 20px; margin-top: 10px;">
+            <li><strong>Desktop (>1024px):</strong> Three colored boxes side by side (Blue | Orange | Purple)</li>
+            <li><strong>Mobile (<1024px):</strong> Three colored boxes stacked vertically</li>
+        </ul>
+        
+        <h3 style="margin-top: 20px;">If You See Boxes Stacked on Desktop:</h3>
+        <ol style="margin-left: 20px; margin-top: 10px;">
+            <li>Your browser window might be too narrow - resize it to be wider than 1024px</li>
+            <li>Your browser might not support CSS Grid (very unlikely)</li>
+            <li>There might be a CSS conflict in the main application</li>
+        </ol>
+    </div>
+    
+    <script>
+        function updateViewportSize() {
+            const width = window.innerWidth;
+            document.getElementById('width').textContent = width;
+            
+            const statusEl = document.getElementById('status');
+            if (width >= 1024) {
+                statusEl.textContent = '✓ Grid should be active';
+                statusEl.className = 'status good';
+            } else {
+                statusEl.textContent = '✗ Too narrow for grid';
+                statusEl.className = 'status bad';
+            }
+        }
+        
+        updateViewportSize();
+        window.addEventListener('resize', updateViewportSize);
+        
+        // Log grid info to console
+        console.log('=== Grid Layout Test ===');
+        console.log('Viewport width:', window.innerWidth);
+        console.log('Grid should activate at: 1024px');
+        
+        const grid = document.querySelector('.test-grid');
+        const computedStyle = window.getComputedStyle(grid);
+        console.log('Grid display:', computedStyle.display);
+        console.log('Grid template columns:', computedStyle.gridTemplateColumns);
+    </script>
+</body>
+</html>
