@@ -8,6 +8,7 @@ from django.views.decorators.http import require_GET, require_POST
 from django.core.exceptions import ValidationError
 from django.db import transaction, IntegrityError
 from django.utils import timezone
+from django.conf import settings
 from .models import Message, UserStatus, Notification
 from .notification_service import NotificationService
 from .message_persistence_manager import message_persistence_manager
@@ -518,9 +519,18 @@ def messages_inbox(request):
     
     except Exception as e:
         logger.error(f"Unexpected error in messages_inbox: {e}")
-        return render(request, 'messaging/error.html', {
-            'error_message': 'Unable to load inbox. Please try again.'
-        }, status=500)
+        # For debugging, show the actual error in development
+        if settings.DEBUG:
+            import traceback
+            error_details = traceback.format_exc()
+            logger.error(f"Full traceback: {error_details}")
+            return render(request, 'messaging/error.html', {
+                'error_message': f'Debug Error: {str(e)}'
+            }, status=500)
+        else:
+            return render(request, 'messaging/error.html', {
+                'error_message': 'Unable to load inbox. Please try again.'
+            }, status=500)
 
 
 @login_required
