@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.http import JsonResponse
 from .models import Connection, Follow
+from users.models import Profile
 
 User = get_user_model()
 
@@ -84,6 +85,11 @@ def network_view(request):
                           [request.user.id]
 
     suggestions = User.objects.exclude(id__in=connected_users_ids).select_related('profile')[:10]
+    
+    # Ensure all users have profiles
+    for user in suggestions:
+        if not hasattr(user, 'profile'):
+            Profile.objects.get_or_create(user=user)
     
     # Implement pagination for connections
     connections_paginator = Paginator(connections, 20)  # 20 connections per page
