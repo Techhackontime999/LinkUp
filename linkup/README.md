@@ -38,7 +38,9 @@
 
 ## 🌟 Overview
 
-**linkup** is a comprehensive professional networking platform designed to connect professionals, facilitate job opportunities, and enable meaningful interactions. Built with Django and modern web technologies, it offers a seamless experience for users to build their professional network.
+**LinkUp** is a comprehensive professional networking platform designed to connect professionals, facilitate job opportunities, and enable meaningful interactions. Built with Django and modern web technologies, it offers a seamless experience for users to build their professional network.
+
+**Founded by:** [Techhackontime999](https://github.com/Techhackontime999) (amitkumarkh010102006@gmail.com)
 
 ### Why LinkUp?
 
@@ -150,8 +152,8 @@ Before you begin, ensure you have the following installed:
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/antigravity.git
-cd antigravity
+git clone https://github.com/Techhackontime999/LinkUp.git
+cd LinkUp
 ```
 
 ### Step 2: Create Virtual Environment
@@ -248,7 +250,7 @@ ALLOWED_HOSTS=localhost,127.0.0.1
 
 # Database (for PostgreSQL in production)
 DB_ENGINE=django.db.backends.postgresql
-DB_NAME=antigravity_db
+DB_NAME=linkup_db
 DB_USER=your_db_user
 DB_PASSWORD=your_db_password
 DB_HOST=localhost
@@ -354,7 +356,7 @@ Access the Django admin panel at `http://127.0.0.1:8000/admin/`
 ## 📁 Project Structure
 
 ```
-antigravity/
+LinkUp/
 ├── core/                          # Core functionality
 │   ├── middleware.py             # Security & rate limiting
 │   ├── performance.py            # Performance monitoring
@@ -684,8 +686,8 @@ sudo apt-get update
 sudo apt-get install python3-pip python3-venv nginx redis-server postgresql
 
 # Clone repository
-git clone https://github.com/yourusername/antigravity.git
-cd antigravity
+git clone https://github.com/Techhackontime999/LinkUp.git
+cd LinkUp
 
 # Set up virtual environment
 python3 -m venv venv
@@ -693,7 +695,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Configure Nginx
-sudo nano /etc/nginx/sites-available/antigravity
+sudo nano /etc/nginx/sites-available/linkup
 
 # Start services
 sudo systemctl start nginx
@@ -729,12 +731,12 @@ services:
       - redis
     environment:
       - DEBUG=False
-      - DATABASE_URL=postgresql://user:pass@db:5432/antigravity
+      - DATABASE_URL=postgresql://user:pass@db:5432/linkup
 
   db:
     image: postgres:14
     environment:
-      - POSTGRES_DB=antigravity
+      - POSTGRES_DB=linkup
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=pass
 
@@ -1031,7 +1033,7 @@ tail -f /var/log/nginx/error.log
 
 ## 🤝 Contributing
 
-We welcome contributions to Antigravity! Here's how you can help:
+We welcome contributions to LinkUp! Here's how you can help:
 
 ### Getting Started
 
@@ -1042,8 +1044,8 @@ We welcome contributions to Antigravity! Here's how you can help:
 
 2. **Clone Your Fork**
    ```bash
-   git clone https://github.com/your-username/antigravity.git
-   cd antigravity
+   git clone https://github.com/your-username/LinkUp.git
+   cd LinkUp
    ```
 
 3. **Create a Branch**
@@ -1138,7 +1140,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ```
 MIT License
 
-Copyright (c) 2026 Antigravity
+Copyright (c) 2026 LinkUp
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -1172,16 +1174,16 @@ SOFTWARE.
 
 ### Support
 
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/yourusername/antigravity/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/antigravity/discussions)
-- 📧 **Email**: support@antigravity.com
-- 💼 **LinkedIn**: [Antigravity Network](https://linkedin.com/company/antigravity)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/Techhackontime999/LinkUp/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/Techhackontime999/LinkUp/discussions)
+- 📧 **Email**: amitkumarkh010102006@gmail.com
+- 💼 **LinkedIn**: [LinkUp Network](https://linkedin.com/company/linkup)
 
 ### Community
 
 - 🌟 **Star us on GitHub**: Show your support!
-- 🐦 **Follow on Twitter**: [@antigravity](https://twitter.com/antigravity)
-- 📱 **Join Discord**: [Antigravity Community](https://discord.gg/antigravity)
+- 🐦 **Follow on Twitter**: [@linkup](https://twitter.com/linkup)
+- 📱 **Join Discord**: [LinkUp Community](https://discord.gg/linkup)
 
 ---
 
@@ -1209,11 +1211,11 @@ Thanks to all contributors who have helped make this project better!
 
 ## 📊 Project Stats
 
-![GitHub stars](https://img.shields.io/github/stars/yourusername/antigravity?style=social)
-![GitHub forks](https://img.shields.io/github/forks/yourusername/antigravity?style=social)
-![GitHub issues](https://img.shields.io/github/issues/yourusername/antigravity)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/yourusername/antigravity)
-![GitHub last commit](https://img.shields.io/github/last-commit/yourusername/antigravity)
+![GitHub stars](https://img.shields.io/github/stars/Techhackontime999/LinkUp?style=social)
+![GitHub forks](https://img.shields.io/github/forks/Techhackontime999/LinkUp?style=social)
+![GitHub issues](https://img.shields.io/github/issues/Techhackontime999/LinkUp)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/Techhackontime999/LinkUp)
+![GitHub last commit](https://img.shields.io/github/last-commit/Techhackontime999/LinkUp)
 
 ---
 
@@ -1274,9 +1276,9 @@ Thanks to all contributors who have helped make this project better!
 
 <div align="center">
 
-**Made with ❤️ by the Antigravity Team**
+**Made with ❤️ by the LinkUp Team**
 
-[⬆ Back to Top](#-antigravity---professional-network-platform)
+[⬆ Back to Top](#-linkup---professional-network-platform)
 
 </div>
 

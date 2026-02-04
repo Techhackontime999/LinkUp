@@ -168,26 +168,26 @@ Created `test_comment_share.py` with comprehensive tests:
 ## Files Modified
 
 ### Models
-- `antigravity/feed/models.py` - Added Comment model and total_comments method
+- `linkup/feed/models.py` - Added Comment model and total_comments method
 
 ### Views
-- `antigravity/feed/views.py` - Added comment and share views
+- `linkup/feed/views.py` - Added comment and share views
 
 ### Forms
-- `antigravity/feed/forms.py` - Added CommentForm
+- `linkup/feed/forms.py` - Added CommentForm
 
 ### URLs
-- `antigravity/feed/urls.py` - Added new URL patterns
+- `linkup/feed/urls.py` - Added new URL patterns
 
 ### Templates
-- `antigravity/feed/templates/feed/index.html` - Enhanced with comment/share UI
-- `antigravity/feed/templates/feed/post_detail.html` - New post detail page
+- `linkup/feed/templates/feed/index.html` - Enhanced with comment/share UI
+- `linkup/feed/templates/feed/post_detail.html` - New post detail page
 
 ### Admin
-- `antigravity/feed/admin.py` - Added CommentAdmin and enhanced PostAdmin
+- `linkup/feed/admin.py` - Added CommentAdmin and enhanced PostAdmin
 
 ### Migrations
-- `antigravity/feed/migrations/0003_comment.py` - Created Comment table
+- `linkup/feed/migrations/0003_comment.py` - Created Comment table
 
 ## Browser Compatibility
 

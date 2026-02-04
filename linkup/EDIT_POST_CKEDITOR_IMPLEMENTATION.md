@@ -87,7 +87,7 @@ Users can now format their post content with:
 
 Run the test script to verify configuration:
 ```bash
-cd antigravity
+cd linkup
 python3 test_edit_ckeditor.py
 ```
 
@@ -102,11 +102,11 @@ python3 test_edit_ckeditor.py
 8. Save changes and verify formatting is preserved
 
 ## Files Modified
-- `antigravity/feed/templates/feed/index.html` - Added CKEditor initialization and integration
+- `linkup/feed/templates/feed/index.html` - Added CKEditor initialization and integration
 
 ## Files Created
-- `antigravity/test_edit_ckeditor.py` - Test script for verification
-- `antigravity/EDIT_POST_CKEDITOR_IMPLEMENTATION.md` - This documentation
+- `linkup/test_edit_ckeditor.py` - Test script for verification
+- `linkup/EDIT_POST_CKEDITOR_IMPLEMENTATION.md` - This documentation
 
 ## Dependencies
 - CKEditor is already installed and configured in the project

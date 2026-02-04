@@ -112,7 +112,7 @@ Modal खुलने पर आपको formatting toolbar दिखेगा:
 Ctrl + Shift + R (hard reload)
 
 # या terminal में:
-cd antigravity
+cd linkup
 python3 manage.py collectstatic --noinput
 ```
 

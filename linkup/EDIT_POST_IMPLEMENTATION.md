@@ -150,14 +150,14 @@ Implemented edit post functionality with a modal dialog that allows users to edi
 ## Files Modified
 
 ### Views
-- `antigravity/feed/views.py` - Added `get_post_for_edit` and `update_post` views
+- `linkup/feed/views.py` - Added `get_post_for_edit` and `update_post` views
 
 ### URLs
-- `antigravity/feed/urls.py` - Added 2 new endpoints
+- `linkup/feed/urls.py` - Added 2 new endpoints
 
 ### Templates
-- `antigravity/feed/templates/feed/index.html` - Added edit button and modal
-- `antigravity/feed/templates/feed/post_detail.html` - Added "Edit on Feed" link
+- `linkup/feed/templates/feed/index.html` - Added edit button and modal
+- `linkup/feed/templates/feed/post_detail.html` - Added "Edit on Feed" link
 
 ## Testing
 

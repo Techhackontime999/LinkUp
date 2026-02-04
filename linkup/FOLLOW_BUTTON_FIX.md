@@ -135,12 +135,12 @@ The CSS styles for `.btn-follow.following` and `.btn-follow.not-following` exist
 
 ## Files Modified
 
-1. `antigravity/theme/static/css/custom_styles.css`
+1. `linkup/theme/static/css/custom_styles.css`
    - Enhanced `.btn-follow` styles
    - Added hover states
    - Added borders and shadows
 
-2. `antigravity/staticfiles/css/custom_styles.css`
+2. `linkup/staticfiles/css/custom_styles.css`
    - Updated via `collectstatic` command
 
 ## Technical Details

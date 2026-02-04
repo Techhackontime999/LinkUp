@@ -24,13 +24,12 @@
                         </div>
                         {% endif %}
                     </div>
+                </div>
 
-                    <div class="flex-1 mt-6 md:mt-0 mb-2 text-center md:text-left">
-                        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-                            <div>
-                                <h1 class="text-4xl font-extrabold text-gray-900 mb-1">{% if profile_user.get_full_name
-                                    %}{{ profile_user.get_full_name }}{% else %}{{ profile_user.username|capfirst }}{%
-                                    endif %}</h1>
+                <div class="flex-1 mt-6 md:mt-0 mb-2 text-center md:text-left">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                        <div>
+                            <h1 class="text-4xl font-extrabold text-gray-900 mb-1">{% if profile_user.get_full_name %}{{ profile_user.get_full_name }}{% else %}{{ profile_user.username|capfirst }}{% endif %}</h1>
                                 <p class="text-xl text-gray-600 font-medium">{{
                                     profile_user.profile.headline|default:"Professional on LinkUp" }}</p>
                                 <div

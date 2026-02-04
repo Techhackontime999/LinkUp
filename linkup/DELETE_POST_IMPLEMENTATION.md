@@ -108,14 +108,14 @@ Implemented delete post functionality with a 3-dot menu that appears only for po
 ## Files Modified
 
 ### Views
-- `antigravity/feed/views.py` - Added `delete_post` view
+- `linkup/feed/views.py` - Added `delete_post` view
 
 ### URLs
-- `antigravity/feed/urls.py` - Added delete endpoint
+- `linkup/feed/urls.py` - Added delete endpoint
 
 ### Templates
-- `antigravity/feed/templates/feed/index.html` - Added menu and delete UI
-- `antigravity/feed/templates/feed/post_detail.html` - Added menu and delete UI
+- `linkup/feed/templates/feed/index.html` - Added menu and delete UI
+- `linkup/feed/templates/feed/post_detail.html` - Added menu and delete UI
 
 ## Testing
 

@@ -25,7 +25,7 @@ This caused the loop to iterate over nothing, making all posts invisible.
 ## Fix Applied
 
 ### 1. Template Loop Variable (CRITICAL FIX)
-**File**: `antigravity/feed/templates/feed/index.html`
+**File**: `linkup/feed/templates/feed/index.html`
 
 Changed the loop to use the correct variable:
 ```html

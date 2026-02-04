@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 ## Files Modified
 
-1. `antigravity/feed/templates/feed/index.html`
+1. `linkup/feed/templates/feed/index.html`
    - Removed orphaned JavaScript code (lines 591-620)
    - Added console.log statements for debugging
    - Fixed JavaScript structure
