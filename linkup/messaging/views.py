@@ -793,28 +793,39 @@ def queue_message(request, username):
         if len(text) > 5000:  # Reasonable message length limit
             return JsonResponse({'error': 'Message too long (max 5000 characters)'}, status=400)
 
-        # Queue the message
+        # Create the actual message immediately instead of just queuing
         try:
-            from .models import QueuedMessage
-            
             with transaction.atomic():
+                # Create the actual message
+                message = Message.objects.create(
+                    sender=request.user,
+                    recipient=target,
+                    content=text,
+                    status='sent'
+                )
+                
+                # Also create a queued message for backup/tracking
                 queued_msg = QueuedMessage.objects.create(
                     sender=request.user,
                     recipient=target,
-                    content=text
+                    content=text,
+                    is_processed=True,  # Mark as processed since we created the message
+                    processed_at=timezone.now()
                 )
                 
                 response_data = {
-                    'id': f'queued_{queued_msg.id}',
+                    'id': message.id,  # Use real message ID
                     'sender': request.user.username,
                     'recipient': target.username,
                     'content': text,
-                    'created_at': queued_msg.created_at.isoformat(),
-                    'queued': True,
+                    'status': message.status,
+                    'created_at': message.created_at.isoformat(),
+                    'sent_at': message.sent_at.isoformat() if message.sent_at else None,
+                    'queued': False,  # Not queued anymore, it's a real message
                     'queue_id': queued_msg.id
                 }
                 
-                logger.info(f"Message queued from {request.user.id} to {target.id}")
+                logger.info(f"Message created from {request.user.id} to {target.id}")
                 return JsonResponse(response_data)
                 
         except ValidationError as e:

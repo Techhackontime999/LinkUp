@@ -1071,24 +1071,44 @@
             return response.json();
         })
         .then(data => {
-            if (data.queued) {
-                // Message was queued successfully
+            if (data.id) {
+                // Message was created successfully (either queued or immediate)
                 updateOptimisticMessage(messageData.client_id, {
                     id: data.id,
-                    status: 'queued',
-                    created_at: data.created_at
+                    status: data.status || 'sent',
+                    created_at: data.created_at,
+                    sent_at: data.sent_at
                 });
                 
-                updateConnectionStatus(`Message queued for delivery`, false);
-            } else if (data.id) {
-                // Message was sent immediately via HTTP
-                updateOptimisticMessage(messageData.client_id, {
+                if (data.queued) {
+                    updateConnectionStatus(`Message queued for delivery`, false);
+                } else {
+                    updateConnectionStatus('Message sent successfully', true);
+                }
+                
+                // Add to message cache for display
+                messageCache.set(data.id, {
                     id: data.id,
-                    status: 'sent',
-                    created_at: data.created_at
+                    sender: data.sender,
+                    recipient: data.recipient,
+                    content: data.content,
+                    status: data.status || 'sent',
+                    created_at: data.created_at,
+                    sent_at: data.sent_at,
+                    is_read: false
                 });
                 
-                updateConnectionStatus('Message sent via HTTP', true);
+                // Display the message immediately
+                displayMessage({
+                    id: data.id,
+                    sender: data.sender,
+                    recipient: data.recipient,
+                    content: data.content,
+                    status: data.status || 'sent',
+                    created_at: data.created_at,
+                    sent_at: data.sent_at,
+                    is_read: false
+                });
             }
         })
         .catch(error => {
