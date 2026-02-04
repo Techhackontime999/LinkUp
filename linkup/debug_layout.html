@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Layout Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .debug-box {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .good { color: green; font-weight: bold; }
+        .bad { color: red; font-weight: bold; }
+        .info { color: blue; }
+        pre {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background: #0a66c2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #004182;
+        }
+    </style>
+</head>
+<body>
+    <h1>Layout Debug Tool</h1>
+    
+    <div class="debug-box">
+        <h2>Step 1: Browser Info</h2>
+        <p>Window Width: <span id="width" class="info">0</span>px</p>
+        <p>Status: <span id="status"></span></p>
+    </div>
+    
+    <div class="debug-box">
+        <h2>Step 2: Open Main Page</h2>
+        <button onclick="window.open('/', '_blank')">Open Home Page</button>
+        <p>Phir F12 dabao aur Console tab mein yeh paste karo:</p>
+        <pre id="debugScript">// Copy this code
+const grid = document.querySelector('.grid.grid-cols-1');
+const columns = grid ? grid.children : [];
+
+console.log('=== LAYOUT DEBUG ===');
+console.log('Grid found:', !!grid);
+console.log('Total columns:', columns.length);
+
+if (grid) {
+    const style = window.getComputedStyle(grid);
+    console.log('Display:', style.display);
+    console.log('Grid template columns:', style.gridTemplateColumns);
+    
+    Array.from(columns).forEach((col, i) => {
+        const colStyle = window.getComputedStyle(col);
+        console.log(`Column ${i + 1}:`, {
+            classes: col.className,
+            gridColumn: colStyle.gridColumn,
+            display: colStyle.display
+        });
+    });
+}
+
+// Check what's visible
+const leftSidebar = document.querySelector('.lg\\:col-span-3:first-child');
+const mainFeed = document.querySelector('.lg\\:col-span-6');
+const rightSidebar = document.querySelector('.lg\\:col-span-3:last-child');
+
+console.log('Left sidebar visible:', leftSidebar && window.getComputedStyle(leftSidebar).display !== 'none');
+console.log('Main feed visible:', mainFeed && window.getComputedStyle(mainFeed).display !== 'none');
+console.log('Right sidebar visible:', rightSidebar && window.getComputedStyle(rightSidebar).display !== 'none');</pre>
+        <button onclick="copyDebugScript()">Copy Debug Script</button>
+    </div>
+    
+    <div class="debug-box">
+        <h2>Step 3: Results</h2>
+        <p>Console mein jo output aaya, woh yahan paste karo:</p>
+        <textarea id="results" style="width: 100%; height: 200px; font-family: monospace;"></textarea>
+        <button onclick="analyzeResults()">Analyze Results</button>
+        <div id="analysis"></div>
+    </div>
+    
+    <div class="debug-box">
+        <h2>Quick Checks</h2>
+        <ul>
+            <li>Browser width <span class="good">1024px se zyada</span> hona chahiye</li>
+            <li>Grid display <span class="good">"grid"</span> hona chahiye</li>
+            <li>Grid template columns <span class="good">"repeat(12, ...)"</span> hona chahiye</li>
+            <li>Total columns <span class="good">3</span> hone chahiye (Left, Center, Right)</li>
+        </ul>
+    </div>
+    
+    <script>
+        function updateWidth() {
+            const width = window.innerWidth;
+            document.getElementById('width').textContent = width;
+            const statusEl = document.getElementById('status');
+            
+            if (width >= 1024) {
+                statusEl.innerHTML = '<span class="good">✓ Width OK - Grid should work</span>';
+            } else {
+                statusEl.innerHTML = '<span class="bad">✗ Width too small - Need >1024px</span>';
+            }
+        }
+        
+        function copyDebugScript() {
+            const script = document.getElementById('debugScript').textContent;
+            navigator.clipboard.writeText(script).then(() => {
+                alert('Script copied! Ab main page pe jao, F12 dabao, Console tab kholo, aur paste karo.');
+            });
+        }
+        
+        function analyzeResults() {
+            const results = document.getElementById('results').value;
+            const analysisDiv = document.getElementById('analysis');
+            
+            if (!results) {
+                analysisDiv.innerHTML = '<p class="bad">Please paste console output first!</p>';
+                return;
+            }
+            
+            let html = '<h3>Analysis:</h3><ul>';
+            
+            // Check grid found
+            if (results.includes('Grid found: true')) {
+                html += '<li class="good">✓ Grid element found</li>';
+            } else {
+                html += '<li class="bad">✗ Grid element NOT found</li>';
+            }
+            
+            // Check display
+            if (results.includes('Display: grid')) {
+                html += '<li class="good">✓ Grid display is active</li>';
+            } else {
+                html += '<li class="bad">✗ Grid display is NOT active</li>';
+            }
+            
+            // Check columns
+            if (results.includes('Total columns: 3')) {
+                html += '<li class="good">✓ Correct number of columns (3)</li>';
+            } else if (results.includes('Total columns: 4')) {
+                html += '<li class="bad">✗ Too many columns (4) - Something extra in grid!</li>';
+            } else {
+                html += '<li class="bad">✗ Wrong number of columns</li>';
+            }
+            
+            // Check visibility
+            if (results.includes('Left sidebar visible: true')) {
+                html += '<li class="good">✓ Left sidebar visible</li>';
+            } else {
+                html += '<li class="bad">✗ Left sidebar hidden</li>';
+            }
+            
+            if (results.includes('Main feed visible: true')) {
+                html += '<li class="good">✓ Main feed visible</li>';
+            } else {
+                html += '<li class="bad">✗ Main feed hidden</li>';
+            }
+            
+            if (results.includes('Right sidebar visible: true')) {
+                html += '<li class="good">✓ Right sidebar visible</li>';
+            } else {
+                html += '<li class="bad">✗ Right sidebar hidden</li>';
+            }
+            
+            html += '</ul>';
+            
+            // Recommendations
+            html += '<h3>Recommendations:</h3><ul>';
+            if (!results.includes('Display: grid')) {
+                html += '<li>Tailwind CSS load nahi ho raha - Check Network tab</li>';
+            }
+            if (results.includes('Total columns: 4')) {
+                html += '<li>Koi extra element grid ke andar aa gaya hai - Template check karo</li>';
+            }
+            if (!results.includes('Right sidebar visible: true')) {
+                html += '<li>Right sidebar hidden hai - CSS check karo</li>';
+            }
+            html += '</ul>';
+            
+            analysisDiv.innerHTML = html;
+        }
+        
+        updateWidth();
+        window.addEventListener('resize', updateWidth);
+    </script>
+</body>
+</html>
