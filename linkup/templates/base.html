@@ -24,25 +24,25 @@
     <!-- Navbar -->
     <nav id="navigation" class="premium-nav sticky top-0 z-50 glass shadow-md" role="navigation" aria-label="Main navigation">
         <div class="site-container">
-            <div class="flex items-center justify-between h-16 space-x-4">
+            <div class="flex items-center justify-between h-14 sm:h-16 space-x-2 sm:space-x-4">
                 <!-- Left: Branding -->
                 <div class="flex-shrink-0">
-                    <a href="{% url 'feed' %}" class="text-2xl font-extrabold text-gradient heading-display" aria-label="LinkUp - Go to home page">LinkUp</a>
+                    <a href="{% url 'feed' %}" class="text-xl sm:text-2xl font-extrabold text-gradient heading-display" aria-label="LinkUp - Go to home page">LinkUp</a>
                 </div>
 
                 <!-- Center: Search Bar -->
-                <div class="flex-1 max-w-sm lg:max-w-md">
+                <div class="flex-1 max-w-xs sm:max-w-sm lg:max-w-md">
                     <form action="{% url 'search' %}" method="get" class="search-bar-enhanced" role="search" aria-label="Search the platform">
                         <div
-                            class="flex items-center bg-gray-50/80 rounded-full px-4 py-1.5 border border-gray-200 focus-within:border-purple-300 focus-within:ring-2 focus-within:ring-purple-100 transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none"
+                            class="flex items-center bg-gray-50/80 rounded-full px-2 sm:px-4 py-1 sm:py-1.5 border border-gray-200 focus-within:border-purple-300 focus-within:ring-2 focus-within:ring-purple-100 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 text-gray-400 flex-shrink-0" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                             <label for="search-input" class="sr-only">Search for people, jobs, or posts</label>
                             <input type="text" name="q" id="search-input" placeholder="Search..."
-                                class="bg-transparent border-none outline-none w-full text-sm ml-2 focus:ring-0" 
+                                class="bg-transparent border-none outline-none w-full text-xs sm:text-sm ml-1 sm:ml-2 focus:ring-0" 
                                 aria-describedby="search-help" />
                             <div id="search-help" class="sr-only">Search for people, jobs, posts, and more across the platform</div>
                         </div>
@@ -50,75 +50,71 @@
                 </div>
 
                 <!-- Right: Navigation & User -->
-                <div class="flex items-center space-x-1 lg:space-x-4">
-                    <a href="#create-post" class="btn-premium hidden sm:inline mr-2" aria-label="Create new post">Create</a>
-                    <div class="hidden sm:flex items-center space-x-1 lg:space-x-4" role="menubar" aria-label="Main navigation menu">
+                <div class="flex items-center space-x-1 sm:space-x-2 lg:space-x-4">
+                    <a href="#create-post" class="btn-premium hidden md:inline mr-2 text-xs px-3 py-1.5" aria-label="Create new post">Create</a>
+                    <div class="flex items-center space-x-0.5 sm:space-x-1 lg:space-x-4" role="menubar" aria-label="Main navigation menu">
                         <a href="{% url 'feed' %}"
-                            class="nav-link-premium {% if request.resolver_match.url_name == 'feed' %}active{% endif %}"
+                            class="nav-link-premium {% if request.resolver_match.url_name == 'feed' %}active{% endif %} px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]"
                             role="menuitem"
                             {% if request.resolver_match.url_name == 'feed' %}aria-current="page"{% endif %}>
-                            <span class="hidden lg:inline">Home</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 lg:hidden" fill="none"
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                             </svg>
-                            <span class="sr-only lg:hidden">Home</span>
+                            <span class="hidden lg:inline text-xs">Home</span>
                         </a>
                         <a href="{% url 'network' %}"
-                            class="nav-link-premium {% if request.resolver_match.url_name == 'network' %}active{% endif %}"
+                            class="nav-link-premium {% if request.resolver_match.url_name == 'network' %}active{% endif %} px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]"
                             role="menuitem"
                             {% if request.resolver_match.url_name == 'network' %}aria-current="page"{% endif %}>
-                            <span class="hidden lg:inline">Network</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 lg:hidden" fill="none"
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
-                            <span class="sr-only lg:hidden">Network</span>
+                            <span class="hidden lg:inline text-xs">Network</span>
                         </a>
                         <a href="{% url 'jobs:job_list' %}"
-                            class="nav-link-premium {% if 'jobs' in request.resolver_match.app_name %}active{% endif %}"
+                            class="nav-link-premium {% if 'jobs' in request.resolver_match.app_name %}active{% endif %} px-2 sm:px-3 min-w-[60px] sm:min-w-[80px] hidden sm:flex"
                             role="menuitem"
                             {% if 'jobs' in request.resolver_match.app_name %}aria-current="page"{% endif %}>
-                            <span class="hidden lg:inline">Jobs</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 lg:hidden" fill="none"
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
-                            <span class="sr-only lg:hidden">Jobs</span>
+                            <span class="hidden lg:inline text-xs">Jobs</span>
                         </a>
                         <a href="{% url 'messaging:inbox' %}"
-                            class="nav-link-premium {% if 'messaging' in request.resolver_match.app_name %}active{% endif %} relative"
+                            class="nav-link-premium {% if 'messaging' in request.resolver_match.app_name %}active{% endif %} relative px-2 sm:px-3 min-w-[60px] sm:min-w-[80px] hidden sm:flex"
                             role="menuitem"
                             {% if 'messaging' in request.resolver_match.app_name %}aria-current="page"{% endif %}>
-                            <span class="hidden lg:inline">Messages</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 lg:hidden" fill="none"
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                             </svg>
-                            <span class="sr-only lg:hidden">Messages</span>
+                            <span class="hidden lg:inline text-xs">Messages</span>
                             <span id="messages-badge" class="absolute -top-1 -right-1 bg-red-600 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center hidden" aria-label="Unread messages"></span>
                         </a>
                     </div>
 
                     {% if user.is_authenticated %}
                     <!-- Notifications -->
-                    <div class="relative mr-2">
-                        <button id="notif-btn" type="button" class="flex items-center focus:outline-none py-1" 
+                    <div class="relative">
+                        <button id="notif-btn" type="button" class="flex items-center focus:outline-none py-1 px-1 sm:px-2 min-h-[44px] min-w-[44px] justify-center" 
                                 aria-haspopup="true" aria-expanded="false" aria-label="Open notifications menu"
                                 aria-describedby="notif-badge">
                             <div class="relative">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118.6 14.6V11a6 6 0 10-12 0v3c0 .529-.21 1.039-.584 1.414L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
-                                <span id="notif-badge" class="absolute -top-1 -right-1 bg-red-600 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center" style="display:none;" aria-label="unread notifications">0</span>
-                                <span id="connection-status" class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full connection-status connected" title="Connection status" aria-label="Connection status: connected">●</span>
+                                <span id="notif-badge" class="absolute -top-1 -right-1 bg-red-600 text-white rounded-full text-xs w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center" style="display:none;" aria-label="unread notifications">0</span>
+                                <span id="connection-status" class="absolute -bottom-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 rounded-full connection-status connected" title="Connection status" aria-label="Connection status: connected">●</span>
                             </div>
                         </button>
-                        <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-96 dropdown-premium shadow-2xl origin-top-right ring-1 ring-black ring-opacity-5 focus:outline-none bg-white z-50" role="menu" aria-labelledby="notif-btn">
+                        <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 dropdown-premium shadow-2xl origin-top-right ring-1 ring-black ring-opacity-5 focus:outline-none bg-white z-50" role="menu" aria-labelledby="notif-btn">
                             <div class="py-2">
                                 <!-- Header -->
                                 <div class="flex items-center justify-between px-4 pb-2 border-b border-gray-100">
@@ -164,16 +160,16 @@
                     </div>
 
                     <div class="relative relative-dropdown group">
-                        <button type="button" class="flex items-center focus:outline-none py-1" aria-haspopup="true" aria-expanded="false" aria-label="Open user menu for {{ user.username }}">
+                        <button type="button" class="flex items-center focus:outline-none py-1 px-1 sm:px-2 min-h-[44px] min-w-[44px] justify-center" aria-haspopup="true" aria-expanded="false" aria-label="Open user menu for {{ user.username }}">
                             <div class="avatar-gradient p-0.5 rounded-full">
                                 <div
-                                    class="avatar-inner rounded-full overflow-hidden w-8 h-8 flex items-center justify-center bg-gradient-primary text-white text-xs font-bold"
+                                    class="avatar-inner rounded-full overflow-hidden w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-gradient-primary text-white text-xs font-bold"
                                     aria-label="User avatar for {{ user.username }}">
                                     {{ user.username|slice:":1"|upper }}</div>
                             </div>
                         </button>
                         <div
-                            class="hidden group-hover:block absolute right-0 mt-0 w-52 dropdown-premium shadow-2xl origin-top-right ring-1 ring-black ring-opacity-5 focus:outline-none bg-white" role="menu" aria-label="User menu">
+                            class="hidden group-hover:block absolute right-0 mt-0 w-48 sm:w-52 dropdown-premium shadow-2xl origin-top-right ring-1 ring-black ring-opacity-5 focus:outline-none bg-white" role="menu" aria-label="User menu">
                             <div class="py-1">
                                 <a href="{% url 'profile' %}" class="dropdown-item-premium" role="menuitem">Profile</a>
                                 <div class="border-t border-gray-100 mx-2 my-1" role="separator"></div>
@@ -186,10 +182,9 @@
                         </div>
                     </div>
                     {% else %}
-                    <div class="flex items-center space-x-3">
-                        <a href="{% url 'login' %}" class="text-gray-600 hover:text-purple-600 font-bold text-sm" aria-label="Log in to your account">Log
-                            in</a>
-                        <a href="{% url 'register' %}" class="btn-premium px-5 py-1.5 text-xs" aria-label="Join LinkUp - Create new account">Join now</a>
+                    <div class="flex items-center space-x-2 sm:space-x-3">
+                        <a href="{% url 'login' %}" class="text-gray-600 hover:text-purple-600 font-bold text-xs sm:text-sm" aria-label="Log in to your account">Log in</a>
+                        <a href="{% url 'register' %}" class="btn-premium px-3 sm:px-5 py-1 sm:py-1.5 text-xs" aria-label="Join LinkUp - Create new account">Join now</a>
                     </div>
                     {% endif %}
                 </div>
@@ -197,7 +192,7 @@
         </div>
     </nav>
 
-    <main id="main" class="site-container mt-6" role="main" aria-label="Main content">
+    <main id="main" class="site-container mt-4 sm:mt-6" role="main" aria-label="Main content">
         {% block content %}{% endblock %}
     </main>
     

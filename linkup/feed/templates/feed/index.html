@@ -2,10 +2,10 @@
 {% load static %}
 
 {% block content %}
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-6">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 lg:gap-8 pt-4 md:pt-6 px-2 sm:px-0">
     <!-- Left Sidebar -->
     <div class="hidden lg:block lg:col-span-3">
-        <div class="premium-card overflow-hidden animate-fade-in">
+        <div class="premium-card overflow-hidden animate-fade-in sticky top-20">
             <div class="bg-gradient-primary h-20"></div>
             <div class="px-5 pb-5">
                 <div class="-mt-10 mb-3">
@@ -35,30 +35,30 @@
     </div>
 
     <!-- Main Feed -->
-    <div class="lg:col-span-6 space-y-6">
+    <div class="lg:col-span-6 space-y-4 md:space-y-6 w-full min-w-0 order-2 lg:order-none">
         <!-- Post Creation Card -->
         <div class="composer animate-fade-in" id="create-post">
             <form action="" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 {{ form.media }}
-                <div class="composer-header">
-                    <div class="flex items-center gap-4">
-                        <div class="avatar-gradient">
+                <div class="composer-header flex-col sm:flex-row gap-3 sm:gap-4">
+                    <div class="flex items-center gap-3 sm:gap-4 flex-1">
+                        <div class="avatar-gradient flex-shrink-0">
                             <div class="avatar-inner">
                                 <div
-                                    class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-primary text-white font-semibold">
+                                    class="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-primary text-white font-semibold text-sm sm:text-base">
                                     {{ user.username|slice:":2"|upper }}
                                 </div>
                             </div>
                         </div>
-                        <div>
-                            <h4 class="font-semibold mb-0">Create a post</h4>
-                            <div class="text-sm text-gray-500">Share something meaningful with your network</div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-semibold mb-0 text-sm sm:text-base">Create a post</h4>
+                            <div class="text-xs sm:text-sm text-gray-500 truncate">Share something meaningful with your network</div>
                         </div>
                     </div>
-                    <div class="composer-actions">
-                        <span class="cta-chip">Premium</span>
-                        <button type="button" class="btn-premium" id="composer-toggle">Expand</button>
+                    <div class="composer-actions flex items-center gap-2 self-start sm:self-center">
+                        <span class="cta-chip text-xs sm:text-sm hidden sm:inline-block">Premium</span>
+                        <button type="button" class="btn-premium text-xs sm:text-sm px-3 py-1.5 sm:px-4 sm:py-2" id="composer-toggle">Expand</button>
                     </div>
                 </div>
 
@@ -70,57 +70,57 @@
                     <img src="#" alt="preview" id="preview-img" style="width:100%; height:auto;" />
                 </div>
 
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center flex-wrap gap-2 sm:gap-3 md:space-x-4">
                     <label
-                        class="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                        class="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 md:px-4 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors touch-manipulation min-h-[44px]"
                         title="Add Photo">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none"
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 flex-shrink-0" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        <span class="text-sm font-medium text-gray-700">Photo</span>
+                        <span class="text-xs sm:text-sm font-medium text-gray-700">Photo</span>
                         <input type="file" name="image" class="hidden composer-file-input" accept="image/*"
                             id="composer-image-input">
                     </label>
                     <label
-                        class="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                        class="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 md:px-4 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors touch-manipulation min-h-[44px]"
                         title="Add Video">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none"
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
-                        <span class="text-sm font-medium text-gray-700">Video</span>
+                        <span class="text-xs sm:text-sm font-medium text-gray-700">Video</span>
                         <input type="file" name="video" class="hidden composer-file-input" accept="video/*"
                             id="composer-video-input">
                     </label>
                     <label
-                        class="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                        class="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 md:px-4 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors touch-manipulation min-h-[44px]"
                         title="Add Audio">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" fill="none"
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500 flex-shrink-0" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                         </svg>
-                        <span class="text-sm font-medium text-gray-700">Audio</span>
+                        <span class="text-xs sm:text-sm font-medium text-gray-700 hidden sm:inline">Audio</span>
                         <input type="file" name="audio" class="hidden composer-file-input" accept="audio/*"
                             id="composer-audio-input">
                     </label>
                     <label
-                        class="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                        class="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 md:px-4 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors touch-manipulation min-h-[44px]"
                         title="Add PDF">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none"
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-red-500 flex-shrink-0" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
-                        <span class="text-sm font-medium text-gray-700">PDF</span>
+                        <span class="text-xs sm:text-sm font-medium text-gray-700 hidden sm:inline">PDF</span>
                         <input type="file" name="pdf" class="hidden composer-file-input" accept="application/pdf"
                             id="composer-pdf-input">
                     </label>
                 </div>
-                <button type="submit" class="btn-primary-large">Share Post</button>
+                <button type="submit" class="btn-primary-large w-full sm:w-auto min-h-[44px]">Share Post</button>
         </div>
         </form>
     </div>
@@ -128,21 +128,21 @@
     <!-- Posts Feed -->
     {% for post in page_obj %}
     <div class="post-card animate-fade-in">
-        <div class="post-author">
-            <div class="post-avatar">
+        <div class="post-author flex-wrap sm:flex-nowrap">
+            <div class="post-avatar flex-shrink-0">
                 {{ post.user.username|slice:":2"|upper }}
             </div>
-            <div class="flex-1">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="font-bold text-gray-800 hover:text-purple-600 transition-colors">
+            <div class="flex-1 min-w-0">
+                <div class="flex items-start sm:items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-bold text-sm sm:text-base text-gray-800 hover:text-purple-600 transition-colors truncate">
                             <a href="{% url 'public_profile' post.user.username %}">{{ post.user.username }}</a>
                         </h3>
                         <p class="text-xs text-gray-500">{{ post.created_at|timesince }} ago</p>
                     </div>
                     {% if post.user != request.user %}
                     <button
-                        class="btn-follow {% if post.user in request.user.following.all %}following{% else %}not-following{% endif %} px-4 py-1.5 text-xs"
+                        class="btn-follow {% if post.user in request.user.following.all %}following{% else %}not-following{% endif %} px-3 sm:px-4 py-1.5 text-xs flex-shrink-0 min-h-[36px]"
                         data-user-id="{{ post.user.id }}">
                         <span class="follow-text">{% if post.user in request.user.following.all %}Following{% else
                             %}Follow{% endif %}</span>
@@ -151,9 +151,9 @@
                 </div>
             </div>
             {% if post.user == request.user %}
-            <div class="relative post-menu-container">
-                <button class="text-gray-400 hover:text-gray-600 transition-colors post-menu-btn"
-                    data-post-id="{{ post.id }}">
+            <div class="relative post-menu-container flex-shrink-0">
+                <button class="text-gray-400 hover:text-gray-600 transition-colors post-menu-btn p-2 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
+                    data-post-id="{{ post.id }}" aria-label="Post options">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -188,18 +188,18 @@
             {% endif %}
         </div>
 
-        <div class="post-content">{{ post.content|safe }}</div>
+        <div class="post-content text-sm sm:text-base break-words">{{ post.content|safe }}</div>
 
         <div class="post-media-container space-y-4">
             {% if post.image %}
             <div class="post-image">
-                <img src="{{ post.image.url }}" alt="Post image" class="w-full h-auto rounded-lg" />
+                <img src="{{ post.image.url }}" alt="Post image" class="w-full h-auto rounded-lg object-cover max-h-[500px] sm:max-h-[600px]" loading="lazy" />
             </div>
             {% endif %}
 
             {% if post.video %}
             <div class="post-video">
-                <video controls class="w-full h-auto rounded-lg shadow-inner bg-black">
+                <video controls class="w-full h-auto rounded-lg shadow-inner bg-black max-h-[400px] sm:max-h-[500px]">
                     <source src="{{ post.video.url }}" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
@@ -207,7 +207,7 @@
             {% endif %}
 
             {% if post.audio %}
-            <div class="post-audio p-4 bg-gray-50 rounded-lg">
+            <div class="post-audio p-3 sm:p-4 bg-gray-50 rounded-lg">
                 <audio controls class="w-full">
                     <source src="{{ post.audio.url }}" type="audio/mpeg">
                     Your browser does not support the audio element.
@@ -216,57 +216,57 @@
             {% endif %}
 
             {% if post.pdf %}
-            <div class="post-pdf p-4 bg-white border border-gray-200 rounded-lg flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24"
+            <div class="post-pdf p-3 sm:p-4 bg-white border border-gray-200 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div class="flex items-center space-x-3 min-w-0 flex-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                     </svg>
-                    <div>
-                        <p class="text-sm font-medium text-gray-800">Document (PDF)</p>
-                        <p class="text-xs text-gray-500">{{ post.pdf.name|truncatechars:30 }}</p>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs sm:text-sm font-medium text-gray-800">Document (PDF)</p>
+                        <p class="text-xs text-gray-500 truncate">{{ post.pdf.name|truncatechars:30 }}</p>
                     </div>
                 </div>
                 <a href="{{ post.pdf.url }}" target="_blank"
-                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors">
+                    class="px-3 sm:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap min-h-[44px] flex items-center justify-center w-full sm:w-auto">
                     View / Download
                 </a>
             </div>
             {% endif %}
         </div>
 
-        <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-            <button class="like-btn {% if request.user in post.likes.all %}liked{% endif %}"
-                data-post-id="{{ post.id }}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+        <div class="flex items-center justify-around sm:justify-between pt-3 border-t border-gray-100 flex-wrap gap-1">
+            <button class="like-btn {% if request.user in post.likes.all %}liked{% endif %} min-h-[44px] touch-manipulation"
+                data-post-id="{{ post.id }}" aria-label="Like post">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5"
                     fill="{% if request.user in post.likes.all %}currentColor{% else %}none{% endif %}"
                     viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
                 </svg>
-                <span class="like-count font-medium">{{ post.total_likes }}</span>
+                <span class="like-count font-medium text-xs sm:text-sm">{{ post.total_likes }}</span>
             </button>
             <button
-                class="comment-btn flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600"
-                data-post-id="{{ post.id }}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                class="comment-btn flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600 min-h-[44px] touch-manipulation"
+                data-post-id="{{ post.id }}" aria-label="Comment on post">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
-                <span class="text-sm font-medium">Comment</span>
+                <span class="text-xs sm:text-sm font-medium hidden sm:inline">Comment</span>
                 <span class="comment-count text-xs">{{ post.total_comments }}</span>
             </button>
             <button
-                class="share-btn flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600"
-                data-post-id="{{ post.id }}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                class="share-btn flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600 min-h-[44px] touch-manipulation"
+                data-post-id="{{ post.id }}" aria-label="Share post">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                 </svg>
-                <span class="text-sm font-medium">Share</span>
+                <span class="text-xs sm:text-sm font-medium hidden sm:inline">Share</span>
             </button>
         </div>
 
@@ -315,27 +315,27 @@
 
     <!-- Pagination Controls -->
     {% if page_obj.has_other_pages %}
-    <div class="premium-card p-4 animate-fade-in">
-        <div class="flex items-center justify-between">
+    <div class="premium-card p-3 sm:p-4 animate-fade-in">
+        <div class="flex items-center justify-between gap-2">
             <div>
                 {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}" class="btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24"
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn-primary flex items-center gap-1 px-3 py-2 text-xs sm:text-sm min-h-[44px]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
-                    Previous
+                    <span class="hidden sm:inline">Previous</span>
                 </a>
                 {% endif %}
             </div>
-            <div class="text-sm text-gray-600">
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            <div class="text-xs sm:text-sm text-gray-600 text-center">
+                <span class="hidden sm:inline">Page </span>{{ page_obj.number }}<span class="hidden sm:inline"> of {{ page_obj.paginator.num_pages }}</span>
             </div>
             <div>
                 {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="btn-primary">
-                    Next
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24"
+                <a href="?page={{ page_obj.next_page_number }}" class="btn-primary flex items-center gap-1 px-3 py-2 text-xs sm:text-sm min-h-[44px]">
+                    <span class="hidden sm:inline">Next</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
@@ -345,25 +345,37 @@
         </div>
     </div>
     {% endif %}
-</div>
+    </div>
 
-<!-- Right Sidebar -->
-<div class="hidden lg:block lg:col-span-3">
-    <div class="premium-card p-5 animate-fade-in">
-
-        <h3 class="text-lg font-bold text-gray-800 mb-4">Trending Topics</h3>
-        <div class="space-y-4">
-            <div class="hover-lift cursor-pointer p-3 rounded-lg transition-all">
-                <div class="flex items-center justify-between mb-1">
-                    <span class="text-gray-500 text-xs">#WebDevelopment</span>
-                    <span class="text-xs font-semibold text-purple-600">2.4k posts</span>
+    <!-- Right Sidebar - Trending Topics (Moved to top, before main feed on mobile) -->
+    <div class="hidden lg:block lg:col-span-3 order-1 lg:order-none">
+        <div class="premium-card p-5 animate-fade-in sticky top-20">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">Trending Topics</h3>
+            <div class="space-y-4">
+                <div class="hover-lift cursor-pointer p-3 rounded-lg transition-all">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-gray-500 text-xs">#WebDevelopment</span>
+                        <span class="text-xs font-semibold text-purple-600">2.4k posts</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-700">Latest trends in web development</p>
                 </div>
-                <p class="text-sm font-medium text-gray-700">Latest trends in web development</p>
+                <div class="hover-lift cursor-pointer p-3 rounded-lg transition-all">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-gray-500 text-xs">#AI</span>
+                        <span class="text-xs font-semibold text-purple-600">1.8k posts</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-700">Artificial Intelligence innovations</p>
+                </div>
+                <div class="hover-lift cursor-pointer p-3 rounded-lg transition-all">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-gray-500 text-xs">#RemoteWork</span>
+                        <span class="text-xs font-semibold text-purple-600">1.2k posts</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-700">Remote work best practices</p>
+                </div>
             </div>
-            <!-- ... -->
         </div>
     </div>
-</div>
 </div>
 
 <!-- Edit Post Modal -->
