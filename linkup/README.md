@@ -1,15 +1,16 @@
-# 🚀 LinkUp - Professional Network Platform
+# 🚀 LinkUp v1.0.0 - Professional Network Platform
 
 <div align="center">
 
 ![Django](https://img.shields.io/badge/Django-5.2.10-green.svg)
 ![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Status](https://img.shields.io/badge/Status-Active-success.svg)
+![Version](https://img.shields.io/badge/Version-1.0.0-success.svg)
+![Status](https://img.shields.io/badge/Status-Released-brightgreen.svg)
 
-**A modern, feature-rich professional networking platform built with Django**
+**A modern, feature-rich professional networking platform with image sharing capabilities**
 
-[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Documentation](#-documentation) • [Contributing](#-contributing)
+[🚀 Features](#-features) • [📦 Installation](#-installation) • [🎯 Usage](#-usage) • [📚 Documentation](#-documentation) • [🤝 Contributing](#-contributing)
 
 </div>
 
