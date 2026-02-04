@@ -235,7 +235,8 @@ class MessageSyncManager:
                 effective_since = max(since_time, cutoff_time)
                 
                 messages = Message.objects.filter(
-                    sender_id=user_id,
+                    sender_id=user_id
+                ).filter(
                     Q(delivered_at__gte=effective_since) | Q(read_at__gte=effective_since)
                 ).select_related('recipient').order_by('created_at')
                 
