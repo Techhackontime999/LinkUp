@@ -8,7 +8,6 @@ from django.views.decorators.http import require_GET, require_POST
 from django.core.exceptions import ValidationError
 from django.db import transaction, IntegrityError
 from django.utils import timezone
-from channels.db import database_sync_to_async
 from .models import Message, UserStatus, Notification
 from .notification_service import NotificationService
 from .message_persistence_manager import message_persistence_manager
@@ -158,9 +157,7 @@ def fetch_history(request, username):
         
         # Use enhanced persistence manager for conversation loading
         try:
-            conversation_data = await database_sync_to_async(
-                message_persistence_manager.get_conversation_messages
-            )(
+            conversation_data = message_persistence_manager.get_conversation_messages(
                 user1_id=request.user.id,
                 user2_id=target.id,
                 limit=page_size,
@@ -247,9 +244,9 @@ def fetch_history(request, username):
             ]
             
             if unread_message_ids:
-                await database_sync_to_async(
-                    message_persistence_manager.bulk_update_message_status
-                )(unread_message_ids, 'read', request.user.id)
+                message_persistence_manager.bulk_update_message_status(
+                    unread_message_ids, 'read', request.user.id
+                )
                 
                 # Update the messages in response to reflect read status
                 for msg in messages:
@@ -557,9 +554,7 @@ def load_older_messages(request, username):
         
         # Use persistence manager for optimized message loading
         try:
-            conversation_data = await database_sync_to_async(
-                message_persistence_manager.get_conversation_messages
-            )(
+            conversation_data = message_persistence_manager.get_conversation_messages(
                 user1_id=request.user.id,
                 user2_id=target.id,
                 limit=page_size,
@@ -699,9 +694,7 @@ def synchronize_conversation(request, username):
         
         # Use persistence manager for synchronization
         try:
-            sync_result = await database_sync_to_async(
-                message_persistence_manager.synchronize_conversation
-            )(
+            sync_result = message_persistence_manager.synchronize_conversation(
                 user_id=request.user.id,
                 partner_id=target.id,
                 last_sync_time=last_sync_time
