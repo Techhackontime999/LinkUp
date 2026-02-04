@@ -123,11 +123,12 @@
                 <button type="submit" class="btn-primary-large w-full sm:w-auto min-h-[44px]">Share Post</button>
         </div>
         </form>
-    </div>
+        </div>
 
-        <!-- Posts Feed -->
-        {% for post in page_obj %}
-        <div class="post-card animate-fade-in">
+        <!-- Posts Feed Container -->
+        {% if page_obj %}
+            {% for post in page_obj %}
+            <div class="post-card animate-fade-in">
         <div class="post-author flex-wrap sm:flex-nowrap">
             <div class="post-avatar flex-shrink-0">
                 {{ post.user.username|slice:":2"|upper }}
@@ -297,9 +298,11 @@
                     </form>
                 </div>
             </div>
+                </div>
             </div>
         </div>
-        {% empty %}
+            {% endfor %}
+        {% else %}
             <div class="premium-card p-12 text-center animate-fade-in">
                 <div class="mb-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300" fill="none"
@@ -311,7 +314,7 @@
                 <h3 class="text-lg font-semibold text-gray-700 mb-2">No posts yet</h3>
                 <p class="text-gray-500">Be the first to share something amazing!</p>
             </div>
-        {% endfor %}
+        {% endif %}
 
         <!-- Pagination Controls -->
         {% if page_obj.has_other_pages %}
