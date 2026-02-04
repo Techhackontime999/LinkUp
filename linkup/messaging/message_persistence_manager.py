@@ -582,8 +582,11 @@ class MessagePersistenceManager:
             
             # Add metadata if requested
             if include_metadata:
-                metadata = await self._get_conversation_metadata(user1_id, user2_id)
-                result['metadata'] = metadata
+                # Simplified metadata for sync operation
+                result['metadata'] = {
+                    'conversation_id': f"{min(user1_id, user2_id)}_{max(user1_id, user2_id)}",
+                    'participants': [user1_id, user2_id]
+                }
             
             return result
             
