@@ -720,8 +720,8 @@
             smoothScrollToBottom();
         }
         
-        // Track oldest message for infinite scroll
-        if (!oldestMessageId || m.id < oldestMessageId) {
+        // Track oldest message for infinite scroll (only use real message IDs, not temp client IDs)
+        if (m.id && typeof m.id === 'number' && (!oldestMessageId || m.id < oldestMessageId)) {
             oldestMessageId = m.id;
         }
         
@@ -766,7 +766,7 @@
 
     // Enhanced infinite scroll with improved performance
     function loadOlderMessages() {
-        if (isLoadingOlder || !hasMoreMessages || !oldestMessageId) {
+        if (isLoadingOlder || !hasMoreMessages || !oldestMessageId || typeof oldestMessageId !== 'number') {
             return;
         }
         
