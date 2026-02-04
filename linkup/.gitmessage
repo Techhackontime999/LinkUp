@@ -1,0 +1,33 @@
+# <type>(<scope>): <subject>
+#
+# <body>
+#
+# <footer>
+
+# Type should be one of the following:
+# * feat: A new feature
+# * fix: A bug fix
+# * docs: Documentation only changes
+# * style: Changes that do not affect the meaning of the code
+# * refactor: A code change that neither fixes a bug nor adds a feature
+# * perf: A code change that improves performance
+# * test: Adding missing tests or correcting existing tests
+# * chore: Changes to the build process or auxiliary tools
+
+# Scope should be noun describing a section of the codebase
+# Examples: auth, ui, network, admin, search, feed
+
+# Subject should be imperative, lower case and no final period
+# Examples:
+# feat(auth): add user login functionality
+# fix(ui): resolve button alignment issue
+# docs(readme): update installation instructions
+
+# Body should explain what and why vs. how
+# Can be multiple paragraphs, each separated by a blank line
+
+# Footer should contain any information about Breaking Changes
+# and is also the place to reference GitHub issues that this commit closes
+# Examples:
+# Closes #123
+# BREAKING CHANGE: remove deprecated API endpoint
