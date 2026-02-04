@@ -512,6 +512,7 @@ def messages_inbox(request):
         
         return render(request, 'messaging/inbox.html', {
             'page_obj': page_obj,
+            'conversations': page_obj.object_list,
             'total_conversations': len(conversations)
         })
     
