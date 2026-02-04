@@ -1351,15 +1351,28 @@
         }
     });
 
-    // Get CSRF token with caching
+    // Get CSRF token with caching and fallback methods
     let csrfToken = null;
     function getCookie(name) {
         if (name === 'csrftoken' && csrfToken) {
             return csrfToken;
         }
         
+        // Try to get from cookie first
         const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
-        const token = v ? v[2] : null;
+        let token = v ? v[2] : null;
+        
+        // Fallback to meta tag if cookie not found
+        if (!token && name === 'csrftoken') {
+            const metaTag = document.querySelector('meta[name="csrf-token"]');
+            token = metaTag ? metaTag.getAttribute('content') : null;
+        }
+        
+        // Fallback to form input if still not found
+        if (!token && name === 'csrftoken') {
+            const formInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+            token = formInput ? formInput.value : null;
+        }
         
         if (name === 'csrftoken') {
             csrfToken = token;
