@@ -4,7 +4,15 @@
 {% block content %}
   <div class="app-sanitize-confirm">
     <h1>{{ title }}</h1>
-    <p>{% blocktrans count count=objects|length %}You are about to review {{ count }} post for sanitization.{% endblocktrans %}</p>
+    <p>
+      {% with objects|length as count %}
+        {% if count == 1 %}
+          You are about to review {{ count }} post for sanitization.
+        {% else %}
+          You are about to review {{ count }} posts for sanitization.
+        {% endif %}
+      {% endwith %}
+    </p>
 
     <form method="post" style="margin-top:1rem;">
       {% csrf_token %}
