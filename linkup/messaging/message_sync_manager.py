@@ -376,7 +376,8 @@ class MessageSyncManager:
                 with transaction.atomic():
                     # Update messages to mark them as synchronized
                     Message.objects.filter(
-                        id__in=message_ids,
+                        id__in=message_ids
+                    ).filter(
                         Q(sender_id=user_id) | Q(recipient_id=user_id)
                     ).update(
                         # Add a synchronized timestamp if the model supports it
