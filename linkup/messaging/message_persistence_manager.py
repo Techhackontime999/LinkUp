@@ -443,7 +443,7 @@ class MessagePersistenceManager:
             logger.error(f"Error updating message status: {e}")
             return False
     
-    async def bulk_update_message_status(self, message_ids: List[int], new_status: str, 
+    def bulk_update_message_status(self, message_ids: List[int], new_status: str, 
                                        user_id: int = None) -> Dict[str, Any]:
         """
         Update multiple message statuses in a single transaction.
@@ -507,29 +507,8 @@ class MessagePersistenceManager:
                             logger.error(f"Error updating message {message.id}: {e}")
                             failed_count += 1
             
-            # Broadcast updates for successful messages
-            for msg_data in updated_messages:
-                await self.sync_manager.broadcast_message_update(
-                    msg_data['sender_id'],
-                    {
-                        'id': msg_data['id'],
-                        'status': msg_data['new_status'],
-                        'old_status': msg_data['old_status'],
-                        'updated_by': user_id,
-                        'bulk_update': True
-                    }
-                )
-                
-                await self.sync_manager.broadcast_message_update(
-                    msg_data['recipient_id'],
-                    {
-                        'id': msg_data['id'],
-                        'status': msg_data['new_status'],
-                        'old_status': msg_data['old_status'],
-                        'updated_by': user_id,
-                        'bulk_update': True
-                    }
-                )
+            # Note: Removed async broadcasting for synchronous operation
+            # Broadcasting can be handled separately if needed
             
             result = {
                 'updated_count': updated_count,
@@ -551,7 +530,7 @@ class MessagePersistenceManager:
                 'error': str(e)
             }
     
-    async def get_conversation_messages(self, user1_id: int, user2_id: int, 
+    def get_conversation_messages(self, user1_id: int, user2_id: int, 
                                       limit: int = 50, before_id: int = None,
                                       include_metadata: bool = True) -> Dict[str, Any]:
         """
@@ -579,13 +558,13 @@ class MessagePersistenceManager:
             # Apply before_id filter if provided
             if before_id:
                 try:
-                    before_message = await Message.objects.aget(id=before_id)
+                    before_message = Message.objects.get(id=before_id)
                     base_query = base_query.filter(created_at__lt=before_message.created_at)
                 except Message.DoesNotExist:
                     pass
             
             # Get messages with limit
-            messages = await base_query.order_by('-created_at')[:limit].aall()
+            messages = list(base_query.order_by('-created_at')[:limit])
             
             # Reverse to show oldest first
             messages = list(reversed(messages))
@@ -593,7 +572,7 @@ class MessagePersistenceManager:
             # Serialize messages
             serialized_messages = []
             for message in messages:
-                serialized_messages.append(await self._serialize_message(message))
+                serialized_messages.append(self._serialize_message_sync(message))
             
             result = {
                 'messages': serialized_messages,
@@ -617,7 +596,7 @@ class MessagePersistenceManager:
                 'error': str(e)
             }
     
-    async def synchronize_conversation(self, user_id: int, partner_id: int, 
+    def synchronize_conversation(self, user_id: int, partner_id: int, 
                                      last_sync_time: datetime = None) -> Dict[str, Any]:
         """
         Synchronize conversation data across tabs and devices.
@@ -644,15 +623,15 @@ class MessagePersistenceManager:
             if last_sync_time:
                 query = query.filter(updated_at__gt=last_sync_time)
             
-            updated_messages = await query.order_by('created_at').aall()
+            updated_messages = list(query.order_by('created_at'))
             
             # Serialize updated messages
             serialized_messages = []
             for message in updated_messages:
-                serialized_messages.append(await self._serialize_message(message))
+                serialized_messages.append(self._serialize_message_sync(message))
             
-            # Get conversation statistics
-            stats = await self._get_conversation_stats(user_id, partner_id)
+            # Get conversation statistics (simplified for sync operation)
+            stats = {'total_messages': len(updated_messages)}
             
             sync_result = {
                 'sync_token': sync_token,
@@ -662,12 +641,7 @@ class MessagePersistenceManager:
                 'conversation_stats': stats
             }
             
-            # Broadcast sync completion
-            await self.sync_manager.broadcast_conversation_sync(
-                user_id, partner_id, sync_result
-            )
-            
-            self.sync_manager.mark_sync_completed(sync_token)
+            # Note: Removed async broadcasting for synchronous operation
             
             logger.info(f"Synchronized conversation for user {user_id} with partner {partner_id}")
             return sync_result
@@ -702,6 +676,27 @@ class MessagePersistenceManager:
         
         return new_status in valid_transitions.get(current_status, [])
     
+    def _serialize_message_sync(self, message: 'Message') -> Dict[str, Any]:
+        """Serialize a message object to dictionary (synchronous version)."""
+        return {
+            'id': message.id,
+            'sender_id': message.sender_id,
+            'sender_username': message.sender.username,
+            'recipient_id': message.recipient_id,
+            'recipient_username': message.recipient.username,
+            'content': message.content,
+            'status': message.status,
+            'client_id': message.client_id,
+            'created_at': message.created_at.isoformat(),
+            'sent_at': message.sent_at.isoformat() if message.sent_at else None,
+            'delivered_at': message.delivered_at.isoformat() if message.delivered_at else None,
+            'read_at': message.read_at.isoformat() if message.read_at else None,
+            'is_read': message.is_read,
+            'retry_count': message.retry_count,
+            'last_error': message.last_error,
+            'updated_at': message.updated_at.isoformat()
+        }
+
     async def _serialize_message(self, message: 'Message') -> Dict[str, Any]:
         """Serialize a message object to dictionary."""
         return {
