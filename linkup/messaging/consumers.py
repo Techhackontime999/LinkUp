@@ -576,6 +576,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 context_data={'event': event, 'user_id': self.user.id}
             )
 
+    async def multi_tab_sync(self, event):
+        """Handle cross-tab synchronization events"""
+        try:
+            # Forward the sync event to the client so other tabs can update their UI
+            sync_payload = {
+                'type': 'multi_tab_sync',
+                'sync_type': event.get('sync_type'),
+                'data': event.get('data'),
+                'timestamp': event.get('timestamp')
+            }
+            serialized_payload = self.json_serializer.safe_serialize(sync_payload)
+            await self.send(text_data=self.json_serializer.to_json_string(serialized_payload))
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error in multi_tab_sync handler: {e}",
+                context_data={'event': event, 'user_id': self.user.id}
+            )
+
     async def read_receipt_update(self, event):
         """Send enhanced read receipt update to WebSocket"""
         try:
@@ -598,6 +616,30 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             MessagingLogger.log_error(
                 f"Error in user_status handler: {e}",
+                context_data={'event': event, 'user_id': self.user.id}
+            )
+
+    async def notification_message(self, event):
+        """Send notification to the connected client with enhanced serialization"""
+        try:
+            message = self.connection_validator.safe_get(event, 'message', {})
+            serialized_message = self.json_serializer.safe_serialize(message)
+            await self.send(text_data=self.json_serializer.to_json_string(serialized_message))
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error in notification_message handler: {e}",
+                context_data={'event': event, 'user_id': self.user.id}
+            )
+
+    async def badge_update(self, event):
+        """Send badge count update to the connected client with enhanced serialization"""
+        try:
+            message = self.connection_validator.safe_get(event, 'message', {})
+            serialized_message = self.json_serializer.safe_serialize(message)
+            await self.send(text_data=self.json_serializer.to_json_string(serialized_message))
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error in badge_update handler: {e}",
                 context_data={'event': event, 'user_id': self.user.id}
             )
 
@@ -1001,6 +1043,24 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
             MessagingLogger.log_error(
                 f"Error sending notification error response: {e}",
                 context_data={'original_error': error_message}
+            )
+
+    async def multi_tab_sync(self, event):
+        """Handle cross-tab synchronization events"""
+        try:
+            # Forward the sync event to the client so other tabs can update their UI
+            sync_payload = {
+                'type': 'multi_tab_sync',
+                'sync_type': event.get('sync_type'),
+                'data': event.get('data'),
+                'timestamp': event.get('timestamp')
+            }
+            serialized_payload = self.json_serializer.safe_serialize(sync_payload)
+            await self.send(text_data=self.json_serializer.to_json_string(serialized_payload))
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error in multi_tab_sync handler: {e}",
+                context_data={'event': event, 'user_id': self.user.id}
             )
 
     async def notification_message(self, event):
