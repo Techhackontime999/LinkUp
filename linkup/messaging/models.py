@@ -40,6 +40,7 @@ class Message(models.Model):
     read_at = models.DateTimeField(null=True, blank=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     # New timestamp fields
     sent_at = models.DateTimeField(null=True, blank=True)

@@ -167,6 +167,7 @@ class AsyncSafeMessageHandler:
             return False
     
     @database_sync_to_async
+    @database_sync_to_async
     def set_user_online_status(self, user: User, is_online: bool) -> bool:
         """
         Set user online/offline status with proper async context handling

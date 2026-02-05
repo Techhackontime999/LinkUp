@@ -392,6 +392,7 @@ class MessagePersistenceManager:
         """
         try:
             from .models import Message
+            from channels.db import database_sync_to_async
             
             # Generate client_id if not provided
             if not client_id:
@@ -422,6 +423,7 @@ class MessagePersistenceManager:
                     **kwargs
                 }
                 
+                # Use async database operation
                 message = await Message.objects.acreate(**message_data)
                 
                 # Broadcast to multi-tab sync
@@ -605,11 +607,11 @@ class MessagePersistenceManager:
                 'error': str(e)
             }
     
-    def get_conversation_messages(self, user1_id: int, user2_id: int, 
-                                      limit: int = 50, before_id: int = None,
-                                      include_metadata: bool = True) -> Dict[str, Any]:
+    async def get_conversation_messages_async(self, user1_id: int, user2_id: int, 
+                                            limit: int = 50, before_id: int = None,
+                                            include_metadata: bool = True) -> Dict[str, Any]:
         """
-        Get conversation messages with proper locking and caching.
+        Get conversation messages with proper async handling.
         
         Args:
             user1_id: ID of first user
@@ -623,8 +625,9 @@ class MessagePersistenceManager:
         """
         try:
             from .models import Message
+            from channels.db import database_sync_to_async
             
-            # Build query
+            # Build query using async ORM
             base_query = Message.objects.filter(
                 (Q(sender_id=user1_id) & Q(recipient_id=user2_id)) |
                 (Q(sender_id=user2_id) & Q(recipient_id=user1_id))
@@ -633,13 +636,15 @@ class MessagePersistenceManager:
             # Apply before_id filter if provided
             if before_id:
                 try:
-                    before_message = Message.objects.get(id=before_id)
+                    before_message = await Message.objects.aget(id=before_id)
                     base_query = base_query.filter(created_at__lt=before_message.created_at)
                 except Message.DoesNotExist:
                     pass
             
-            # Get messages with limit
-            messages = list(base_query.order_by('-created_at')[:limit])
+            # Get messages with limit using async
+            messages = []
+            async for message in base_query.order_by('-created_at')[:limit]:
+                messages.append(message)
             
             # Reverse to show oldest first
             messages = list(reversed(messages))
@@ -647,7 +652,7 @@ class MessagePersistenceManager:
             # Serialize messages
             serialized_messages = []
             for message in messages:
-                serialized_messages.append(self._serialize_message_sync(message))
+                serialized_messages.append(await self._serialize_message(message))
             
             result = {
                 'messages': serialized_messages,
@@ -657,11 +662,7 @@ class MessagePersistenceManager:
             
             # Add metadata if requested
             if include_metadata:
-                # Simplified metadata for sync operation
-                result['metadata'] = {
-                    'conversation_id': f"{min(user1_id, user2_id)}_{max(user1_id, user2_id)}",
-                    'participants': [user1_id, user2_id]
-                }
+                result['metadata'] = await self._get_conversation_metadata(user1_id, user2_id)
             
             return result
             
