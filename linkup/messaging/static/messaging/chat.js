@@ -1105,7 +1105,7 @@
                 });
                 
                 // Display the message immediately
-                displayMessage({
+                appendMessage({
                     id: data.id,
                     sender: data.sender,
                     recipient: data.recipient,
