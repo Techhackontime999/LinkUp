@@ -55,7 +55,7 @@ class ReadReceiptManager:
         """
         try:
             from .models import Message
-            from django.db import sync_to_async
+            from channels.db import database_sync_to_async
             
             if read_timestamp is None:
                 read_timestamp = timezone.now()
@@ -66,7 +66,7 @@ class ReadReceiptManager:
                 logger.debug(f"Read receipt for message {message_id} already processed recently")
                 return True
             
-            @sync_to_async
+            @database_sync_to_async
             def mark_read():
                 try:
                     with transaction.atomic():

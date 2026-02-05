@@ -413,6 +413,16 @@ class MessagePersistenceManager:
                 # Create message with precise timestamp
                 created_at = self.timestamp_manager.get_precise_timestamp()
                 
+                # Filter out fields that don't exist in the Message model
+                valid_fields = {
+                    'sender', 'recipient', 'content', 'client_id', 'created_at', 'status',
+                    'attachment', 'is_read', 'read_at', 'delivered_at', 'sent_at', 'failed_at',
+                    'retry_count', 'last_error'
+                }
+                
+                # Filter kwargs to only include valid Message model fields
+                filtered_kwargs = {k: v for k, v in kwargs.items() if k in valid_fields}
+                
                 message_data = {
                     'sender': sender,
                     'recipient': recipient,
@@ -420,7 +430,7 @@ class MessagePersistenceManager:
                     'client_id': client_id,
                     'created_at': created_at,
                     'status': kwargs.get('status', 'pending'),
-                    **kwargs
+                    **filtered_kwargs
                 }
                 
                 # Use async database operation
@@ -607,6 +617,75 @@ class MessagePersistenceManager:
                 'error': str(e)
             }
     
+    def get_conversation_messages(self, user1_id: int, user2_id: int, 
+                                      limit: int = 50, before_id: int = None,
+                                      include_metadata: bool = True) -> Dict[str, Any]:
+        """
+        Get conversation messages with proper locking and caching (sync version).
+        
+        Args:
+            user1_id: ID of first user
+            user2_id: ID of second user
+            limit: Maximum number of messages to return
+            before_id: Get messages before this message ID
+            include_metadata: Whether to include conversation metadata
+            
+        Returns:
+            Dictionary with messages and metadata
+        """
+        try:
+            from .models import Message
+            
+            # Build query
+            base_query = Message.objects.filter(
+                (Q(sender_id=user1_id) & Q(recipient_id=user2_id)) |
+                (Q(sender_id=user2_id) & Q(recipient_id=user1_id))
+            ).select_related('sender', 'recipient')
+            
+            # Apply before_id filter if provided
+            if before_id:
+                try:
+                    before_message = Message.objects.get(id=before_id)
+                    base_query = base_query.filter(created_at__lt=before_message.created_at)
+                except Message.DoesNotExist:
+                    pass
+            
+            # Get messages with limit
+            messages = list(base_query.order_by('-created_at')[:limit])
+            
+            # Reverse to show oldest first
+            messages = list(reversed(messages))
+            
+            # Serialize messages
+            serialized_messages = []
+            for message in messages:
+                serialized_messages.append(self._serialize_message_sync(message))
+            
+            result = {
+                'messages': serialized_messages,
+                'count': len(serialized_messages),
+                'has_more': len(messages) == limit
+            }
+            
+            # Add metadata if requested
+            if include_metadata:
+                # Simplified metadata for sync operation
+                result['metadata'] = {
+                    'conversation_id': f"{min(user1_id, user2_id)}_{max(user1_id, user2_id)}",
+                    'participants': [user1_id, user2_id]
+                }
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error getting conversation messages: {e}")
+            return {
+                'messages': [],
+                'count': 0,
+                'has_more': False,
+                'error': str(e)
+            }
+
     async def get_conversation_messages_async(self, user1_id: int, user2_id: int, 
                                             limit: int = 50, before_id: int = None,
                                             include_metadata: bool = True) -> Dict[str, Any]:
