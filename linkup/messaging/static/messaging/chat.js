@@ -265,6 +265,26 @@
             case undefined: // Default to message
                 handleIncomingMessage(data);
                 break;
+            case 'chat_message':
+                // Compatibility: some server paths may send an envelope like {type:'chat_message', message:{...}}
+                if (data && data.message && typeof data.message === 'object') {
+                    handleIncomingMessage(data.message);
+                } else {
+                    console.warn('Invalid chat_message payload:', data);
+                }
+                break;
+            case 'message_sync':
+                // Compatibility: server may send missed messages after reconnect; render them without requiring refresh.
+                if (data && data.sync_result && Array.isArray(data.sync_result.messages)) {
+                    data.sync_result.messages.forEach((m) => {
+                        if (m && typeof m === 'object') {
+                            handleIncomingMessage(m);
+                        }
+                    });
+                } else {
+                    console.warn('Invalid message_sync payload:', data);
+                }
+                break;
             case 'typing':
                 handleTypingIndicator(data);
                 break;
