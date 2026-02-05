@@ -5,7 +5,7 @@ import logging
 import traceback
 from typing import Optional, Dict, Any
 from django.contrib.auth import get_user_model
-from .error_models import MessagingError
+from .models import MessagingError
 
 logger = logging.getLogger(__name__)
 User = get_user_model()

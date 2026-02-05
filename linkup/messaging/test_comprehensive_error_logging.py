@@ -9,9 +9,8 @@ from channels.testing import WebsocketCommunicator
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from .consumers import ChatConsumer, NotificationsConsumer
-from .models import Message, Notification, UserStatus
+from .models import Message, Notification, UserStatus, MessagingError
 from .logging_utils import MessagingLogger
-from .error_models import MessagingError
 
 User = get_user_model()
 
