@@ -257,6 +257,17 @@
     }
 
     // Enhanced message handling with optimistic UI
+    function normalizeMessagePayload(m) {
+        if (!m || typeof m !== 'object') return m;
+
+        // Some APIs (persistence manager) return sender_username/recipient_username
+        // while the WebSocket payload uses sender/recipient.
+        if (!m.sender && m.sender_username) m.sender = m.sender_username;
+        if (!m.recipient && m.recipient_username) m.recipient = m.recipient_username;
+
+        return m;
+    }
+
     function handleWebSocketMessage(data) {
         const type = data.type;
         
@@ -323,6 +334,8 @@
 
     // Handle incoming messages with deduplication
     function handleIncomingMessage(data) {
+        data = normalizeMessagePayload(data);
+
         // Check for duplicate messages
         if (messageCache.has(data.id)) {
             return; // Skip duplicate
@@ -635,6 +648,8 @@
 
     // Enhanced message display with optimistic UI and improved performance
     function appendMessage(m, prepend = false) {
+        m = normalizeMessagePayload(m);
+
         // Remove loading indicator if present
         const loadingEl = document.getElementById('loading-messages');
         if (loadingEl) {
@@ -642,7 +657,8 @@
         }
         
         const el = document.createElement('div');
-        const isCurrentUser = m.sender === currentUser;
+        const senderUsername = m && m.sender ? m.sender : '';
+        const isCurrentUser = senderUsername === currentUser;
         
         el.className = `flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-3 message-bubble transition-all duration-200 ease-in-out`;
         el.setAttribute('data-message-id', m.id);
@@ -665,7 +681,7 @@
         // Enhanced message bubble with better styling and animations
         el.innerHTML = `
             <div class="max-w-xs lg:max-w-md transform transition-all duration-200 hover:scale-[1.02]">
-                ${!isCurrentUser ? `<div class="text-xs text-gray-500 mb-1 ml-1 font-medium">${escapeHtml(m.sender)}</div>` : ''}
+                ${!isCurrentUser ? `<div class="text-xs text-gray-500 mb-1 ml-1 font-medium">${escapeHtml(senderUsername)}</div>` : ''}
                 <div class="relative group">
                     <div class="px-4 py-2.5 rounded-2xl shadow-sm transition-all duration-200 ${
                         isCurrentUser 
