@@ -62,19 +62,18 @@
                     <div class="flex items-center space-x-4">
                         <a href="{% url 'public_profile' connection_user.username %}"
                             class="flex items-center space-x-4 flex-1 no-underline text-current"
-                            aria-label="View {{ connection_user.get_full_name|default:connection_user.username }}'s profile">
+                            aria-label="View {% if connection_user.first_name %}{{ connection_user.first_name }} {{ connection_user.last_name }}{% else %}{{ connection_user.username }}{% endif %}'s profile">
                             <div class="post-avatar w-14 h-14 text-lg rounded-full overflow-hidden">
                                 {% if connection_user.profile.avatar %}
                                 <img src="{{ connection_user.profile.avatar.url }}"
-                                    alt="{{ connection_user.get_full_name|default:connection_user.username }}'s avatar"
+                                    alt="{% if connection_user.first_name %}{{ connection_user.first_name }} {{ connection_user.last_name }}{% else %}{{ connection_user.username }}{% endif %}'s avatar"
                                     class="avatar-img object-cover" />
                                 {% else %}
                                 {{ connection_user.username|slice:":2"|upper }}
                                 {% endif %}
                             </div>
                             <div>
-                                <h3 class="font-bold text-gray-800">{{
-                                    connection_user.get_full_name|default:connection_user.username }}</h3>
+                                <h3 class="font-bold text-gray-800">{% if connection_user.first_name %}{{ connection_user.first_name }} {{ connection_user.last_name }}{% else %}{{ connection_user.username }}{% endif %}</h3>
                                 <p class="text-sm text-gray-600">@{{ connection_user.username }}</p>
                                 <p class="text-xs text-gray-500 mt-1">Connected {{ conn.created_at|date:"M Y" }}</p>
                             </div>
@@ -95,19 +94,18 @@
                     <div class="flex items-center space-x-4">
                         <a href="{% url 'public_profile' connection_user.username %}"
                             class="flex items-center space-x-4 flex-1 no-underline text-current"
-                            aria-label="View {{ connection_user.get_full_name|default:connection_user.username }}'s profile">
+                            aria-label="View {% if connection_user.first_name %}{{ connection_user.first_name }} {{ connection_user.last_name }}{% else %}{{ connection_user.username }}{% endif %}'s profile">
                             <div class="post-avatar w-14 h-14 text-lg rounded-full overflow-hidden">
                                 {% if connection_user.profile.avatar %}
                                 <img src="{{ connection_user.profile.avatar.url }}"
-                                    alt="{{ connection_user.get_full_name|default:connection_user.username }}'s avatar"
+                                    alt="{% if connection_user.first_name %}{{ connection_user.first_name }} {{ connection_user.last_name }}{% else %}{{ connection_user.username }}{% endif %}'s avatar"
                                     class="avatar-img object-cover" />
                                 {% else %}
                                 {{ connection_user.username|slice:":2"|upper }}
                                 {% endif %}
                             </div>
                             <div>
-                                <h3 class="font-bold text-gray-800">{{
-                                    connection_user.get_full_name|default:connection_user.username }}</h3>
+                                <h3 class="font-bold text-gray-800">{% if connection_user.first_name %}{{ connection_user.first_name }} {{ connection_user.last_name }}{% else %}{{ connection_user.username }}{% endif %}</h3>
                                 <p class="text-sm text-gray-600">@{{ connection_user.username }}</p>
                                 <p class="text-xs text-gray-500 mt-1">Connected {{ conn.created_at|date:"M Y" }}</p>
                             </div>
@@ -135,21 +133,20 @@
                 {% for user in suggestions %}
                 <div class="connection-card text-center animate-fade-in group">
                     <a href="{% url 'public_profile' user.username %}" class="no-underline text-current"
-                        aria-label="View {{ user.get_full_name|default:user.username }}'s profile">
+                        aria-label="View {% if user.first_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username }}{% endif %}'s profile">
                         <div class="mb-4 relative">
                             <div
                                 class="post-avatar w-24 h-24 text-3xl mx-auto shadow-lg group-hover:shadow-glow transition-all rounded-full overflow-hidden">
                                 {% if user.profile.avatar %}
                                 <img src="{{ user.profile.avatar.url }}"
-                                    alt="{{ user.get_full_name|default:user.username }}'s avatar"
+                                    alt="{% if user.first_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username }}{% endif %}'s avatar"
                                     class="avatar-img object-cover mx-auto" />
                                 {% else %}
                                 {{ user.username|slice:":2"|upper }}
                                 {% endif %}
                             </div>
                         </div>
-                        <h3 class="font-bold text-gray-800 text-lg mb-1">{{ user.get_full_name|default:user.username }}
-                        </h3>
+                        <h3 class="font-bold text-gray-800 text-lg mb-1">{% if user.first_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username }}{% endif %}</h3>
                         <p class="text-sm text-gray-600 mb-6 h-10 overflow-hidden">
                             {% if user.profile %}
                                 {{ user.profile.headline|default:"Professional on LinkUp" }}
