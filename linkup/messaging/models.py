@@ -5,6 +5,7 @@ from datetime import timedelta
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from core.validators import AttachmentUploadValidator, get_upload_path
+from channels.db import database_sync_to_async
 
 
 class Message(models.Model):
@@ -772,6 +773,18 @@ class MessagingError(models.Model):
     @classmethod
     def log_error(cls, error_type, error_message, context_data=None, user=None, severity='medium'):
         """Convenience method to log an error"""
+        return cls.objects.create(
+            error_type=error_type,
+            error_message=error_message,
+            context_data=context_data or {},
+            user=user,
+            severity=severity
+        )
+    
+    @classmethod
+    @database_sync_to_async
+    def log_error_async(cls, error_type, error_message, context_data=None, user=None, severity='medium'):
+        """Async-safe convenience method to log an error"""
         return cls.objects.create(
             error_type=error_type,
             error_message=error_message,

@@ -220,7 +220,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
 
         # Validate connection data structure
-        if not self.connection_validator.validate_message_data(data):
+        validation_result = self.connection_validator.validate_message_data(data)
+        if not validation_result.get('is_valid', False):
             MessagingLogger.log_error(
                 "Invalid message data structure",
                 context_data={'data_keys': list(data.keys()) if isinstance(data, dict) else 'not_dict'}
@@ -295,6 +296,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'type': 'sync_completed',
                     'timestamp': timezone.now().isoformat()
                 }))
+
+            elif message_type == 'get_connection_status':
+                await self._handle_get_connection_status(data)
 
             else:
                 MessagingLogger.log_error(
@@ -386,6 +390,33 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             MessagingLogger.log_error(
                 f"Error handling ping: {e}",
+                context_data={'user_id': self.user.id}
+            )
+
+    async def _handle_get_connection_status(self, data):
+        """Handle get connection status request"""
+        try:
+            connection_id = getattr(self, 'connection_id', None)
+            if connection_id:
+                status = connection_recovery_manager.get_connection_status(connection_id)
+                response = {
+                    'type': 'connection_status',
+                    'connection_id': connection_id,
+                    'status': status,
+                    'timestamp': timezone.now().isoformat()
+                }
+            else:
+                response = {
+                    'type': 'connection_status',
+                    'error': 'No connection ID available',
+                    'timestamp': timezone.now().isoformat()
+                }
+            
+            serialized_response = self.json_serializer.safe_serialize(response)
+            await self.send(text_data=self.json_serializer.to_json_string(serialized_response))
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error handling get connection status: {e}",
                 context_data={'user_id': self.user.id}
             )
 
@@ -585,8 +616,29 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def handle_user_connected(self):
         """Handle user connection with presence manager"""
         try:
+            # Safely extract headers from scope
+            headers = {}
+            scope_headers = self.scope.get('headers', [])
+            
+            if isinstance(scope_headers, (list, tuple)):
+                for header_item in scope_headers:
+                    try:
+                        if isinstance(header_item, (list, tuple)) and len(header_item) >= 2:
+                            key = header_item[0]
+                            value = header_item[1]
+                            
+                            # Convert bytes to string if needed
+                            if isinstance(key, bytes):
+                                key = key.decode('utf-8', errors='ignore')
+                            if isinstance(value, bytes):
+                                value = value.decode('utf-8', errors='ignore')
+                            
+                            headers[str(key)] = str(value)
+                    except Exception:
+                        continue
+            
             connection_info = {
-                'user_agent': self.scope.get('headers', {}).get('user-agent', ''),
+                'user_agent': headers.get('user-agent', ''),
                 'connected_at': timezone.now().isoformat()
             }
             return presence_manager.user_connected(self.user, connection_info)
@@ -817,7 +869,8 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
             return
 
         # Validate message data structure
-        if not self.connection_validator.validate_message_data(data):
+        validation_result = self.connection_validator.validate_message_data(data)
+        if not validation_result.get('is_valid', False):
             MessagingLogger.log_error(
                 "Invalid notification message data structure",
                 context_data={'data_keys': list(data.keys()) if isinstance(data, dict) else 'not_dict'}

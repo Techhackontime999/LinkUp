@@ -278,7 +278,7 @@ class ConnectionValidator:
             validation_result['parsed_data']['type'] = message_type
             
             # Validate message type
-            valid_types = ['message', 'typing', 'read_receipt', 'ping', 'mark_read', 'mark_all_read', 'get_notifications']
+            valid_types = ['message', 'typing', 'read_receipt', 'ping', 'mark_read', 'mark_all_read', 'get_notifications', 'get_connection_status', 'bulk_read_receipt', 'mark_chat_read', 'force_reconnect', 'sync_request']
             if message_type not in valid_types:
                 validation_result['errors'].append(f'Invalid message type: {message_type}')
                 self.logger.log_connection_error(
@@ -362,6 +362,17 @@ class ConnectionValidator:
             return bool(value)
         except Exception as e:
             self.logger.log_debug(f'Error extracting boolean field {field_name}: {e}')
+            return default
+    
+    def safe_get(self, data: Dict[str, Any], field_name: str, default: Any = None) -> Any:
+        """Safely extract any field from data dictionary with fallback"""
+        try:
+            if not isinstance(data, dict):
+                self.logger.log_debug(f'Data is not a dictionary when accessing {field_name}')
+                return default
+            return data.get(field_name, default)
+        except Exception as e:
+            self.logger.log_debug(f'Error extracting field {field_name}: {e}')
             return default
     
     def generate_error_response(self, errors: List[str], message_type: str = 'error') -> Dict[str, Any]:
