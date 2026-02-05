@@ -1045,6 +1045,18 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
                 context_data={'original_error': error_message}
             )
 
+
+    async def read_receipt_update(self, event):
+        """Send read receipt update to WebSocket"""
+        try:
+            serialized_message = self.json_serializer.safe_serialize(event["message"])
+            await self.send(text_data=self.json_serializer.to_json_string(serialized_message))
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error in read_receipt_update handler: {e}",
+                context_data={"event": event, "user_id": self.user.id}
+            )
+
     async def multi_tab_sync(self, event):
         """Handle cross-tab synchronization events"""
         try:
