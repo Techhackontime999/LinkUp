@@ -28,3 +28,9 @@ dj-database-url==2.2.0
 gunicorn==23.0.0
 whitenoise==6.8.2
 django-redis==5.4.0
+
+# Testing dependencies
+hypothesis==6.112.5
+pytest==8.3.4
+pytest-django==4.9.0
+pytest-asyncio==0.25.0

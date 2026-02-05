@@ -1,28 +1,62 @@
 import json
+import time
+from datetime import datetime
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from .models import Message, UserStatus, Notification
+from .async_handlers import AsyncSafeMessageHandler
+from .serializers import JSONSerializer
+from .connection_validator import ConnectionValidator
+from .logging_utils import MessagingLogger
+from .retry_handler import MessageRetryHandler, MessageValidator, RetryConfig
 
 User = get_user_model()
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.message_handler = AsyncSafeMessageHandler()
+        self.json_serializer = JSONSerializer()
+        self.connection_validator = ConnectionValidator()
+        self.retry_handler = MessageRetryHandler()
+        self.message_validator = MessageValidator()
+    
     async def connect(self):
         user = self.scope.get('user')
         if user is None or not user.is_authenticated:
+            MessagingLogger.log_connection_error(
+                "Unauthenticated connection attempt",
+                context_data={'scope_keys': list(self.scope.keys())}
+            )
             await self.close()
             return
 
         self.other_username = self.scope['url_route']['kwargs'].get('username')
         if not self.other_username:
+            MessagingLogger.log_connection_error(
+                "Missing username in URL route",
+                context_data={'url_route': self.scope.get('url_route', {})}
+            )
             await self.close()
             return
 
         try:
             self.other_user = await database_sync_to_async(User.objects.get)(username=self.other_username)
         except User.DoesNotExist:
+            MessagingLogger.log_connection_error(
+                f"User not found: {self.other_username}",
+                context_data={'requested_username': self.other_username}
+            )
+            await self.close()
+            return
+        except Exception as e:
+            MessagingLogger.log_connection_error(
+                f"Database error while fetching user: {e}",
+                context_data={'requested_username': self.other_username}
+            )
             await self.close()
             return
 
@@ -41,8 +75,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         
         await self.accept()
         
-        # Mark user as online
-        await self.set_user_online(user, True)
+        # Mark user as online using async-safe handler
+        success = await self.message_handler.set_user_online_status(user, True)
+        if not success:
+            MessagingLogger.log_error(
+                "Failed to set user online status",
+                context_data={'user_id': user.id}
+            )
         
         # Send online status to the other user
         await self.channel_layer.group_send(
@@ -55,60 +94,138 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         )
         
-        # Send other user's status to this user
-        other_status = await self.get_user_status(self.other_user)
-        await self.send(text_data=json.dumps({
+        # Send other user's status to this user using async-safe handler
+        other_status = await self.message_handler.get_user_status(self.other_user)
+        status_message = {
             'type': 'user_status',
             'user_id': self.other_user.id,
             'username': self.other_user.username,
             'is_online': other_status['is_online'],
             'last_seen': other_status['last_seen']
-        }))
+        }
+        
+        # Use JSON serializer for safe transmission
+        serialized_status = self.json_serializer.safe_serialize(status_message)
+        await self.send(text_data=self.json_serializer.to_json_string(serialized_status))
 
     async def disconnect(self, close_code):
         try:
-            # Mark user as offline
-            await self.set_user_online(self.user, False)
+            # Mark user as offline using async-safe handler
+            if hasattr(self, 'user'):
+                success = await self.message_handler.set_user_online_status(self.user, False)
+                if not success:
+                    MessagingLogger.log_error(
+                        "Failed to set user offline status",
+                        context_data={'user_id': self.user.id, 'close_code': close_code}
+                    )
+                
+                # Notify other user
+                if hasattr(self, 'other_user'):
+                    await self.channel_layer.group_send(
+                        f'user_{self.other_user.id}',
+                        {
+                            'type': 'user_status',
+                            'user_id': self.user.id,
+                            'username': self.user.username,
+                            'is_online': False
+                        }
+                    )
             
-            # Notify other user
-            await self.channel_layer.group_send(
-                f'user_{self.other_user.id}',
-                {
-                    'type': 'user_status',
-                    'user_id': self.user.id,
-                    'username': self.user.username,
-                    'is_online': False
-                }
-            )
-            
-            await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
-            await self.channel_layer.group_discard(self.user_group_name, self.channel_name)
+            # Clean up channel groups
+            if hasattr(self, 'room_group_name'):
+                await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+            if hasattr(self, 'user_group_name'):
+                await self.channel_layer.group_discard(self.user_group_name, self.channel_name)
+                
         except Exception as e:
-            print(f"Error in disconnect: {e}")
+            MessagingLogger.log_connection_error(
+                f"Error in disconnect: {e}",
+                context_data={'close_code': close_code}
+            )
 
     async def receive(self, text_data=None, bytes_data=None):
         if text_data is None:
+            MessagingLogger.log_error("Received empty text_data")
             return
         
-        data = json.loads(text_data)
-        message_type = data.get('type', 'message')
+        # Validate and parse incoming data
+        try:
+            data = json.loads(text_data)
+        except json.JSONDecodeError as e:
+            MessagingLogger.log_json_error(
+                e,
+                data=text_data,
+                context_data={'operation': 'parse_incoming_message'}
+            )
+            await self.send_error_response("Invalid JSON format")
+            return
         
+        # Validate connection data structure
+        if not self.connection_validator.validate_message_data(data):
+            MessagingLogger.log_error(
+                "Invalid message data structure",
+                context_data={'data_keys': list(data.keys()) if isinstance(data, dict) else 'not_dict'}
+            )
+            await self.send_error_response("Invalid message format")
+            return
+        
+        # Additional message format validation for message type
+        message_type = self.connection_validator.safe_get(data, 'type', 'message')
+        if message_type == 'message':
+            # Validate message content before processing
+            message_content = self.connection_validator.safe_get(data, 'message', '')
+            if not message_content.strip():
+                await self.send_error_response("Message content cannot be empty")
+                return
+            
+            # Validate message length
+            if len(message_content) > 10000:
+                await self.send_error_response("Message content too long")
+                return
+        
+        # Handle different message types
         if message_type == 'typing':
-            # Handle typing indicator
+            await self._handle_typing_indicator(data)
+        elif message_type == 'read_receipt':
+            await self._handle_read_receipt(data)
+        elif message_type == 'message':
+            await self._handle_message(data)
+        elif message_type == 'ping':
+            await self._handle_ping(data)
+        else:
+            MessagingLogger.log_error(
+                f"Unknown message type: {message_type}",
+                context_data={'message_type': message_type, 'data': data}
+            )
+            await self.send_error_response(f"Unknown message type: {message_type}")
+    
+    async def _handle_typing_indicator(self, data):
+        """Handle typing indicator with validation"""
+        try:
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
                     'type': 'typing_indicator',
                     'username': self.user.username,
-                    'is_typing': data.get('is_typing', False)
+                    'is_typing': self.connection_validator.safe_get(data, 'is_typing', False)
                 }
             )
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error handling typing indicator: {e}",
+                context_data={'user_id': self.user.id}
+            )
+    
+    async def _handle_read_receipt(self, data):
+        """Handle read receipt with async-safe operations"""
+        message_id = self.connection_validator.safe_get(data, 'message_id')
+        if not message_id:
+            await self.send_error_response("Missing message_id for read receipt")
+            return
         
-        elif message_type == 'read_receipt':
-            # Handle read receipt
-            message_id = data.get('message_id')
-            if message_id:
-                await self.mark_message_read(message_id)
+        try:
+            success = await self.message_handler.mark_message_read(message_id, self.user)
+            if success:
                 await self.channel_layer.group_send(
                     self.room_group_name,
                     {
@@ -117,153 +234,314 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         'read_by': self.user.username
                     }
                 )
-        
-        elif message_type == 'message':
-            # Handle regular message
-            message_text = data.get('message')
-            retry_id = data.get('retry_id')  # For message retry functionality
-            
-            if not message_text:
-                return
-
-            # Persist message
-            try:
-                msg = await database_sync_to_async(Message.objects.create)(
-                    sender=self.user, 
-                    recipient=self.other_user, 
-                    content=message_text
+            else:
+                MessagingLogger.log_error(
+                    f"Failed to mark message {message_id} as read",
+                    context_data={'message_id': message_id, 'user_id': self.user.id}
                 )
-
-                payload = {
-                    'type': 'message',
-                    'id': msg.id,
-                    'sender': self.user.username,
-                    'recipient': self.other_user.username,
-                    'content': msg.content,
-                    'created_at': msg.created_at.isoformat(),
-                    'is_read': msg.is_read,
-                    'read_at': msg.read_at.isoformat() if msg.read_at else None,
-                    'delivered_at': msg.delivered_at.isoformat() if msg.delivered_at else None,
-                    'retry_id': retry_id  # Include retry_id if this was a retry
-                }
-
-                # Broadcast to room
-                await self.channel_layer.group_send(self.room_group_name, {
-                    'type': 'chat_message',
-                    'message': payload,
-                })
-
-                # Create notification for the recipient
-                await self.create_message_notification(msg)
-                    
-            except Exception as e:
-                # Send error response for failed message
-                await self.send(text_data=json.dumps({
-                    'type': 'error',
-                    'error': 'Failed to send message',
-                    'retry_id': retry_id
-                }))
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error handling read receipt: {e}",
+                context_data={'message_id': message_id, 'user_id': self.user.id}
+            )
+    
+    async def _handle_message(self, data):
+        """Handle regular message with async-safe operations, enhanced serialization, and retry mechanisms"""
+        message_text = self.connection_validator.safe_get(data, 'message')
+        retry_id = self.connection_validator.safe_get(data, 'retry_id')
         
-        elif message_type == 'ping':
-            # Handle ping for connection health check
-            await self.send(text_data=json.dumps({
+        if not message_text:
+            await self.send_error_response("Empty message content", retry_id)
+            return
+
+        # Validate message format before processing
+        message_data = {
+            'sender': self.user.username,
+            'recipient': self.other_user.username,
+            'content': message_text
+        }
+        
+        if not self.message_validator.validate_message_format(message_data):
+            await self.send_error_response("Invalid message format", retry_id)
+            return
+
+        try:
+            # Use retry handler for message creation with retry mechanisms
+            result = await self.retry_handler.retry_message_creation(
+                sender=self.user,
+                recipient=self.other_user,
+                content=message_text,
+                retry_id=retry_id
+            )
+            
+            if not result:
+                # If retry failed, queue the message for later processing
+                queued = await self.retry_handler.queue_failed_message(
+                    sender=self.user,
+                    recipient=self.other_user,
+                    content=message_text,
+                    original_error="Message creation failed after retries",
+                    retry_id=retry_id
+                )
+                
+                if queued:
+                    await self.send_error_response("Message queued for retry", retry_id)
+                else:
+                    await self.send_error_response("Failed to send message", retry_id)
+                return
+            
+            # Use JSON serializer for safe transmission
+            serialized_message = self.json_serializer.safe_serialize(result)
+            
+            # Retry WebSocket transmission with backoff
+            operation_id = f"websocket_send_{result.get('id', 'unknown')}_{int(time.time())}"
+            transmission_success = await self.retry_handler.retry_websocket_transmission(
+                channel_layer=self.channel_layer,
+                group_name=self.room_group_name,
+                message_data=serialized_message,
+                operation_id=operation_id
+            )
+            
+            if not transmission_success:
+                MessagingLogger.log_error(
+                    f"WebSocket transmission failed after retries for message {result.get('id')}",
+                    context_data={
+                        'message_id': result.get('id'),
+                        'operation_id': operation_id,
+                        'retry_id': retry_id
+                    }
+                )
+                # Message was created but transmission failed - this is logged for monitoring
+                # The message still exists in the database and can be retrieved via other means
+                    
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error handling message with retry mechanisms: {e}",
+                context_data={
+                    'sender_id': self.user.id,
+                    'recipient_id': self.other_user.id,
+                    'content_length': len(message_text),
+                    'retry_id': retry_id
+                }
+            )
+            await self.send_error_response("Failed to send message", retry_id)
+    
+    async def _handle_ping(self, data):
+        """Handle ping for connection health check"""
+        try:
+            timestamp = self.connection_validator.safe_get(data, 'timestamp')
+            response = {
                 'type': 'pong',
-                'timestamp': data.get('timestamp')
-            }))
+                'timestamp': timestamp
+            }
+            serialized_response = self.json_serializer.safe_serialize(response)
+            await self.send(text_data=self.json_serializer.to_json_string(serialized_response))
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error handling ping: {e}",
+                context_data={'user_id': self.user.id}
+            )
+    
+    async def send_error_response(self, error_message, retry_id=None):
+        """Send error response with proper serialization"""
+        try:
+            error_data = {
+                'type': 'error',
+                'error': error_message,
+                'timestamp': timezone.now().isoformat()
+            }
+            if retry_id:
+                error_data['retry_id'] = retry_id
+            
+            serialized_error = self.json_serializer.safe_serialize(error_data)
+            await self.send(text_data=self.json_serializer.to_json_string(serialized_error))
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error sending error response: {e}",
+                context_data={'original_error': error_message, 'retry_id': retry_id}
+            )
+    
+    async def validate_and_recover_message_ordering(self, messages: list) -> list:
+        """
+        Validate message ordering and recover from ordering issues during error recovery
+        
+        Args:
+            messages: List of message dictionaries
+            
+        Returns:
+            List of messages with corrected ordering
+        """
+        try:
+            if not messages or len(messages) <= 1:
+                return messages
+            
+            # Validate current ordering
+            if self.message_validator.validate_message_ordering(messages):
+                return messages
+            
+            # Attempt to recover ordering by sorting by timestamp
+            MessagingLogger.log_error(
+                "Message ordering violation detected, attempting recovery",
+                context_data={
+                    'message_count': len(messages),
+                    'user_id': self.user.id
+                }
+            )
+            
+            # Sort messages by created_at timestamp
+            sorted_messages = []
+            for message in messages:
+                created_at = message.get('created_at')
+                if created_at:
+                    try:
+                        from datetime import datetime
+                        # Parse timestamp for sorting
+                        dt = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
+                        sorted_messages.append((dt, message))
+                    except ValueError:
+                        # If timestamp parsing fails, append to end
+                        sorted_messages.append((datetime.max, message))
+                else:
+                    # Messages without timestamps go to end
+                    sorted_messages.append((datetime.max, message))
+            
+            # Sort by timestamp and extract messages
+            sorted_messages.sort(key=lambda x: x[0])
+            recovered_messages = [msg for _, msg in sorted_messages]
+            
+            # Validate recovered ordering
+            if self.message_validator.validate_message_ordering(recovered_messages):
+                MessagingLogger.log_debug(
+                    "Message ordering successfully recovered",
+                    context_data={
+                        'original_count': len(messages),
+                        'recovered_count': len(recovered_messages),
+                        'user_id': self.user.id
+                    }
+                )
+                return recovered_messages
+            else:
+                MessagingLogger.log_error(
+                    "Failed to recover message ordering",
+                    context_data={
+                        'message_count': len(messages),
+                        'user_id': self.user.id
+                    }
+                )
+                return messages  # Return original if recovery fails
+                
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error in message ordering validation/recovery: {e}",
+                context_data={
+                    'message_count': len(messages) if messages else 0,
+                    'user_id': self.user.id
+                }
+            )
+            return messages  # Return original on error
 
     async def chat_message(self, event):
-        """Send message to WebSocket"""
-        message = event['message']
-        
-        # Mark as delivered if recipient is receiving it
-        if message['recipient'] == self.user.username and not message.get('delivered_at'):
-            await self.mark_message_delivered(message['id'])
-            message['delivered_at'] = timezone.now().isoformat()
-        
-        await self.send(text_data=json.dumps(message))
+        """Send message to WebSocket with enhanced serialization and ordering preservation"""
+        try:
+            message = event['message']
+            
+            # Validate message format before transmission
+            if not self.message_validator.validate_message_format(message):
+                MessagingLogger.log_error(
+                    "Invalid message format in chat_message handler",
+                    context_data={'message': message, 'user_id': self.user.id}
+                )
+                return
+            
+            # Mark as delivered if recipient is receiving it
+            if (self.connection_validator.safe_get(message, 'recipient') == self.user.username and 
+                not self.connection_validator.safe_get(message, 'delivered_at')):
+                
+                message_id = self.connection_validator.safe_get(message, 'id')
+                if message_id:
+                    success = await self.message_handler.mark_message_delivered(message_id)
+                    if success:
+                        message['delivered_at'] = timezone.now().isoformat()
+            
+            # Preserve message ordering by adding sequence information
+            message['sequence_id'] = int(time.time() * 1000000)  # Microsecond precision
+            
+            # Use JSON serializer for safe transmission
+            serialized_message = self.json_serializer.safe_serialize(message)
+            await self.send(text_data=self.json_serializer.to_json_string(serialized_message))
+            
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error in chat_message handler: {e}",
+                context_data={'event': event, 'user_id': self.user.id}
+            )
 
     async def typing_indicator(self, event):
-        """Send typing indicator to WebSocket"""
-        # Don't send typing indicator back to the person typing
-        if event['username'] != self.user.username:
-            await self.send(text_data=json.dumps({
-                'type': 'typing',
-                'username': event['username'],
-                'is_typing': event['is_typing']
-            }))
+        """Send typing indicator to WebSocket with validation"""
+        try:
+            # Don't send typing indicator back to the person typing
+            if self.connection_validator.safe_get(event, 'username') != self.user.username:
+                response = {
+                    'type': 'typing',
+                    'username': self.connection_validator.safe_get(event, 'username'),
+                    'is_typing': self.connection_validator.safe_get(event, 'is_typing', False)
+                }
+                serialized_response = self.json_serializer.safe_serialize(response)
+                await self.send(text_data=self.json_serializer.to_json_string(serialized_response))
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error in typing_indicator handler: {e}",
+                context_data={'event': event, 'user_id': self.user.id}
+            )
 
     async def read_receipt(self, event):
-        """Send read receipt to WebSocket"""
-        await self.send(text_data=json.dumps({
-            'type': 'read_receipt',
-            'message_id': event['message_id'],
-            'read_by': event['read_by']
-        }))
+        """Send read receipt to WebSocket with enhanced serialization"""
+        try:
+            response = {
+                'type': 'read_receipt',
+                'message_id': self.connection_validator.safe_get(event, 'message_id'),
+                'read_by': self.connection_validator.safe_get(event, 'read_by')
+            }
+            serialized_response = self.json_serializer.safe_serialize(response)
+            await self.send(text_data=self.json_serializer.to_json_string(serialized_response))
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error in read_receipt handler: {e}",
+                context_data={'event': event, 'user_id': self.user.id}
+            )
 
     async def user_status(self, event):
-        """Send user status update to WebSocket"""
-        await self.send(text_data=json.dumps({
-            'type': 'user_status',
-            'user_id': event['user_id'],
-            'username': event['username'],
-            'is_online': event['is_online']
-        }))
-
-    @database_sync_to_async
-    def set_user_online(self, user, is_online):
-        """Set user online/offline status"""
-        status, created = UserStatus.objects.get_or_create(user=user)
-        status.is_online = is_online
-        status.save()
-
-    @database_sync_to_async
-    def get_user_status(self, user):
-        """Get user online status"""
+        """Send user status update to WebSocket with enhanced serialization"""
         try:
-            status = UserStatus.objects.get(user=user)
-            return {
-                'is_online': status.is_online,
-                'last_seen': status.last_seen.isoformat() if status.last_seen else None
+            response = {
+                'type': 'user_status',
+                'user_id': self.connection_validator.safe_get(event, 'user_id'),
+                'username': self.connection_validator.safe_get(event, 'username'),
+                'is_online': self.connection_validator.safe_get(event, 'is_online', False)
             }
-        except UserStatus.DoesNotExist:
-            return {'is_online': False, 'last_seen': None}
-
-    @database_sync_to_async
-    def mark_message_read(self, message_id):
-        """Mark a message as read"""
-        try:
-            message = Message.objects.get(id=message_id, recipient=self.user)
-            message.mark_as_read()
-        except Message.DoesNotExist:
-            pass
-
-    @database_sync_to_async
-    def mark_message_delivered(self, message_id):
-        """Mark a message as delivered"""
-        try:
-            message = Message.objects.get(id=message_id)
-            message.mark_as_delivered()
-        except Message.DoesNotExist:
-            pass
-
-    @database_sync_to_async
-    def create_message_notification(self, message):
-        """Create a notification for a new message"""
-        try:
-            from .notification_service import notify_new_message
-            notify_new_message(
-                sender=message.sender,
-                recipient=message.recipient,
-                message_obj=message
-            )
+            serialized_response = self.json_serializer.safe_serialize(response)
+            await self.send(text_data=self.json_serializer.to_json_string(serialized_response))
         except Exception as e:
-            print(f"Error creating message notification: {e}")
+            MessagingLogger.log_error(
+                f"Error in user_status handler: {e}",
+                context_data={'event': event, 'user_id': self.user.id}
+            )
 
 
 class NotificationsConsumer(AsyncWebsocketConsumer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.message_handler = AsyncSafeMessageHandler()
+        self.json_serializer = JSONSerializer()
+        self.connection_validator = ConnectionValidator()
+    
     async def connect(self):
         user = self.scope.get('user')
         if user is None or not user.is_authenticated:
+            MessagingLogger.log_connection_error(
+                "Unauthenticated notification connection attempt",
+                context_data={'scope_keys': list(self.scope.keys())}
+            )
             await self.close()
             return
 
@@ -272,126 +550,237 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.user_group_name, self.channel_name)
         await self.accept()
         
-        # Mark user as online
-        await self.set_user_online(user, True)
+        # Mark user as online using async-safe handler
+        success = await self.message_handler.set_user_online_status(user, True)
+        if not success:
+            MessagingLogger.log_error(
+                "Failed to set user online status in notifications",
+                context_data={'user_id': user.id}
+            )
         
         # Send initial unread count
         unread_count = await self.get_unread_notification_count(user)
-        await self.send(text_data=json.dumps({
+        response = {
             'type': 'badge_update',
             'unread_count': unread_count
-        }))
+        }
+        serialized_response = self.json_serializer.safe_serialize(response)
+        await self.send(text_data=self.json_serializer.to_json_string(serialized_response))
 
     async def disconnect(self, close_code):
         try:
-            # Mark user as offline
-            await self.set_user_online(self.user, False)
-            await self.channel_layer.group_discard(self.user_group_name, self.channel_name)
-        except Exception:
-            pass
+            # Mark user as offline using async-safe handler
+            if hasattr(self, 'user'):
+                success = await self.message_handler.set_user_online_status(self.user, False)
+                if not success:
+                    MessagingLogger.log_error(
+                        "Failed to set user offline status in notifications",
+                        context_data={'user_id': self.user.id, 'close_code': close_code}
+                    )
+            
+            # Clean up channel group
+            if hasattr(self, 'user_group_name'):
+                await self.channel_layer.group_discard(self.user_group_name, self.channel_name)
+        except Exception as e:
+            MessagingLogger.log_connection_error(
+                f"Error in notifications disconnect: {e}",
+                context_data={'close_code': close_code}
+            )
 
     async def receive(self, text_data=None, bytes_data=None):
-        """Handle incoming WebSocket messages for notification actions"""
+        """Handle incoming WebSocket messages for notification actions with enhanced validation"""
         if text_data is None:
+            MessagingLogger.log_error("Received empty text_data in notifications")
             return
         
         try:
             data = json.loads(text_data)
-            message_type = data.get('type')
-            
+        except json.JSONDecodeError as e:
+            MessagingLogger.log_json_error(
+                e,
+                data=text_data,
+                context_data={'operation': 'parse_notification_message'}
+            )
+            await self.send_error_response("Invalid JSON format")
+            return
+        
+        # Validate message data structure
+        if not self.connection_validator.validate_message_data(data):
+            MessagingLogger.log_error(
+                "Invalid notification message data structure",
+                context_data={'data_keys': list(data.keys()) if isinstance(data, dict) else 'not_dict'}
+            )
+            await self.send_error_response("Invalid message format")
+            return
+        
+        message_type = self.connection_validator.safe_get(data, 'type')
+        
+        try:
             if message_type == 'mark_read':
-                # Mark specific notification as read
-                notification_id = data.get('notification_id')
-                if notification_id:
-                    success = await self.mark_notification_read(notification_id)
-                    await self.send(text_data=json.dumps({
-                        'type': 'mark_read_response',
-                        'notification_id': notification_id,
-                        'success': success
-                    }))
-            
+                await self._handle_mark_read(data)
             elif message_type == 'mark_all_read':
-                # Mark all notifications as read
-                notification_type = data.get('notification_type')  # Optional filter
-                count = await self.mark_all_notifications_read(notification_type)
-                await self.send(text_data=json.dumps({
-                    'type': 'mark_all_read_response',
-                    'marked_count': count
-                }))
-            
+                await self._handle_mark_all_read(data)
             elif message_type == 'get_notifications':
-                # Get notifications with pagination
-                limit = data.get('limit', 20)
-                offset = data.get('offset', 0)
-                unread_only = data.get('unread_only', False)
-                notifications = await self.get_notifications(limit, offset, unread_only)
-                await self.send(text_data=json.dumps({
-                    'type': 'notifications_list',
-                    'notifications': notifications,
-                    'limit': limit,
-                    'offset': offset
-                }))
-            
+                await self._handle_get_notifications(data)
             elif message_type == 'ping':
-                # Health check
-                await self.send(text_data=json.dumps({
-                    'type': 'pong',
-                    'timestamp': data.get('timestamp')
-                }))
+                await self._handle_notification_ping(data)
+            else:
+                MessagingLogger.log_error(
+                    f"Unknown notification message type: {message_type}",
+                    context_data={'message_type': message_type, 'user_id': self.user.id}
+                )
+                await self.send_error_response(f"Unknown message type: {message_type}")
                 
-        except json.JSONDecodeError:
-            await self.send(text_data=json.dumps({
-                'type': 'error',
-                'message': 'Invalid JSON format'
-            }))
         except Exception as e:
-            await self.send(text_data=json.dumps({
+            MessagingLogger.log_error(
+                f"Error processing notification request: {e}",
+                context_data={'message_type': message_type, 'user_id': self.user.id}
+            )
+            await self.send_error_response(f"Error processing request: {str(e)}")
+    
+    async def _handle_mark_read(self, data):
+        """Handle mark notification as read"""
+        notification_id = self.connection_validator.safe_get(data, 'notification_id')
+        if not notification_id:
+            await self.send_error_response("Missing notification_id")
+            return
+        
+        success = await self.mark_notification_read(notification_id)
+        response = {
+            'type': 'mark_read_response',
+            'notification_id': notification_id,
+            'success': success
+        }
+        serialized_response = self.json_serializer.safe_serialize(response)
+        await self.send(text_data=self.json_serializer.to_json_string(serialized_response))
+    
+    async def _handle_mark_all_read(self, data):
+        """Handle mark all notifications as read"""
+        notification_type = self.connection_validator.safe_get(data, 'notification_type')
+        count = await self.mark_all_notifications_read(notification_type)
+        response = {
+            'type': 'mark_all_read_response',
+            'marked_count': count
+        }
+        serialized_response = self.json_serializer.safe_serialize(response)
+        await self.send(text_data=self.json_serializer.to_json_string(serialized_response))
+    
+    async def _handle_get_notifications(self, data):
+        """Handle get notifications request"""
+        limit = self.connection_validator.safe_get(data, 'limit', 20)
+        offset = self.connection_validator.safe_get(data, 'offset', 0)
+        unread_only = self.connection_validator.safe_get(data, 'unread_only', False)
+        
+        notifications = await self.get_notifications(limit, offset, unread_only)
+        response = {
+            'type': 'notifications_list',
+            'notifications': notifications,
+            'limit': limit,
+            'offset': offset
+        }
+        serialized_response = self.json_serializer.safe_serialize(response)
+        await self.send(text_data=self.json_serializer.to_json_string(serialized_response))
+    
+    async def _handle_notification_ping(self, data):
+        """Handle ping for notifications connection"""
+        timestamp = self.connection_validator.safe_get(data, 'timestamp')
+        response = {
+            'type': 'pong',
+            'timestamp': timestamp
+        }
+        serialized_response = self.json_serializer.safe_serialize(response)
+        await self.send(text_data=self.json_serializer.to_json_string(serialized_response))
+    
+    async def send_error_response(self, error_message):
+        """Send error response for notifications"""
+        try:
+            error_data = {
                 'type': 'error',
-                'message': f'Error processing request: {str(e)}'
-            }))
+                'message': error_message
+            }
+            serialized_error = self.json_serializer.safe_serialize(error_data)
+            await self.send(text_data=self.json_serializer.to_json_string(serialized_error))
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error sending notification error response: {e}",
+                context_data={'original_error': error_message}
+            )
 
     async def notification_message(self, event):
-        """Send notification to the connected client"""
-        await self.send(text_data=json.dumps(event['message']))
+        """Send notification to the connected client with enhanced serialization"""
+        try:
+            message = self.connection_validator.safe_get(event, 'message', {})
+            serialized_message = self.json_serializer.safe_serialize(message)
+            await self.send(text_data=self.json_serializer.to_json_string(serialized_message))
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error in notification_message handler: {e}",
+                context_data={'event': event, 'user_id': self.user.id}
+            )
 
     async def badge_update(self, event):
-        """Send badge count update to the connected client"""
-        await self.send(text_data=json.dumps(event['message']))
+        """Send badge count update to the connected client with enhanced serialization"""
+        try:
+            message = self.connection_validator.safe_get(event, 'message', {})
+            serialized_message = self.json_serializer.safe_serialize(message)
+            await self.send(text_data=self.json_serializer.to_json_string(serialized_message))
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error in badge_update handler: {e}",
+                context_data={'event': event, 'user_id': self.user.id}
+            )
 
     async def notification(self, event):
-        """Send notification payload to the connected client (legacy support)"""
-        await self.send(text_data=json.dumps(event['message']))
-
-    @database_sync_to_async
-    def set_user_online(self, user, is_online):
-        """Set user online/offline status"""
-        status, created = UserStatus.objects.get_or_create(user=user)
-        status.is_online = is_online
-        status.save()
+        """Send notification payload to the connected client (legacy support) with enhanced serialization"""
+        try:
+            message = self.connection_validator.safe_get(event, 'message', {})
+            serialized_message = self.json_serializer.safe_serialize(message)
+            await self.send(text_data=self.json_serializer.to_json_string(serialized_message))
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error in notification handler: {e}",
+                context_data={'event': event, 'user_id': self.user.id}
+            )
 
     @database_sync_to_async
     def get_unread_notification_count(self, user):
-        """Get total unread notification count"""
+        """Get total unread notification count with error handling"""
         try:
             return Notification.objects.filter(recipient=user, is_read=False).count()
-        except Exception:
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error getting unread notification count: {e}",
+                context_data={'user_id': user.id}
+            )
             return 0
 
     @database_sync_to_async
     def mark_notification_read(self, notification_id):
-        """Mark a specific notification as read"""
+        """Mark a specific notification as read with error handling"""
         try:
             notification = Notification.objects.get(id=notification_id, recipient=self.user)
             notification.mark_as_read()
+            MessagingLogger.log_debug(
+                f"Notification {notification_id} marked as read",
+                {'user_id': self.user.id}
+            )
             return True
         except Notification.DoesNotExist:
+            MessagingLogger.log_debug(
+                f"Notification {notification_id} not found for user {self.user.id}",
+                {'notification_id': notification_id, 'user_id': self.user.id}
+            )
             return False
-        except Exception:
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error marking notification as read: {e}",
+                context_data={'notification_id': notification_id, 'user_id': self.user.id}
+            )
             return False
 
     @database_sync_to_async
     def mark_all_notifications_read(self, notification_type=None):
-        """Mark all notifications as read for the user"""
+        """Mark all notifications as read for the user with error handling"""
         try:
             query = Notification.objects.filter(recipient=self.user, is_read=False)
             if notification_type:
@@ -402,13 +791,21 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
                 notification.mark_as_read()
                 count += 1
             
+            MessagingLogger.log_debug(
+                f"Marked {count} notifications as read",
+                {'user_id': self.user.id, 'notification_type': notification_type}
+            )
             return count
-        except Exception:
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error marking all notifications as read: {e}",
+                context_data={'user_id': self.user.id, 'notification_type': notification_type}
+            )
             return 0
 
     @database_sync_to_async
     def get_notifications(self, limit=20, offset=0, unread_only=False):
-        """Get notifications for the user"""
+        """Get notifications for the user with enhanced serialization"""
         try:
             query = Notification.objects.filter(recipient=self.user)
             
@@ -419,22 +816,19 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
             
             result = []
             for notification in notifications:
-                result.append({
-                    'id': notification.id,
-                    'notification_type': notification.notification_type,
-                    'title': notification.title,
-                    'message': notification.message,
-                    'priority': notification.priority,
-                    'sender': notification.sender.username if notification.sender else None,
-                    'sender_avatar': notification.sender.profile.avatar.url if notification.sender and hasattr(notification.sender, 'profile') and notification.sender.profile.avatar else None,
-                    'is_read': notification.is_read,
-                    'read_at': notification.read_at.isoformat() if notification.read_at else None,
-                    'created_at': notification.created_at.isoformat(),
-                    'action_url': notification.action_url,
-                    'is_grouped': notification.is_grouped,
-                    'group_count': notification.group_count,
-                })
+                # Use JSON serializer for safe notification serialization
+                serialized_notification = self.json_serializer.serialize_notification(notification)
+                result.append(serialized_notification)
             
             return result
-        except Exception:
+        except Exception as e:
+            MessagingLogger.log_error(
+                f"Error getting notifications: {e}",
+                context_data={
+                    'user_id': self.user.id,
+                    'limit': limit,
+                    'offset': offset,
+                    'unread_only': unread_only
+                }
+            )
             return []
