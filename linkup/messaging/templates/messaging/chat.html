@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_head %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+{% endblock %}
+
 {% block content %}
 <div class="max-w-5xl mx-auto py-4 px-4">
     <!-- Back Button -->
@@ -87,6 +91,7 @@
             <!-- Message Input Area -->
             <div class="border-t border-gray-200 bg-white p-4">
                 <form id="chat-form" class="flex items-end gap-3" onsubmit="return false;">
+                    {% csrf_token %}
                     <!-- Emoji Button (Optional) -->
                     <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors pb-3" title="Emoji">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

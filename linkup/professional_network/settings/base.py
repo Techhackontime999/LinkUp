@@ -51,6 +51,7 @@ CKEDITOR_CONFIGS = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add this line
     'core.middleware.SecurityHeadersMiddleware',
     'core.performance.PerformanceMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -136,3 +137,8 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
 
 # Create logs directory if it doesn't exist
 os.makedirs(BASE_DIR / 'logs', exist_ok=True)
+
+# File ke end me add karo
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True

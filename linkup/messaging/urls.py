@@ -8,6 +8,7 @@ urlpatterns = [
     path('chat/<str:username>/', views.chat_view, name='chat_view'),
     path('history/<str:username>/', views.fetch_history, name='fetch_history'),
     path('load-older/<str:username>/', views.load_older_messages, name='load_older_messages'),
+    path('sync/<str:username>/', views.synchronize_conversation, name='synchronize_conversation'),
     path('send/<str:username>/', views.send_message_fallback, name='send_message_fallback'),
     path('queue/<str:username>/', views.queue_message, name='queue_message'),
     path('unread/', views.unread_notifications, name='unread_notifications'),

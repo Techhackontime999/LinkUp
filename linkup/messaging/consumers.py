@@ -6,18 +6,36 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from .models import Message, UserStatus, Notification
+# Our comprehensive messaging system fixes
 from .async_handlers import AsyncSafeMessageHandler
 from .serializers import JSONSerializer
 from .connection_validator import ConnectionValidator
 from .logging_utils import MessagingLogger
 from .retry_handler import MessageRetryHandler, MessageValidator, RetryConfig
+# WhatsApp messaging features
+from .message_status_manager import message_status_manager
+from .typing_manager import typing_manager
+from .presence_manager import presence_manager
+from .connection_recovery_manager import connection_recovery_manager
+from .message_sync_manager import message_sync_manager
+from .read_receipt_manager import read_receipt_manager
+from .message_retry_manager import MessageRetryManager
+from .message_persistence_manager import message_persistence_manager
+import logging
+import uuid
+import asyncio
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
+
+# Initialize retry managers (both systems)
+retry_manager = MessageRetryManager()
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Our comprehensive messaging system components
         self.message_handler = AsyncSafeMessageHandler()
         self.json_serializer = JSONSerializer()
         self.connection_validator = ConnectionValidator()
@@ -75,7 +93,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         
         await self.accept()
         
-        # Mark user as online using async-safe handler
+        # Handle user connection with presence manager (WhatsApp features)
+        self.connection_id = await self.handle_user_connected()
+        
+        # Mark user as online using async-safe handler (our fixes)
         success = await self.message_handler.set_user_online_status(user, True)
         if not success:
             MessagingLogger.log_error(
@@ -83,34 +104,65 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 context_data={'user_id': user.id}
             )
         
-        # Send online status to the other user
-        await self.channel_layer.group_send(
-            f'user_{self.other_user.id}',
-            {
-                'type': 'user_status',
-                'user_id': user.id,
-                'username': user.username,
-                'is_online': True
-            }
-        )
+        # Register connection with recovery manager
+        await self.register_connection_recovery()
         
-        # Send other user's status to this user using async-safe handler
-        other_status = await self.message_handler.get_user_status(self.other_user)
+        # Enable automatic read receipts for active chat windows
+        self.auto_read_receipts = True
+        
+        # Check for missed messages and synchronize
+        await self.synchronize_missed_messages()
+        
+        # Send other user's status to this user (integrated approach)
+        other_presence = await self.get_user_presence(self.other_user)
         status_message = {
             'type': 'user_status',
             'user_id': self.other_user.id,
             'username': self.other_user.username,
-            'is_online': other_status['is_online'],
-            'last_seen': other_status['last_seen']
+            'is_online': other_presence['is_online'],
+            'last_seen': other_presence['last_seen'],
+            'last_seen_display': other_presence['last_seen_display']
         }
         
-        # Use JSON serializer for safe transmission
+        # Use JSON serializer for safe transmission (our fixes)
         serialized_status = self.json_serializer.safe_serialize(status_message)
         await self.send(text_data=self.json_serializer.to_json_string(serialized_status))
 
     async def disconnect(self, close_code):
+        """Enhanced disconnect handler with comprehensive cleanup and error handling"""
+        disconnect_errors = []
+
         try:
-            # Mark user as offline using async-safe handler
+            # Stop all typing indicators for this user
+            await self.stop_all_typing()
+        except Exception as e:
+            disconnect_errors.append(f"Failed to stop typing indicators: {e}")
+            logger.error(f"Error stopping typing indicators during disconnect: {e}")
+
+        try:
+            # Unregister from connection recovery manager
+            await self.unregister_connection_recovery()
+        except Exception as e:
+            disconnect_errors.append(f"Failed to unregister connection recovery: {e}")
+            logger.error(f"Error unregistering connection recovery during disconnect: {e}")
+
+        try:
+            # Handle user disconnection with presence manager
+            await self.handle_user_disconnected()
+        except Exception as e:
+            disconnect_errors.append(f"Failed to handle user disconnection: {e}")
+            logger.error(f"Error handling user disconnection: {e}")
+
+        try:
+            # Process any pending retry queue before disconnecting
+            if hasattr(self, 'connection_id'):
+                await retry_manager.process_retry_queue()
+        except Exception as e:
+            disconnect_errors.append(f"Failed to process retry queue: {e}")
+            logger.error(f"Error processing retry queue during disconnect: {e}")
+
+        try:
+            # Mark user as offline using async-safe handler (our fixes)
             if hasattr(self, 'user'):
                 success = await self.message_handler.set_user_online_status(self.user, False)
                 if not success:
@@ -118,7 +170,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         "Failed to set user offline status",
                         context_data={'user_id': self.user.id, 'close_code': close_code}
                     )
-                
+
                 # Notify other user
                 if hasattr(self, 'other_user'):
                     await self.channel_layer.group_send(
@@ -130,24 +182,31 @@ class ChatConsumer(AsyncWebsocketConsumer):
                             'is_online': False
                         }
                     )
-            
-            # Clean up channel groups
+        except Exception as e:
+            disconnect_errors.append(f"Failed to update user status: {e}")
+            logger.error(f"Error updating user status during disconnect: {e}")
+
+        try:
+            # Clean up channel layer groups
             if hasattr(self, 'room_group_name'):
                 await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
             if hasattr(self, 'user_group_name'):
                 await self.channel_layer.group_discard(self.user_group_name, self.channel_name)
-                
         except Exception as e:
-            MessagingLogger.log_connection_error(
-                f"Error in disconnect: {e}",
-                context_data={'close_code': close_code}
-            )
+            disconnect_errors.append(f"Failed to clean up channel groups: {e}")
+            logger.error(f"Error cleaning up channel groups during disconnect: {e}")
+
+        # Log summary of disconnect process
+        if disconnect_errors:
+            logger.warning(f"Disconnect completed with {len(disconnect_errors)} errors for user {getattr(self, 'user', 'unknown')}")
+        else:
+            logger.info(f"Clean disconnect completed for user {getattr(self, 'user', 'unknown')}")
 
     async def receive(self, text_data=None, bytes_data=None):
         if text_data is None:
             MessagingLogger.log_error("Received empty text_data")
             return
-        
+
         # Validate and parse incoming data
         try:
             data = json.loads(text_data)
@@ -159,7 +218,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
             await self.send_error_response("Invalid JSON format")
             return
-        
+
         # Validate connection data structure
         if not self.connection_validator.validate_message_data(data):
             MessagingLogger.log_error(
@@ -168,167 +227,155 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
             await self.send_error_response("Invalid message format")
             return
-        
-        # Additional message format validation for message type
-        message_type = self.connection_validator.safe_get(data, 'type', 'message')
-        if message_type == 'message':
-            # Validate message content before processing
-            message_content = self.connection_validator.safe_get(data, 'message', '')
-            if not message_content.strip():
-                await self.send_error_response("Message content cannot be empty")
-                return
-            
-            # Validate message length
-            if len(message_content) > 10000:
-                await self.send_error_response("Message content too long")
-                return
-        
-        # Handle different message types
-        if message_type == 'typing':
-            await self._handle_typing_indicator(data)
-        elif message_type == 'read_receipt':
-            await self._handle_read_receipt(data)
-        elif message_type == 'message':
-            await self._handle_message(data)
-        elif message_type == 'ping':
-            await self._handle_ping(data)
-        else:
-            MessagingLogger.log_error(
-                f"Unknown message type: {message_type}",
-                context_data={'message_type': message_type, 'data': data}
-            )
-            await self.send_error_response(f"Unknown message type: {message_type}")
-    
-    async def _handle_typing_indicator(self, data):
-        """Handle typing indicator with validation"""
+
+        message_type = data.get('type', 'message')
+
         try:
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    'type': 'typing_indicator',
-                    'username': self.user.username,
-                    'is_typing': self.connection_validator.safe_get(data, 'is_typing', False)
-                }
-            )
-        except Exception as e:
-            MessagingLogger.log_error(
-                f"Error handling typing indicator: {e}",
-                context_data={'user_id': self.user.id}
-            )
-    
-    async def _handle_read_receipt(self, data):
-        """Handle read receipt with async-safe operations"""
-        message_id = self.connection_validator.safe_get(data, 'message_id')
-        if not message_id:
-            await self.send_error_response("Missing message_id for read receipt")
-            return
-        
-        try:
-            success = await self.message_handler.mark_message_read(message_id, self.user)
-            if success:
-                await self.channel_layer.group_send(
-                    self.room_group_name,
-                    {
-                        'type': 'read_receipt',
+            if message_type == 'typing':
+                # Handle typing indicator with enhanced debouncing
+                is_typing = data.get('is_typing', False)
+                await self.update_typing_status(is_typing)
+
+            elif message_type == 'read_receipt':
+                # Handle single read receipt with enhanced processing
+                message_id = data.get('message_id')
+                if message_id:
+                    success = await read_receipt_manager.mark_message_as_read(
+                        message_id=message_id,
+                        reader_user_id=self.user.id
+                    )
+                    await self.send(text_data=json.dumps({
+                        'type': 'read_receipt_processed',
                         'message_id': message_id,
-                        'read_by': self.user.username
-                    }
+                        'success': success,
+                        'timestamp': timezone.now().isoformat()
+                    }))
+
+            elif message_type == 'bulk_read_receipt':
+                # Handle bulk read receipts
+                message_ids = data.get('message_ids', [])
+                if message_ids:
+                    result = await read_receipt_manager.mark_multiple_messages_as_read(
+                        message_ids=message_ids,
+                        reader_user_id=self.user.id
+                    )
+                    await self.send(text_data=json.dumps({
+                        'type': 'bulk_read_receipt_processed',
+                        'result': result
+                    }))
+
+            elif message_type == 'mark_chat_read':
+                # Handle marking entire chat as read
+                result = await read_receipt_manager.mark_visible_messages_as_read(
+                    user_id=self.user.id,
+                    chat_partner_id=self.other_user.id,
+                    visible_message_ids=data.get('visible_message_ids')
                 )
+                await self.send(text_data=json.dumps({
+                    'type': 'chat_marked_read',
+                    'result': result
+                }))
+
+            elif message_type == 'message':
+                await self._handle_message(data)
+
+            elif message_type == 'ping':
+                await self._handle_ping(data)
+
+            elif message_type == 'force_reconnect':
+                await self.force_reconnect()
+                await self.send(text_data=json.dumps({
+                    'type': 'reconnect_initiated',
+                    'timestamp': timezone.now().isoformat()
+                }))
+
+            elif message_type == 'sync_request':
+                await self.synchronize_missed_messages()
+                await self.send(text_data=json.dumps({
+                    'type': 'sync_completed',
+                    'timestamp': timezone.now().isoformat()
+                }))
+
             else:
                 MessagingLogger.log_error(
-                    f"Failed to mark message {message_id} as read",
-                    context_data={'message_id': message_id, 'user_id': self.user.id}
+                    f"Unknown message type: {message_type}",
+                    context_data={'message_type': message_type, 'data': data}
                 )
+                await self.send_error_response(f"Unknown message type: {message_type}")
+
         except Exception as e:
-            MessagingLogger.log_error(
-                f"Error handling read receipt: {e}",
-                context_data={'message_id': message_id, 'user_id': self.user.id}
+            logger.error(f"Error in receive: {e}")
+            await self.send_error_response(
+                "Internal server error",
+                error_type="internal_error",
+                error_details=str(e) if logger.isEnabledFor(logging.DEBUG) else None
             )
-    
+
     async def _handle_message(self, data):
         """Handle regular message with async-safe operations, enhanced serialization, and retry mechanisms"""
         message_text = self.connection_validator.safe_get(data, 'message')
+        client_id = data.get('client_id') or f"client_{uuid.uuid4().hex[:12]}"
         retry_id = self.connection_validator.safe_get(data, 'retry_id')
-        
-        if not message_text:
-            await self.send_error_response("Empty message content", retry_id)
+
+        if not message_text or not message_text.strip():
+            await self.send_error_response("Message content cannot be empty", client_id=client_id)
             return
 
-        # Validate message format before processing
-        message_data = {
-            'sender': self.user.username,
-            'recipient': self.other_user.username,
-            'content': message_text
-        }
-        
-        if not self.message_validator.validate_message_format(message_data):
-            await self.send_error_response("Invalid message format", retry_id)
+        if len(message_text) > 5000:
+            await self.send_error_response("Message too long (max 5000 characters)", client_id=client_id)
             return
 
         try:
-            # Use retry handler for message creation with retry mechanisms
-            result = await self.retry_handler.retry_message_creation(
+            # Persist message with immediate status tracking
+            msg = await message_persistence_manager.create_message_atomic(
                 sender=self.user,
                 recipient=self.other_user,
                 content=message_text,
+                client_id=client_id,
                 retry_id=retry_id
             )
-            
-            if not result:
-                # If retry failed, queue the message for later processing
-                queued = await self.retry_handler.queue_failed_message(
-                    sender=self.user,
-                    recipient=self.other_user,
-                    content=message_text,
-                    original_error="Message creation failed after retries",
-                    retry_id=retry_id
-                )
-                
-                if queued:
-                    await self.send_error_response("Message queued for retry", retry_id)
+
+            if msg:
+                # Create optimized payload for real-time delivery
+                payload = await self.create_message_payload(msg, retry_id)
+
+                # Attempt WebSocket broadcast with error handling
+                broadcast_success = await self.safe_broadcast_message(payload)
+
+                if broadcast_success:
+                    # Update status to sent immediately after successful broadcasting
+                    await message_persistence_manager.update_message_status_atomic(
+                        msg.id, 'sent', self.user.id
+                    )
+                    # Create notification for the recipient
+                    await self.create_message_notification(msg)
                 else:
-                    await self.send_error_response("Failed to send message", retry_id)
-                return
-            
-            # Use JSON serializer for safe transmission
-            serialized_message = self.json_serializer.safe_serialize(result)
-            
-            # Retry WebSocket transmission with backoff
-            operation_id = f"websocket_send_{result.get('id', 'unknown')}_{int(time.time())}"
-            transmission_success = await self.retry_handler.retry_websocket_transmission(
-                channel_layer=self.channel_layer,
-                group_name=self.room_group_name,
-                message_data=serialized_message,
-                operation_id=operation_id
-            )
-            
-            if not transmission_success:
-                MessagingLogger.log_error(
-                    f"WebSocket transmission failed after retries for message {result.get('id')}",
-                    context_data={
-                        'message_id': result.get('id'),
-                        'operation_id': operation_id,
-                        'retry_id': retry_id
-                    }
-                )
-                # Message was created but transmission failed - this is logged for monitoring
-                # The message still exists in the database and can be retrieved via other means
-                    
+                    # Broadcasting failed, initiate retry mechanism
+                    logger.warning(f"Message {msg.id} broadcast failed, initiating retry")
+                    await retry_manager.retry_failed_message(msg.id, 'broadcast_failed')
+                    await self.send_error_response(
+                        "Message delivery failed, retrying automatically",
+                        client_id=client_id,
+                        retry_available=True,
+                        message_id=msg.id
+                    )
+            else:
+                await self.send_error_response("Failed to create message", client_id=client_id)
+
         except Exception as e:
-            MessagingLogger.log_error(
-                f"Error handling message with retry mechanisms: {e}",
-                context_data={
-                    'sender_id': self.user.id,
-                    'recipient_id': self.other_user.id,
-                    'content_length': len(message_text),
-                    'retry_id': retry_id
-                }
+            logger.error(f"Error processing message: {e}")
+            await self.send_error_response(
+                "Failed to send message",
+                client_id=client_id,
+                error_details=str(e) if logger.isEnabledFor(logging.DEBUG) else None
             )
-            await self.send_error_response("Failed to send message", retry_id)
-    
+
     async def _handle_ping(self, data):
         """Handle ping for connection health check"""
         try:
+            await self.update_heartbeat()
+            connection_recovery_manager.update_heartbeat(self.connection_id)
+            
             timestamp = self.connection_validator.safe_get(data, 'timestamp')
             response = {
                 'type': 'pong',
@@ -341,17 +388,32 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 f"Error handling ping: {e}",
                 context_data={'user_id': self.user.id}
             )
-    
-    async def send_error_response(self, error_message, retry_id=None):
-        """Send error response with proper serialization"""
+
+    async def send_error_response(self, error_message, retry_id=None, client_id=None, error_type=None,
+                                error_details=None, retry_available=False, message_id=None):
+        """Send enhanced error message to client with comprehensive error information"""
         try:
             error_data = {
                 'type': 'error',
                 'error': error_message,
-                'timestamp': timezone.now().isoformat()
+                'timestamp': timezone.now().isoformat(),
+                'error_id': f"err_{uuid.uuid4().hex[:8]}"
             }
+            
             if retry_id:
                 error_data['retry_id'] = retry_id
+            if client_id:
+                error_data['client_id'] = client_id
+            if error_type:
+                error_data['error_type'] = error_type
+            if error_details:
+                error_data['error_details'] = error_details
+            if retry_available:
+                error_data['retry_available'] = retry_available
+            if message_id:
+                error_data['message_id'] = message_id
+
+            logger.error(f"WebSocket error for user {self.user.id}: {error_message} (ID: {error_data['error_id']})")
             
             serialized_error = self.json_serializer.safe_serialize(error_data)
             await self.send(text_data=self.json_serializer.to_json_string(serialized_error))
@@ -360,131 +422,88 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 f"Error sending error response: {e}",
                 context_data={'original_error': error_message, 'retry_id': retry_id}
             )
-    
-    async def validate_and_recover_message_ordering(self, messages: list) -> list:
-        """
-        Validate message ordering and recover from ordering issues during error recovery
-        
-        Args:
-            messages: List of message dictionaries
-            
-        Returns:
-            List of messages with corrected ordering
-        """
+
+    async def safe_broadcast_message(self, payload):
+        """Safely broadcast message with error handling and circuit breaker logic"""
         try:
-            if not messages or len(messages) <= 1:
-                return messages
-            
-            # Validate current ordering
-            if self.message_validator.validate_message_ordering(messages):
-                return messages
-            
-            # Attempt to recover ordering by sorting by timestamp
-            MessagingLogger.log_error(
-                "Message ordering violation detected, attempting recovery",
-                context_data={
-                    'message_count': len(messages),
-                    'user_id': self.user.id
-                }
+            await asyncio.wait_for(
+                self.channel_layer.group_send(self.room_group_name, {
+                    'type': 'chat_message',
+                    'message': payload,
+                }),
+                timeout=5.0
             )
-            
-            # Sort messages by created_at timestamp
-            sorted_messages = []
-            for message in messages:
-                created_at = message.get('created_at')
-                if created_at:
-                    try:
-                        from datetime import datetime
-                        # Parse timestamp for sorting
-                        dt = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
-                        sorted_messages.append((dt, message))
-                    except ValueError:
-                        # If timestamp parsing fails, append to end
-                        sorted_messages.append((datetime.max, message))
-                else:
-                    # Messages without timestamps go to end
-                    sorted_messages.append((datetime.max, message))
-            
-            # Sort by timestamp and extract messages
-            sorted_messages.sort(key=lambda x: x[0])
-            recovered_messages = [msg for _, msg in sorted_messages]
-            
-            # Validate recovered ordering
-            if self.message_validator.validate_message_ordering(recovered_messages):
-                MessagingLogger.log_debug(
-                    "Message ordering successfully recovered",
-                    context_data={
-                        'original_count': len(messages),
-                        'recovered_count': len(recovered_messages),
-                        'user_id': self.user.id
-                    }
-                )
-                return recovered_messages
-            else:
-                MessagingLogger.log_error(
-                    "Failed to recover message ordering",
-                    context_data={
-                        'message_count': len(messages),
-                        'user_id': self.user.id
-                    }
-                )
-                return messages  # Return original if recovery fails
-                
+            return True
+        except asyncio.TimeoutError:
+            logger.warning(f"Message broadcast timeout for room {self.room_group_name}")
+            return False
         except Exception as e:
-            MessagingLogger.log_error(
-                f"Error in message ordering validation/recovery: {e}",
-                context_data={
-                    'message_count': len(messages) if messages else 0,
-                    'user_id': self.user.id
-                }
-            )
-            return messages  # Return original on error
+            logger.error(f"Message broadcast error for room {self.room_group_name}: {e}")
+            return False
 
     async def chat_message(self, event):
-        """Send message to WebSocket with enhanced serialization and ordering preservation"""
+        """Send message to WebSocket with enhanced status tracking, automatic read receipts, and error handling"""
         try:
             message = event['message']
-            
-            # Validate message format before transmission
-            if not self.message_validator.validate_message_format(message):
-                MessagingLogger.log_error(
-                    "Invalid message format in chat_message handler",
-                    context_data={'message': message, 'user_id': self.user.id}
-                )
-                return
-            
+
             # Mark as delivered if recipient is receiving it
-            if (self.connection_validator.safe_get(message, 'recipient') == self.user.username and 
-                not self.connection_validator.safe_get(message, 'delivered_at')):
-                
-                message_id = self.connection_validator.safe_get(message, 'id')
-                if message_id:
-                    success = await self.message_handler.mark_message_delivered(message_id)
-                    if success:
-                        message['delivered_at'] = timezone.now().isoformat()
-            
-            # Preserve message ordering by adding sequence information
-            message['sequence_id'] = int(time.time() * 1000000)  # Microsecond precision
-            
-            # Use JSON serializer for safe transmission
-            serialized_message = self.json_serializer.safe_serialize(message)
-            await self.send(text_data=self.json_serializer.to_json_string(serialized_message))
-            
+            if message['recipient'] == self.user.username and message.get('status') != 'delivered':
+                delivery_success = await message_persistence_manager.update_message_status_atomic(
+                    message['id'], 'delivered', self.user.id
+                )
+                if delivery_success:
+                    message['status'] = 'delivered'
+                    message['delivered_at'] = timezone.now().isoformat()
+
+            # Send message to client with error handling
+            try:
+                serialized_message = self.json_serializer.safe_serialize(message)
+                await self.send(text_data=self.json_serializer.to_json_string(serialized_message))
+            except Exception as e:
+                logger.error(f"Failed to send message {message['id']} to client: {e}")
+                await retry_manager.retry_failed_message(message['id'], 'client_send_failed')
+                return
+
+            # Auto-generate read receipt if this is for the recipient and chat is active
+            if (message['recipient'] == self.user.username and
+                message.get('type') == 'message' and
+                hasattr(self, 'auto_read_receipts') and
+                self.auto_read_receipts):
+
+                try:
+                    await asyncio.sleep(0.5)  # Small delay to simulate user viewing
+                    await read_receipt_manager.mark_message_as_read(
+                        message_id=message['id'],
+                        reader_user_id=self.user.id
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to generate auto read receipt for message {message['id']}: {e}")
+
         except Exception as e:
-            MessagingLogger.log_error(
-                f"Error in chat_message handler: {e}",
-                context_data={'event': event, 'user_id': self.user.id}
+            logger.error(f"Error in chat_message handler: {e}")
+            await self.send_error_response(
+                "Error processing incoming message",
+                error_type="message_processing_error",
+                error_details=str(e) if logger.isEnabledFor(logging.DEBUG) else None
             )
 
+    async def message_status_update(self, event):
+        """Send message status update to WebSocket"""
+        try:
+            serialized_message = self.json_serializer.safe_serialize(event['message'])
+            await self.send(text_data=self.json_serializer.to_json_string(serialized_message))
+        except Exception as e:
+            logger.error(f"Error in message_status_update handler: {e}")
+
     async def typing_indicator(self, event):
-        """Send typing indicator to WebSocket with validation"""
+        """Send typing indicator to WebSocket"""
         try:
             # Don't send typing indicator back to the person typing
-            if self.connection_validator.safe_get(event, 'username') != self.user.username:
+            if event['username'] != self.user.username:
                 response = {
                     'type': 'typing',
-                    'username': self.connection_validator.safe_get(event, 'username'),
-                    'is_typing': self.connection_validator.safe_get(event, 'is_typing', False)
+                    'username': event['username'],
+                    'is_typing': event['is_typing']
                 }
                 serialized_response = self.json_serializer.safe_serialize(response)
                 await self.send(text_data=self.json_serializer.to_json_string(serialized_response))
@@ -494,30 +513,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 context_data={'event': event, 'user_id': self.user.id}
             )
 
-    async def read_receipt(self, event):
-        """Send read receipt to WebSocket with enhanced serialization"""
+    async def read_receipt_update(self, event):
+        """Send enhanced read receipt update to WebSocket"""
         try:
-            response = {
-                'type': 'read_receipt',
-                'message_id': self.connection_validator.safe_get(event, 'message_id'),
-                'read_by': self.connection_validator.safe_get(event, 'read_by')
-            }
-            serialized_response = self.json_serializer.safe_serialize(response)
-            await self.send(text_data=self.json_serializer.to_json_string(serialized_response))
+            serialized_message = self.json_serializer.safe_serialize(event['message'])
+            await self.send(text_data=self.json_serializer.to_json_string(serialized_message))
         except Exception as e:
-            MessagingLogger.log_error(
-                f"Error in read_receipt handler: {e}",
-                context_data={'event': event, 'user_id': self.user.id}
-            )
+            logger.error(f"Error in read_receipt_update handler: {e}")
 
     async def user_status(self, event):
-        """Send user status update to WebSocket with enhanced serialization"""
+        """Send user status update to WebSocket"""
         try:
             response = {
                 'type': 'user_status',
-                'user_id': self.connection_validator.safe_get(event, 'user_id'),
-                'username': self.connection_validator.safe_get(event, 'username'),
-                'is_online': self.connection_validator.safe_get(event, 'is_online', False)
+                'user_id': event['user_id'],
+                'username': event['username'],
+                'is_online': event['is_online']
             }
             serialized_response = self.json_serializer.safe_serialize(response)
             await self.send(text_data=self.json_serializer.to_json_string(serialized_response))
@@ -527,6 +538,207 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 context_data={'event': event, 'user_id': self.user.id}
             )
 
+    # Database operations with async decorators
+    @database_sync_to_async
+    def create_message_payload(self, msg, retry_id=None):
+        """Create optimized message payload for real-time delivery"""
+        return {
+            'type': 'message',
+            'id': msg.id,
+            'sender': msg.sender.username,
+            'recipient': msg.recipient.username,
+            'content': msg.content,
+            'status': msg.status,
+            'client_id': msg.client_id,
+            'created_at': msg.created_at.isoformat(),
+            'sent_at': msg.sent_at.isoformat() if msg.sent_at else None,
+            'delivered_at': msg.delivered_at.isoformat() if msg.delivered_at else None,
+            'read_at': msg.read_at.isoformat() if msg.read_at else None,
+            'is_read': msg.is_read,
+            'retry_id': retry_id,
+            'status_icon': msg.get_status_icon()
+        }
+
+    @database_sync_to_async
+    def update_typing_status(self, is_typing):
+        """Update typing status using the typing manager"""
+        try:
+            return typing_manager.update_typing_status(
+                self.user,
+                self.other_user, 
+                is_typing
+            )
+        except Exception as e:
+            logger.error(f"Failed to update typing status: {e}")
+            return False
+
+    @database_sync_to_async
+    def stop_all_typing(self):
+        """Stop all typing indicators for this user"""
+        try:
+            return typing_manager.stop_all_typing_for_user(self.user)
+        except Exception as e:
+            logger.error(f"Failed to stop typing for user: {e}")
+            return 0
+
+    @database_sync_to_async
+    def handle_user_connected(self):
+        """Handle user connection with presence manager"""
+        try:
+            connection_info = {
+                'user_agent': self.scope.get('headers', {}).get('user-agent', ''),
+                'connected_at': timezone.now().isoformat()
+            }
+            return presence_manager.user_connected(self.user, connection_info)
+        except Exception as e:
+            logger.error(f"Failed to handle user connection: {e}")
+            return f"conn_{self.user.id}_{uuid.uuid4().hex[:8]}"
+
+    @database_sync_to_async
+    def handle_user_disconnected(self):
+        """Handle user disconnection with presence manager"""
+        try:
+            connection_id = getattr(self, 'connection_id', None)
+            presence_manager.user_disconnected(self.user, connection_id)
+        except Exception as e:
+            logger.error(f"Failed to handle user disconnection: {e}")
+
+    @database_sync_to_async
+    def update_heartbeat(self):
+        """Update user heartbeat"""
+        try:
+            connection_id = getattr(self, 'connection_id', None)
+            return presence_manager.update_heartbeat(self.user, connection_id)
+        except Exception as e:
+            logger.error(f"Failed to update heartbeat: {e}")
+            return False
+
+    @database_sync_to_async
+    def get_user_presence(self, user):
+        """Get user presence information"""
+        try:
+            return presence_manager.get_user_presence(user)
+        except Exception as e:
+            logger.error(f"Failed to get user presence: {e}")
+            return {
+                'is_online': False,
+                'last_seen': None,
+                'last_seen_display': 'Unknown'
+            }
+
+    @database_sync_to_async
+    def create_message_notification(self, message):
+        """Create a notification for a new message"""
+        try:
+            from .notification_service import notify_new_message
+            notify_new_message(
+                sender=message.sender,
+                recipient=message.recipient,
+                message_obj=message
+            )
+        except Exception as e:
+            logger.error(f"Error creating message notification: {e}")
+
+    # Connection Recovery Integration Methods
+    async def register_connection_recovery(self):
+        """Register this connection with the recovery manager"""
+        try:
+            websocket_url = f"/ws/chat/{self.other_username}/"
+            
+            async def reconnect_callback():
+                try:
+                    return True
+                except Exception as e:
+                    logger.error(f"Reconnection callback error: {e}")
+                    return False
+
+            connection_recovery_manager.register_connection(
+                connection_id=self.connection_id,
+                user_id=self.user.id,
+                websocket_url=websocket_url,
+                reconnect_callback=reconnect_callback
+            )
+
+            connection_recovery_manager.add_status_callback(
+                self.connection_id,
+                self.handle_connection_status_update
+            )
+
+            logger.info(f"Registered connection recovery for {self.connection_id}")
+
+        except Exception as e:
+            logger.error(f"Error registering connection recovery: {e}")
+
+    async def unregister_connection_recovery(self):
+        """Unregister this connection from the recovery manager"""
+        try:
+            connection_recovery_manager.unregister_connection(self.connection_id)
+            logger.info(f"Unregistered connection recovery for {self.connection_id}")
+        except Exception as e:
+            logger.error(f"Error unregistering connection recovery: {e}")
+
+    async def handle_connection_status_update(self, status_update):
+        """Handle connection status updates from recovery manager"""
+        try:
+            await self.send(text_data=json.dumps({
+                'type': 'connection_status',
+                'connection_id': status_update['connection_id'],
+                'state': status_update['state'],
+                'retry_count': status_update['retry_count'],
+                'next_retry_at': status_update.get('next_retry_at'),
+                'error_message': status_update.get('error_message'),
+                'timestamp': status_update['timestamp']
+            }))
+        except Exception as e:
+            logger.error(f"Error handling connection status update: {e}")
+
+    async def synchronize_missed_messages(self):
+        """Synchronize messages that were missed during disconnection"""
+        try:
+            user_presence = await self.get_user_presence(self.user)
+            last_disconnect = user_presence.get('last_disconnect')
+
+            if last_disconnect:
+                from datetime import datetime
+                if isinstance(last_disconnect, str):
+                    last_disconnect_time = datetime.fromisoformat(last_disconnect.replace('Z', '+00:00'))
+                else:
+                    last_disconnect_time = last_disconnect
+
+                sync_result = await message_sync_manager.synchronize_messages_on_reconnection(
+                    user_id=self.user.id,
+                    last_disconnect_time=last_disconnect_time,
+                    connection_id=self.connection_id
+                )
+
+                if sync_result.get('messages'):
+                    await self.send(text_data=json.dumps({
+                        'type': 'message_sync',
+                        'sync_result': sync_result
+                    }))
+
+                queue_result = await message_sync_manager.process_offline_message_queue(
+                    user_id=self.user.id
+                )
+
+                if queue_result.get('processed_count', 0) > 0:
+                    await self.send(text_data=json.dumps({
+                        'type': 'queue_processed',
+                        'result': queue_result
+                    }))
+
+                logger.info(f"Message synchronization completed for user {self.user.id}")
+
+        except Exception as e:
+            logger.error(f"Error synchronizing missed messages: {e}")
+
+    async def force_reconnect(self):
+        """Force immediate reconnection attempt"""
+        try:
+            connection_recovery_manager.force_reconnect(self.connection_id)
+        except Exception as e:
+            logger.error(f"Error forcing reconnect: {e}")
+
 
 class NotificationsConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
@@ -534,7 +746,7 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
         self.message_handler = AsyncSafeMessageHandler()
         self.json_serializer = JSONSerializer()
         self.connection_validator = ConnectionValidator()
-    
+
     async def connect(self):
         user = self.scope.get('user')
         if user is None or not user.is_authenticated:
@@ -549,7 +761,7 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
         self.user_group_name = f'user_{user.id}'
         await self.channel_layer.group_add(self.user_group_name, self.channel_name)
         await self.accept()
-        
+
         # Mark user as online using async-safe handler
         success = await self.message_handler.set_user_online_status(user, True)
         if not success:
@@ -557,7 +769,7 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
                 "Failed to set user online status in notifications",
                 context_data={'user_id': user.id}
             )
-        
+
         # Send initial unread count
         unread_count = await self.get_unread_notification_count(user)
         response = {
@@ -577,7 +789,7 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
                         "Failed to set user offline status in notifications",
                         context_data={'user_id': self.user.id, 'close_code': close_code}
                     )
-            
+
             # Clean up channel group
             if hasattr(self, 'user_group_name'):
                 await self.channel_layer.group_discard(self.user_group_name, self.channel_name)
@@ -592,7 +804,7 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
         if text_data is None:
             MessagingLogger.log_error("Received empty text_data in notifications")
             return
-        
+
         try:
             data = json.loads(text_data)
         except json.JSONDecodeError as e:
@@ -603,7 +815,7 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
             )
             await self.send_error_response("Invalid JSON format")
             return
-        
+
         # Validate message data structure
         if not self.connection_validator.validate_message_data(data):
             MessagingLogger.log_error(
@@ -612,9 +824,9 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
             )
             await self.send_error_response("Invalid message format")
             return
-        
+
         message_type = self.connection_validator.safe_get(data, 'type')
-        
+
         try:
             if message_type == 'mark_read':
                 await self._handle_mark_read(data)
@@ -630,21 +842,21 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
                     context_data={'message_type': message_type, 'user_id': self.user.id}
                 )
                 await self.send_error_response(f"Unknown message type: {message_type}")
-                
+
         except Exception as e:
             MessagingLogger.log_error(
                 f"Error processing notification request: {e}",
                 context_data={'message_type': message_type, 'user_id': self.user.id}
             )
             await self.send_error_response(f"Error processing request: {str(e)}")
-    
+
     async def _handle_mark_read(self, data):
         """Handle mark notification as read"""
         notification_id = self.connection_validator.safe_get(data, 'notification_id')
         if not notification_id:
             await self.send_error_response("Missing notification_id")
             return
-        
+
         success = await self.mark_notification_read(notification_id)
         response = {
             'type': 'mark_read_response',
@@ -653,7 +865,7 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
         }
         serialized_response = self.json_serializer.safe_serialize(response)
         await self.send(text_data=self.json_serializer.to_json_string(serialized_response))
-    
+
     async def _handle_mark_all_read(self, data):
         """Handle mark all notifications as read"""
         notification_type = self.connection_validator.safe_get(data, 'notification_type')
@@ -664,13 +876,13 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
         }
         serialized_response = self.json_serializer.safe_serialize(response)
         await self.send(text_data=self.json_serializer.to_json_string(serialized_response))
-    
+
     async def _handle_get_notifications(self, data):
         """Handle get notifications request"""
         limit = self.connection_validator.safe_get(data, 'limit', 20)
         offset = self.connection_validator.safe_get(data, 'offset', 0)
         unread_only = self.connection_validator.safe_get(data, 'unread_only', False)
-        
+
         notifications = await self.get_notifications(limit, offset, unread_only)
         response = {
             'type': 'notifications_list',
@@ -680,7 +892,7 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
         }
         serialized_response = self.json_serializer.safe_serialize(response)
         await self.send(text_data=self.json_serializer.to_json_string(serialized_response))
-    
+
     async def _handle_notification_ping(self, data):
         """Handle ping for notifications connection"""
         timestamp = self.connection_validator.safe_get(data, 'timestamp')
@@ -690,7 +902,7 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
         }
         serialized_response = self.json_serializer.safe_serialize(response)
         await self.send(text_data=self.json_serializer.to_json_string(serialized_response))
-    
+
     async def send_error_response(self, error_message):
         """Send error response for notifications"""
         try:
@@ -785,12 +997,12 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
             query = Notification.objects.filter(recipient=self.user, is_read=False)
             if notification_type:
                 query = query.filter(notification_type=notification_type)
-            
+
             count = 0
             for notification in query:
                 notification.mark_as_read()
                 count += 1
-            
+
             MessagingLogger.log_debug(
                 f"Marked {count} notifications as read",
                 {'user_id': self.user.id, 'notification_type': notification_type}
@@ -808,18 +1020,18 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
         """Get notifications for the user with enhanced serialization"""
         try:
             query = Notification.objects.filter(recipient=self.user)
-            
+
             if unread_only:
                 query = query.filter(is_read=False)
-            
+
             notifications = query.select_related('sender').order_by('-created_at')[offset:offset+limit]
-            
+
             result = []
             for notification in notifications:
                 # Use JSON serializer for safe notification serialization
                 serialized_notification = self.json_serializer.serialize_notification(notification)
                 result.append(serialized_notification)
-            
+
             return result
         except Exception as e:
             MessagingLogger.log_error(
