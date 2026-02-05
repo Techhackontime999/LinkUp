@@ -11,6 +11,7 @@ from .async_handlers import AsyncSafeMessageHandler
 from .serializers import JSONSerializer
 from .connection_validator import ConnectionValidator
 from .logging_utils import MessagingLogger
+from .async_error_handler import AsyncErrorHandler, log_websocket_error, log_async_context_error
 from .retry_handler import MessageRetryHandler, MessageValidator, RetryConfig
 # WhatsApp messaging features
 from .message_status_manager import message_status_manager
@@ -43,90 +44,111 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.message_validator = MessageValidator()
     
     async def connect(self):
-        user = self.scope.get('user')
-        if user is None or not user.is_authenticated:
-            MessagingLogger.log_connection_error(
-                "Unauthenticated connection attempt",
-                context_data={'scope_keys': list(self.scope.keys())}
-            )
-            await self.close()
-            return
-
-        self.other_username = self.scope['url_route']['kwargs'].get('username')
-        if not self.other_username:
-            MessagingLogger.log_connection_error(
-                "Missing username in URL route",
-                context_data={'url_route': self.scope.get('url_route', {})}
-            )
-            await self.close()
-            return
-
+        """Enhanced connect method with comprehensive error handling"""
         try:
-            self.other_user = await database_sync_to_async(User.objects.get)(username=self.other_username)
-        except User.DoesNotExist:
-            MessagingLogger.log_connection_error(
-                f"User not found: {self.other_username}",
-                context_data={'requested_username': self.other_username}
-            )
-            await self.close()
-            return
-        except Exception as e:
-            MessagingLogger.log_connection_error(
-                f"Database error while fetching user: {e}",
-                context_data={'requested_username': self.other_username}
-            )
-            await self.close()
-            return
+            user = self.scope.get('user')
+            if user is None or not user.is_authenticated:
+                await log_websocket_error(
+                    Exception("Unauthenticated connection attempt"),
+                    "connect",
+                    context_data={'scope_keys': list(self.scope.keys())}
+                )
+                await self.close()
+                return
 
-        self.user = user
-        
-        # Deterministic room name for private chat between two users
-        a, b = sorted([user.id, self.other_user.id])
-        self.room_group_name = f'chat_{a}_{b}'
-        
-        # Add to chat room
-        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-        
-        # Add to personal user group for status updates
-        self.user_group_name = f'user_{user.id}'
-        await self.channel_layer.group_add(self.user_group_name, self.channel_name)
-        
-        await self.accept()
-        
-        # Handle user connection with presence manager (WhatsApp features)
-        self.connection_id = await self.handle_user_connected()
-        
-        # Mark user as online using async-safe handler (our fixes)
-        success = await self.message_handler.set_user_online_status(user, True)
-        if not success:
-            MessagingLogger.log_error(
-                "Failed to set user online status",
-                context_data={'user_id': user.id}
+            self.other_username = self.scope['url_route']['kwargs'].get('username')
+            if not self.other_username:
+                await log_websocket_error(
+                    Exception("Missing username in URL route"),
+                    "connect",
+                    user,
+                    context_data={'url_route': self.scope.get('url_route', {})}
+                )
+                await self.close()
+                return
+
+            try:
+                self.other_user = await database_sync_to_async(User.objects.get)(username=self.other_username)
+            except User.DoesNotExist:
+                await log_websocket_error(
+                    Exception(f"User not found: {self.other_username}"),
+                    "connect",
+                    user,
+                    context_data={'requested_username': self.other_username}
+                )
+                await self.close()
+                return
+            except Exception as e:
+                await log_async_context_error(
+                    e,
+                    "database_user_fetch",
+                    user,
+                    context_data={'requested_username': self.other_username}
+                )
+                await self.close()
+                return
+
+            self.user = user
+            
+            # Deterministic room name for private chat between two users
+            a, b = sorted([user.id, self.other_user.id])
+            self.room_group_name = f'chat_{a}_{b}'
+            
+            # Add to chat room
+            await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+            
+            # Add to personal user group for status updates
+            self.user_group_name = f'user_{user.id}'
+            await self.channel_layer.group_add(self.user_group_name, self.channel_name)
+            
+            await self.accept()
+            
+            # Handle user connection with presence manager (WhatsApp features)
+            self.connection_id = await self.handle_user_connected()
+            
+            # Mark user as online using async-safe handler (our fixes)
+            success = await self.message_handler.set_user_online_status(user, True)
+            if not success:
+                await log_websocket_error(
+                    Exception("Failed to set user online status"),
+                    "connect",
+                    user,
+                    context_data={'user_id': user.id}
+                )
+            
+            # Register connection with recovery manager
+            await self.register_connection_recovery()
+            
+            # Enable automatic read receipts for active chat windows
+            self.auto_read_receipts = True
+            
+            # Check for missed messages and synchronize
+            await self.synchronize_missed_messages()
+            
+            # Send other user's status to this user (integrated approach)
+            other_presence = await self.get_user_presence(self.other_user)
+            status_message = {
+                'type': 'user_status',
+                'user_id': self.other_user.id,
+                'username': self.other_user.username,
+                'is_online': other_presence['is_online'],
+                'last_seen': other_presence['last_seen'],
+                'last_seen_display': other_presence['last_seen_display']
+            }
+            
+            # Use JSON serializer for safe transmission (our fixes)
+            serialized_status = self.json_serializer.safe_serialize(status_message)
+            await self.send(text_data=self.json_serializer.to_json_string(serialized_status))
+            
+        except Exception as e:
+            # Catch any unexpected errors in connect
+            await log_async_context_error(
+                e,
+                "websocket_connect",
+                getattr(self, 'user', None),
+                context_data={'connection_stage': 'connect_method'}
             )
-        
-        # Register connection with recovery manager
-        await self.register_connection_recovery()
-        
-        # Enable automatic read receipts for active chat windows
-        self.auto_read_receipts = True
-        
-        # Check for missed messages and synchronize
-        await self.synchronize_missed_messages()
-        
-        # Send other user's status to this user (integrated approach)
-        other_presence = await self.get_user_presence(self.other_user)
-        status_message = {
-            'type': 'user_status',
-            'user_id': self.other_user.id,
-            'username': self.other_user.username,
-            'is_online': other_presence['is_online'],
-            'last_seen': other_presence['last_seen'],
-            'last_seen_display': other_presence['last_seen_display']
-        }
-        
-        # Use JSON serializer for safe transmission (our fixes)
-        serialized_status = self.json_serializer.safe_serialize(status_message)
-        await self.send(text_data=self.json_serializer.to_json_string(serialized_status))
+            await self.close()
 
     async def disconnect(self, close_code):
         """Enhanced disconnect handler with comprehensive cleanup and error handling"""
@@ -309,6 +331,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         except Exception as e:
             logger.error(f"Error in receive: {e}")
+            # Use the new async error handler
+            await log_async_context_error(
+                e,
+                "websocket_receive",
+                self.user,
+                context_data={
+                    'message_type': message_type,
+                    'data_keys': list(data.keys()) if isinstance(data, dict) else 'not_dict'
+                }
+            )
             await self.send_error_response(
                 "Internal server error",
                 error_type="internal_error",
