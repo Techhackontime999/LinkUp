@@ -453,31 +453,47 @@ class NotificationSystem {
     }
     
     toggleDropdown() {
-        console.log('toggleDropdown called, dropdown:', this.dropdown);
-        if (this.dropdown) {
-            const isHidden = this.dropdown.classList.contains('hidden');
-            console.log('Dropdown is hidden:', isHidden);
-            
-            if (isHidden) {
-                // Show dropdown
-                this.dropdown.classList.remove('hidden');
-                this.dropdown.classList.add('block');
-                this.btn.setAttribute('aria-expanded', 'true');
-                
-                // Load fresh notifications when opening
-                this.loadInitialNotifications();
-                
-                // Add click outside listener
-                this.addClickOutsideListener();
-                
-                console.log('Notification dropdown opened');
-            } else {
-                // Hide dropdown
-                this.closeDropdown();
-            }
-        } else {
-            console.log('Dropdown element not found!');
+        console.log('=== NOTIFICATION DEBUG ===');
+        console.log('toggleDropdown called');
+        console.log('dropdown element:', this.dropdown);
+        console.log('btn element:', this.btn);
+        console.log('dropdown classes:', this.dropdown ? this.dropdown.className : 'NOT FOUND');
+        console.log('btn classes:', this.btn ? this.btn.className : 'NOT FOUND');
+        
+        if (!this.dropdown) {
+            console.error('Dropdown element not found!');
+            return;
         }
+        
+        if (!this.btn) {
+            console.error('Button element not found!');
+            return;
+        }
+        
+        const isHidden = this.dropdown.classList.contains('hidden');
+        console.log('Dropdown is hidden:', isHidden);
+        
+        if (isHidden) {
+            console.log('Opening dropdown...');
+            // Show dropdown
+            this.dropdown.classList.remove('hidden');
+            this.dropdown.classList.add('block');
+            this.btn.setAttribute('aria-expanded', 'true');
+            
+            // Load fresh notifications when opening
+            this.loadInitialNotifications();
+            
+            // Add click outside listener
+            this.addClickOutsideListener();
+            
+            console.log('Notification dropdown opened successfully');
+        } else {
+            console.log('Closing dropdown...');
+            // Hide dropdown
+            this.closeDropdown();
+        }
+        
+        console.log('=== END DEBUG ===');
     }
     
     closeDropdown() {
