@@ -32,10 +32,29 @@ class NotificationSystem {
     }
     
     init() {
-        if (!this.btn) {
+        console.log('=== NOTIFICATION INIT DEBUG ===');
+        console.log('DOM ready state:', document.readyState);
+        
+        // Check elements immediately
+        const notifBtn = document.getElementById('notif-btn');
+        const notifDropdown = document.getElementById('notif-dropdown');
+        const notifBadge = document.getElementById('notif-badge');
+        
+        console.log('Elements found:', {
+            btn: !!notifBtn,
+            dropdown: !!notifDropdown,
+            badge: !!notifBadge
+        });
+        
+        if (!notifBtn) {
             console.log('No notification UI on this page');
             return; // No notification UI on this page
         }
+        
+        // Store elements
+        this.btn = notifBtn;
+        this.dropdown = notifDropdown;
+        this.badge = notifBadge;
         
         console.log('Initializing notification system...');
         this.setupEventListeners();
@@ -44,6 +63,8 @@ class NotificationSystem {
         
         // Periodic fallback polling
         setInterval(() => this.pollFallback(), 30000);
+        
+        console.log('=== INIT COMPLETE ===');
     }
     
     setupEventListeners() {
