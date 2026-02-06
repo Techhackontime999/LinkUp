@@ -207,6 +207,69 @@
     
     {% if user.is_authenticated %}
     <script src="{% static 'messaging/notifications.js' %}"></script>
+    
+    <!-- Mobile Bottom Navigation -->
+    <div class="fixed bottom-0 left-0 z-50 w-full h-16 bg-white border-t border-gray-200 md:hidden">
+        <div class="grid h-full max-w-lg grid-cols-4 mx-auto font-medium">
+            <!-- Home -->
+            <a href="{% url 'feed' %}" 
+               class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 group {% if request.resolver_match.url_name == 'feed' %}text-purple-600{% else %}text-gray-600{% endif %}">
+                <svg class="w-6 h-6 mb-1 group-hover:text-purple-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 12 8-8 8 8M6 10.5V19a1 1 0 0 0 1 1h3v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h3a1 1 0 0 0 1-1v-8.5"/>
+                </svg>
+                <span class="text-sm group-hover:text-purple-600">Home</span>
+            </a>
+            
+            <!-- Network -->
+            <a href="{% url 'network' %}" 
+               class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 group {% if request.resolver_match.url_name == 'network' %}text-purple-600{% else %}text-gray-600{% endif %}">
+                <svg class="w-6 h-6 mb-1 group-hover:text-purple-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                <span class="text-sm group-hover:text-purple-600">Network</span>
+            </a>
+            
+            <!-- Jobs -->
+            <a href="{% url 'jobs:job_list' %}" 
+               class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 group {% if 'jobs' in request.resolver_match.app_name %}text-purple-600{% else %}text-gray-600{% endif %}">
+                <svg class="w-6 h-6 mb-1 group-hover:text-purple-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                <span class="text-sm group-hover:text-purple-600">Jobs</span>
+            </a>
+            
+            <!-- Messages -->
+            <a href="{% url 'messaging:inbox' %}" 
+               class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 group relative {% if 'messaging' in request.resolver_match.app_name %}text-purple-600{% else %}text-gray-600{% endif %}">
+                <svg class="w-6 h-6 mb-1 group-hover:text-purple-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+                <span id="mobile-messages-badge" class="absolute -top-1 -right-1 bg-red-600 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center hidden" aria-label="Unread messages"></span>
+                <span class="text-sm group-hover:text-purple-600">Messages</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Mobile Navigation Styles -->
+    <style>
+        @media (max-width: 768px) {
+            /* Adjust main content padding for mobile nav */
+            main {
+                padding-bottom: 80px !important;
+            }
+            
+            /* Hide desktop navigation on mobile */
+            .hidden.sm\:flex {
+                display: none !important;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .fixed.bottom-0.left-0.z-50.w-full.h-16 {
+                display: none !important;
+            }
+        }
+    </style>
     {% endif %}
     <script src="{% static 'js/form-enhancements.js' %}"></script>
     <script src="{% static 'js/accessibility-enhancements.js' %}"></script>

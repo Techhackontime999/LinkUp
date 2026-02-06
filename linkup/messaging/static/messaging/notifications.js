@@ -418,12 +418,25 @@ class NotificationSystem {
     
     updateBadgeCount(count) {
         this.unreadCount = count;
+        
+        // Update desktop badge
         if (this.badge) {
             if (count > 0) {
                 this.badge.style.display = 'flex';
                 this.badge.textContent = count > 99 ? '99+' : String(count);
             } else {
                 this.badge.style.display = 'none';
+            }
+        }
+        
+        // Update mobile badge
+        const mobileBadge = document.getElementById('mobile-messages-badge');
+        if (mobileBadge) {
+            if (count > 0) {
+                mobileBadge.style.display = 'flex';
+                mobileBadge.textContent = count > 99 ? '99+' : String(count);
+            } else {
+                mobileBadge.style.display = 'none';
             }
         }
     }
