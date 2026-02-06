@@ -1,0 +1,17 @@
+/* Form Enhancements CSS */
+.form-enhanced {
+    transition: all 0.3s ease;
+}
+
+.form-enhanced:focus {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+}
+
+.form-enhanced:invalid {
+    border-color: #ef4444;
+}
+
+.form-enhanced:valid {
+    border-color: #10b981;
+}

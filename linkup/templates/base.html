@@ -267,12 +267,6 @@
             }
         }
     </style>
-    {% if user.is_authenticated %}
-    <script src="{% static 'messaging/notifications.js' %}"></script>
-    {% endif %}
-    <script src="{% static 'js/form-enhancements.js' %}"></script>
-    <script src="{% static 'js/accessibility-enhancements.js' %}"></script>
-    <script src="{% static 'js/enhanced-search.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 
