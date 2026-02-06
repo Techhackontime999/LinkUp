@@ -601,7 +601,7 @@ def notify_connection_accepted(sender: User, recipient: User, connection_obj):
         message=f'{sender.get_full_name() or sender.username} accepted your connection request',
         sender=sender,
         content_object=connection_obj,
-        action_url=reverse('users:profile', args=[sender.username])
+        action_url=reverse('public_profile', args=[sender.username])
     )
 
 
@@ -663,7 +663,7 @@ def notify_new_follower(follower: User, followed: User, follow_obj):
         message=f'{follower.get_full_name() or follower.username} started following you',
         sender=follower,
         content_object=follow_obj,
-        action_url=reverse('users:profile', args=[follower.username]),
+        action_url=reverse('public_profile', args=[follower.username]),
         group_key=f'followers_{followed.id}'
     )
 
