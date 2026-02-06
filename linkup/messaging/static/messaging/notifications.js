@@ -12,6 +12,11 @@ class NotificationSystem {
         this.notifications = [];
         this.unreadCount = 0;
         
+        // Initialize DOM elements immediately
+        this.initializeDOMElements();
+    }
+    
+    initializeDOMElements() {
         // DOM elements
         this.badge = document.getElementById('notif-badge');
         this.list = document.getElementById('notif-list');

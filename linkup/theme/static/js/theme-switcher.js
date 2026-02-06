@@ -123,19 +123,12 @@ class ThemeManager {
     }
 }
 
-// Initialize theme manager when DOM is ready
-function initializeThemeManager() {
+// Initialize theme manager immediately
+(function() {
     if (!window.themeManager) {
         window.themeManager = new ThemeManager();
     }
-}
-
-// Initialize immediately if DOM is already loaded, otherwise wait for DOMContentLoaded
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeThemeManager);
-} else {
-    initializeThemeManager();
-}
+})();
 
 // Export for use in other scripts
 if (typeof module !== 'undefined' && module.exports) {

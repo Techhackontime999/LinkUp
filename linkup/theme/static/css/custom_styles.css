@@ -1120,6 +1120,22 @@ nav.premium-nav a.active::after {
     color: var(--text-primary) !important;
 }
 
+[data-theme="dark"] .text-gray-400 {
+    color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .text-gray-300 {
+    color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .text-gray-700 {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .text-gray-800 {
+    color: var(--text-primary) !important;
+}
+
 [data-theme="dark"] .border-gray-200 {
     border-color: rgba(255, 255, 255, 0.1) !important;
 }
