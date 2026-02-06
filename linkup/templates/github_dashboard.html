@@ -1,0 +1,686 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* GitHub Integration Styles */
+.github-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.github-header {
+    background: linear-gradient(135deg, #24292e 0%, #2f363d 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.github-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0 0 0.5rem 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.github-header .subtitle {
+    opacity: 0.9;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+.github-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.github-status-badge.connected {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+}
+
+.github-status-badge.disconnected {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.github-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.github-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.github-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.github-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 0 1rem 0;
+    color: #24292e;
+    font-size: 1.3rem;
+}
+
+.github-card .description {
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.github-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: #24292e;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.github-btn:hover {
+    background: #1f2937;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.github-btn.secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.github-btn.secondary:hover {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+}
+
+.github-btn.success {
+    background: #22c55e;
+}
+
+.github-btn.success:hover {
+    background: #16a34a;
+}
+
+.github-btn.warning {
+    background: #f59e0b;
+}
+
+.github-btn.warning:hover {
+    background: #d97706;
+}
+
+.progress-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    border-left: 4px solid #d1d5db;
+    transition: all 0.3s ease;
+}
+
+.step.completed {
+    border-left-color: #22c55e;
+    background: #f0fdf4;
+}
+
+.step.active {
+    border-left-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #d1d5db;
+    color: white;
+    border-radius: 50%;
+    font-weight: 600;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.step.completed .step-number {
+    background: #22c55e;
+}
+
+.step.active .step-number {
+    background: #3b82f6;
+}
+
+.step-content h4 {
+    margin: 0 0 0.25rem 0;
+    color: #1f2937;
+    font-size: 1.1rem;
+}
+
+.step-content p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.repository-info {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+}
+
+.repository-info h4 {
+    margin: 0 0 1rem 0;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.repository-info .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.info-item .label {
+    font-size: 0.85rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.info-item .value {
+    font-size: 0.95rem;
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.command-block {
+    background: #1f2937;
+    color: #f9fafb;
+    padding: 1rem;
+    border-radius: 8px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    overflow-x: auto;
+    margin: 1rem 0;
+    position: relative;
+}
+
+.command-block .copy-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.command-block .copy-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-indicator.success {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.status-indicator.warning {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.status-indicator.error {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.status-indicator.info {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+/* Dark mode overrides */
+[data-theme="dark"] .github-card {
+    background: var(--bg-card);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .github-card h3 {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .github-card .description {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .step {
+    background: rgba(255, 255, 255, 0.05);
+    border-left-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .step.completed {
+    background: rgba(34, 197, 94, 0.1);
+    border-left-color: #22c55e;
+}
+
+[data-theme="dark"] .step.active {
+    background: rgba(59, 130, 246, 0.1);
+    border-left-color: #3b82f6;
+}
+
+[data-theme="dark"] .step-content h4 {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .step-content p {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .repository-info {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .repository-info h4 {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .info-item .label {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .info-item .value {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .github-btn.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .github-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="github-dashboard">
+    <!-- Header -->
+    <div class="github-header">
+        <h1>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+            GitHub Integration
+        </h1>
+        <p class="subtitle">Manage your repository, deployments, and GitHub integrations</p>
+        <div class="github-status-badge disconnected" id="connection-status">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2"/>
+                <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <span id="status-text">Not Connected</span>
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="github-grid">
+        <!-- Quick Actions Card -->
+        <div class="github-card">
+            <h3>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+                Quick Actions
+            </h3>
+            <p class="description">Common GitHub operations and repository management tasks</p>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <button class="github-btn" onclick="initializeRepository()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                    </svg>
+                    Initialize Repository
+                </button>
+                <button class="github-btn secondary" onclick="syncRepository()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+                    </svg>
+                    Sync Repository
+                </button>
+                <button class="github-btn success" onclick="deployToProduction()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    Deploy to Production
+                </button>
+            </div>
+        </div>
+
+        <!-- Repository Status Card -->
+        <div class="github-card">
+            <h3>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                </svg>
+                Repository Status
+            </h3>
+            <p class="description">Current repository information and connection status</p>
+            
+            <div class="repository-info">
+                <h4>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                    </svg>
+                    Repository Information
+                </h4>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="label">Repository Name</span>
+                        <span class="value" id="repo-name">linkup</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Branch</span>
+                        <span class="value" id="repo-branch">main</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Last Commit</span>
+                        <span class="value" id="last-commit">2 hours ago</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Status</span>
+                        <span class="value">
+                            <span class="status-indicator success">Up to date</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 0.75rem;">
+                <button class="github-btn secondary" onclick="viewRepository()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                    </svg>
+                    View on GitHub
+                </button>
+                <button class="github-btn secondary" onclick="openSettings()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                    </svg>
+                    Settings
+                </button>
+            </div>
+        </div>
+
+        <!-- Upload Progress Card -->
+        <div class="github-card">
+            <h3>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Upload Progress
+            </h3>
+            <p class="description">Track your GitHub upload and deployment progress</p>
+            
+            <div class="progress-steps" id="upload-progress">
+                <div class="step completed">
+                    <div class="step-number">✓</div>
+                    <div class="step-content">
+                        <h4>Repository Initialized</h4>
+                        <p>Git repository has been set up successfully</p>
+                    </div>
+                </div>
+                <div class="step completed">
+                    <div class="step-number">✓</div>
+                    <div class="step-content">
+                        <h4>Files Committed</h4>
+                        <p>All project files have been committed to local repository</p>
+                    </div>
+                </div>
+                <div class="step active">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Connect to GitHub</h4>
+                        <p>Establishing connection to GitHub repository...</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Push to GitHub</h4>
+                        <p>Upload files to GitHub repository</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h4>Deployment Ready</h4>
+                        <p>Repository is ready for deployment</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="github-btn warning" onclick="continueUpload()" style="margin-top: 1rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                Continue Upload
+            </button>
+        </div>
+
+        <!-- Commands Reference Card -->
+        <div class="github-card">
+            <h3>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="4 7 4 4 20 4 20 7"/>
+                    <line x1="9" y1="20" x2="15" y2="20"/>
+                    <line x1="12" y1="4" x2="12" y2="20"/>
+                </svg>
+                Quick Commands
+            </h3>
+            <p class="description">Essential Git commands for repository management</p>
+            
+            <div class="command-block">
+                <button class="copy-btn" onclick="copyCommand(this)">Copy</button>
+                git init
+            </div>
+            <div class="command-block">
+                <button class="copy-btn" onclick="copyCommand(this)">Copy</button>
+                git add .
+            </div>
+            <div class="command-block">
+                <button class="copy-btn" onclick="copyCommand(this)">Copy</button>
+                git commit -m "Your commit message"
+            </div>
+            <div class="command-block">
+                <button class="copy-btn" onclick="copyCommand(this)">Copy</button>
+                git remote add origin https://github.com/username/repo.git
+            </div>
+            <div class="command-block">
+                <button class="copy-btn" onclick="copyCommand(this)">Copy</button>
+                git push -u origin main
+            </div>
+        </div>
+    </div>
+
+    <!-- Deployment Status -->
+    <div class="github-card">
+        <h3>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            Deployment Status
+        </h3>
+        <p class="description">Monitor your application deployment status and history</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 1.5rem 0;">
+            <div style="text-align: center; padding: 1.5rem; background: #f9fafb; border-radius: 8px;">
+                <div style="font-size: 2rem; font-weight: 700; color: #22c55e; margin-bottom: 0.5rem;">3</div>
+                <div style="color: #6b7280; font-size: 0.9rem;">Successful Deployments</div>
+            </div>
+            <div style="text-align: center; padding: 1.5rem; background: #f9fafb; border-radius: 8px;">
+                <div style="font-size: 2rem; font-weight: 700; color: #3b82f6; margin-bottom: 0.5rem;">2</div>
+                <div style="color: #6b7280; font-size: 0.9rem;">Active Environments</div>
+            </div>
+            <div style="text-align: center; padding: 1.5rem; background: #f9fafb; border-radius: 8px;">
+                <div style="font-size: 2rem; font-weight: 700; color: #f59e0b; margin-bottom: 0.5rem;">5</div>
+                <div style="color: #6b7280; font-size: 0.9rem;">Pending Updates</div>
+            </div>
+            <div style="text-align: center; padding: 1.5rem; background: #f9fafb; border-radius: 8px;">
+                <div style="font-size: 2rem; font-weight: 700; color: #8b5cf6; margin-bottom: 0.5rem;">99.9%</div>
+                <div style="color: #6b7280; font-size: 0.9rem;">Uptime</div>
+            </div>
+        </div>
+
+        <button class="github-btn" onclick="viewDeploymentHistory()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+            </svg>
+            View Deployment History
+        </button>
+    </div>
+</div>
+
+<script>
+// GitHub Dashboard JavaScript
+function updateConnectionStatus(connected) {
+    const statusBadge = document.getElementById('connection-status');
+    const statusText = document.getElementById('status-text');
+    
+    if (connected) {
+        statusBadge.className = 'github-status-badge connected';
+        statusText.textContent = 'Connected';
+        statusBadge.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" fill="none"/>
+            </svg>
+            <span id="status-text">Connected</span>
+        `;
+    } else {
+        statusBadge.className = 'github-status-badge disconnected';
+        statusText.textContent = 'Not Connected';
+        statusBadge.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2"/>
+                <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <span id="status-text">Not Connected</span>
+        `;
+    }
+}
+
+function initializeRepository() {
+    alert('Initializing repository... This feature will guide you through setting up Git and connecting to GitHub.');
+}
+
+function syncRepository() {
+    alert('Syncing repository... This will pull latest changes and push your commits.');
+}
+
+function deployToProduction() {
+    alert('Deploying to production... This will start the deployment process.');
+}
+
+function viewRepository() {
+    window.open('https://github.com/YOUR_USERNAME/linkup', '_blank');
+}
+
+function openSettings() {
+    alert('Opening GitHub settings... Configure your repository preferences here.');
+}
+
+function continueUpload() {
+    alert('Continuing upload process... This will guide you through the remaining steps.');
+}
+
+function viewDeploymentHistory() {
+    alert('Loading deployment history... View your past deployments and their status.');
+}
+
+function copyCommand(button) {
+    const commandBlock = button.parentElement;
+    const command = commandBlock.textContent.replace('Copy', '').trim();
+    
+    navigator.clipboard.writeText(command).then(() => {
+        button.textContent = 'Copied!';
+        setTimeout(() => {
+            button.textContent = 'Copy';
+        }, 2000);
+    });
+}
+
+// Simulate connection status update
+setTimeout(() => {
+    updateConnectionStatus(false); // Start with disconnected
+}, 1000);
+</script>
+{% endblock %}

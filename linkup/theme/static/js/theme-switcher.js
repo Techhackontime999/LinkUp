@@ -11,6 +11,7 @@ class ThemeManager {
         this.sunIcon = document.getElementById('sun-icon');
         this.moonIcon = document.getElementById('moon-icon');
         
+        // Initialize immediately
         this.init();
     }
 
@@ -82,6 +83,8 @@ class ThemeManager {
         window.dispatchEvent(new CustomEvent('themeChanged', { 
             detail: { theme, isDark } 
         }));
+        
+        console.log('Theme changed to:', theme);
     }
 
     toggleTheme() {
@@ -121,19 +124,17 @@ class ThemeManager {
 }
 
 // Initialize theme manager when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    window.themeManager = new ThemeManager();
-});
-
-// Also initialize immediately if DOM is already loaded
-if (document.readyState === 'loading') {
-    // DOM is still loading
-    document.addEventListener('DOMContentLoaded', () => {
+function initializeThemeManager() {
+    if (!window.themeManager) {
         window.themeManager = new ThemeManager();
-    });
+    }
+}
+
+// Initialize immediately if DOM is already loaded, otherwise wait for DOMContentLoaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeThemeManager);
 } else {
-    // DOM is already loaded
-    window.themeManager = new ThemeManager();
+    initializeThemeManager();
 }
 
 // Export for use in other scripts

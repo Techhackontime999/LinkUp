@@ -24,13 +24,15 @@ class NotificationSystem {
         this.currentOffset = 0;
         this.pageSize = 20;
         this.hasMore = true;
-        
-        this.init();
     }
     
     init() {
-        if (!this.btn) return; // No notification UI on this page
+        if (!this.btn) {
+            console.log('No notification UI on this page');
+            return; // No notification UI on this page
+        }
         
+        console.log('Initializing notification system...');
         this.setupEventListeners();
         this.connectWebSocket();
         this.loadInitialNotifications();
@@ -570,16 +572,19 @@ class NotificationSystem {
 }
 
 // Initialize notification system when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    window.notificationSystem = new NotificationSystem();
-    
-    // Request notification permission on first user interaction
-    document.addEventListener('click', () => {
-        if (window.notificationSystem) {
-            window.notificationSystem.requestNotificationPermission();
-        }
-    }, { once: true });
-});
+function initializeNotificationSystem() {
+    if (!window.notificationSystem) {
+        window.notificationSystem = new NotificationSystem();
+        window.notificationSystem.init();
+    }
+}
+
+// Initialize immediately if DOM is already loaded, otherwise wait for DOMContentLoaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeNotificationSystem);
+} else {
+    initializeNotificationSystem();
+}
 
 // Legacy support for existing code
 (function(){
@@ -595,4 +600,11 @@ document.addEventListener('DOMContentLoaded', () => {
             window.notificationSystem.addNotificationToUI(notification);
         }
     };
+    
+    // Request notification permission on first user interaction
+    document.addEventListener('click', () => {
+        if (window.notificationSystem) {
+            window.notificationSystem.requestNotificationPermission();
+        }
+    }, { once: true });
 })();

@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{% static 'css/form-enhancements.css' %}">
     <link rel="stylesheet" href="{% static 'css/accessibility-enhancements.css' %}">
     <script src="{% static 'js/theme-switcher.js' %}"></script>
+    <script src="{% static 'messaging/notifications.js' %}"></script>
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -282,6 +283,54 @@
         }
     </style>
     {% block extra_js %}{% endblock %}
+    
+    <!-- Initialize Theme and Notification Systems -->
+    <script>
+        // Simple debug script to check if everything is working
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('LinkUp page loaded successfully');
+            
+            // Check if theme toggle button exists
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                console.log('Theme toggle button found');
+            } else {
+                console.log('Theme toggle button not found');
+            }
+            
+            // Check if notification button exists
+            const notifBtn = document.getElementById('notif-btn');
+            if (notifBtn) {
+                console.log('Notification button found');
+            } else {
+                console.log('Notification button not found');
+            }
+            
+            // Test theme toggle
+            if (themeToggle) {
+                themeToggle.addEventListener('click', function() {
+                    console.log('Theme toggle clicked!');
+                    const html = document.documentElement;
+                    const currentTheme = html.getAttribute('data-theme') || 'light';
+                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    html.setAttribute('data-theme', newTheme);
+                    console.log('Theme changed to:', newTheme);
+                });
+            }
+            
+            // Test notification toggle
+            if (notifBtn) {
+                notifBtn.addEventListener('click', function() {
+                    console.log('Notification button clicked!');
+                    const dropdown = document.getElementById('notif-dropdown');
+                    if (dropdown) {
+                        dropdown.classList.toggle('hidden');
+                        console.log('Notification dropdown toggled');
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>
