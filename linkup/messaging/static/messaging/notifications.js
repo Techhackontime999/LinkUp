@@ -445,11 +445,24 @@ class NotificationSystem {
     
     toggleDropdown() {
         if (this.dropdown) {
-            this.dropdown.classList.toggle('hidden');
+            const isHidden = this.dropdown.classList.contains('hidden');
             
-            // Load fresh notifications when opening
-            if (!this.dropdown.classList.contains('hidden')) {
+            if (isHidden) {
+                // Show dropdown
+                this.dropdown.classList.remove('hidden');
+                this.dropdown.classList.add('block');
+                this.btn.setAttribute('aria-expanded', 'true');
+                
+                // Load fresh notifications when opening
                 this.loadInitialNotifications();
+                
+                // Add click outside listener
+                this.addClickOutsideListener();
+                
+                console.log('Notification dropdown opened');
+            } else {
+                // Hide dropdown
+                this.closeDropdown();
             }
         }
     }
@@ -457,6 +470,26 @@ class NotificationSystem {
     closeDropdown() {
         if (this.dropdown) {
             this.dropdown.classList.add('hidden');
+            this.dropdown.classList.remove('block');
+            this.btn.setAttribute('aria-expanded', 'false');
+            this.removeClickOutsideListener();
+            console.log('Notification dropdown closed');
+        }
+    }
+    
+    addClickOutsideListener() {
+        this.clickOutsideHandler = (e) => {
+            if (!this.dropdown.contains(e.target) && !this.btn.contains(e.target)) {
+                this.closeDropdown();
+            }
+        };
+        document.addEventListener('click', this.clickOutsideHandler);
+    }
+    
+    removeClickOutsideListener() {
+        if (this.clickOutsideHandler) {
+            document.removeEventListener('click', this.clickOutsideHandler);
+            this.clickOutsideHandler = null;
         }
     }
     
