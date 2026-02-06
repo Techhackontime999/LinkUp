@@ -48,10 +48,14 @@ class NotificationSystem {
     
     setupEventListeners() {
         // Toggle dropdown
-        this.btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.toggleDropdown();
-        });
+        if (this.btn) {
+            this.btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Notification button clicked!');
+                this.toggleDropdown();
+            });
+        }
         
         // Mark all as read
         if (this.markAllReadBtn) {
@@ -69,7 +73,7 @@ class NotificationSystem {
         
         // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
-            if (!this.dropdown.contains(e.target) && !this.btn.contains(e.target)) {
+            if (this.dropdown && !this.dropdown.contains(e.target) && !this.btn.contains(e.target)) {
                 this.closeDropdown();
             }
         });
@@ -449,8 +453,10 @@ class NotificationSystem {
     }
     
     toggleDropdown() {
+        console.log('toggleDropdown called, dropdown:', this.dropdown);
         if (this.dropdown) {
             const isHidden = this.dropdown.classList.contains('hidden');
+            console.log('Dropdown is hidden:', isHidden);
             
             if (isHidden) {
                 // Show dropdown
@@ -469,6 +475,8 @@ class NotificationSystem {
                 // Hide dropdown
                 this.closeDropdown();
             }
+        } else {
+            console.log('Dropdown element not found!');
         }
     }
     
