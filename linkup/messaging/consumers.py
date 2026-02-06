@@ -188,10 +188,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
             if hasattr(self, 'user'):
                 success = await self.message_handler.set_user_online_status(self.user, False)
                 if not success:
-                    MessagingLogger.log_error(
-                        "Failed to set user offline status",
-                        context_data={'user_id': self.user.id, 'close_code': close_code}
-                    )
+                    try:
+                        await MessagingLogger.log_error(
+                            "Failed to log connection error to database",
+                            context_data={'error_type': 'connection_error', 'exception': str(Exception("Failed to set user offline status")), 'traceback': traceback.format_exc()},
+                            user=self.user
+                        )
+                    except Exception as e:
+                        await log_async_context_error(
+                            e,
+                            "log_connection_error",
+                            self.user,
+                            context_data={'error_type': 'connection_error'}
+                        )
 
                 # Notify other user
                 if hasattr(self, 'other_user'):
