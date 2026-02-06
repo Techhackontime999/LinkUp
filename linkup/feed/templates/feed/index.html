@@ -100,12 +100,14 @@
                             <p class="text-xs text-gray-500">{{ post.created_at|timesince }} ago</p>
                         </div>
                         {% if post.user != request.user %}
-                        <button
-                            class="btn-follow {% if post.user in request.user.following.all %}following{% else %}not-following{% endif %} px-4 py-1.5 text-xs"
-                            data-user-id="{{ post.user.id }}">
-                            <span class="follow-text">{% if post.user in request.user.following.all %}Following{% else
-                                %}Follow{% endif %}</span>
-                        </button>
+                        <div class="flex-shrink-0 ml-4">
+                            <button
+                                class="btn-follow {% if post.user in request.user.following.all %}following{% else %}not-following{% endif %} px-4 py-1.5 text-xs font-medium rounded-full transition-all duration-200"
+                                data-user-id="{{ post.user.id }}">
+                                <span class="follow-text">{% if post.user in request.user.following.all %}Following{% else
+                                    %}Follow{% endif %}</span>
+                            </button>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
