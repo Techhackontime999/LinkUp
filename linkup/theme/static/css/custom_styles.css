@@ -1317,18 +1317,25 @@ nav.premium-nav a.active::after {
 
 /* Fix notification dropdown positioning and visibility */
 #notif-dropdown {
-    position: absolute !important;
-    right: 0 !important;
-    top: 100% !important;
-    margin-top: 0.5rem !important;
-    z-index: 9999 !important;
-    min-width: 24rem !important;
-    max-width: 24rem !important;
-    background: white !important;
-    border: 1px solid #e5e7eb !important;
-    border-radius: 0.5rem !important;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
-    padding: 0.5rem 0 !important;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    z-index: 1000;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    min-width: 20rem;
+    max-width: 24rem;
+    max-height: 32rem;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+[data-theme="dark"] #notif-dropdown {
+    background: #1f2937;
+    border-color: #374151;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
 #notif-dropdown.hidden {

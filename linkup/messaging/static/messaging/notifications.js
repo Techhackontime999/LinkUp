@@ -11,12 +11,7 @@ class NotificationSystem {
         this.isConnected = false;
         this.notifications = [];
         this.unreadCount = 0;
-        
-        // Initialize DOM elements immediately
-        this.initializeDOMElements();
-    }
-    
-    initializeDOMElements() {
+
         // DOM elements
         this.badge = document.getElementById('notif-badge');
         this.list = document.getElementById('notif-list');
@@ -24,122 +19,67 @@ class NotificationSystem {
         this.btn = document.getElementById('notif-btn');
         this.loadMoreBtn = document.getElementById('load-more-notifications');
         this.markAllReadBtn = document.getElementById('mark-all-read');
-        
+
         // Pagination
         this.currentOffset = 0;
         this.pageSize = 20;
         this.hasMore = true;
+
+        this.init();
     }
-    
+
     init() {
-        console.log('=== NOTIFICATION INIT DEBUG ===');
-        console.log('DOM ready state:', document.readyState);
-        
-        // Check elements immediately
-        const notifBtn = document.getElementById('notif-btn');
-        const notifDropdown = document.getElementById('notif-dropdown');
-        const notifBadge = document.getElementById('notif-badge');
-        
-        console.log('Elements found:', {
-            btn: !!notifBtn,
-            dropdown: !!notifDropdown,
-            badge: !!notifBadge
-        });
-        
-        if (!notifBtn) {
-            console.log('No notification UI on this page');
-            return; // No notification UI on this page
-        }
-        
-        // Store elements
-        this.btn = notifBtn;
-        this.dropdown = notifDropdown;
-        this.badge = notifBadge;
-        
-        console.log('Initializing notification system...');
+        if (!this.btn) return; // No notification UI on this page
+
         this.setupEventListeners();
         this.connectWebSocket();
         this.loadInitialNotifications();
-        
+
         // Periodic fallback polling
         setInterval(() => this.pollFallback(), 30000);
-        
-        console.log('=== INIT COMPLETE ===');
     }
-    
+
     setupEventListeners() {
-        console.log('Setting up event listeners...');
-        
         // Toggle dropdown
-        if (this.btn) {
-            console.log('Adding click listener to notification button');
-            this.btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Notification button clicked!');
-                
-                // Simple direct toggle
-                if (this.dropdown) {
-                    const isHidden = this.dropdown.classList.contains('hidden');
-                    console.log('Current dropdown state - hidden:', isHidden);
-                    
-                    if (isHidden) {
-                        console.log('Showing dropdown...');
-                        this.dropdown.classList.remove('hidden');
-                        this.dropdown.classList.add('block');
-                        this.btn.setAttribute('aria-expanded', 'true');
-                    } else {
-                        console.log('Hiding dropdown...');
-                        this.dropdown.classList.add('hidden');
-                        this.dropdown.classList.remove('block');
-                        this.btn.setAttribute('aria-expanded', 'false');
-                    }
-                } else {
-                    console.error('Dropdown element not found!');
-                }
-            });
-        } else {
-            console.error('Notification button not found!');
-        }
-        
+        this.btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.toggleDropdown();
+        });
+
         // Mark all as read
         if (this.markAllReadBtn) {
             this.markAllReadBtn.addEventListener('click', () => {
                 this.markAllAsRead();
             });
         }
-        
+
         // Load more notifications
         if (this.loadMoreBtn) {
             this.loadMoreBtn.addEventListener('click', () => {
                 this.loadMoreNotifications();
             });
         }
-        
+
         // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
-            if (this.dropdown && !this.dropdown.contains(e.target) && !this.btn.contains(e.target)) {
-                this.dropdown.classList.add('hidden');
-                this.dropdown.classList.remove('block');
-                this.btn.setAttribute('aria-expanded', 'false');
-                console.log('Clicked outside - dropdown closed');
+            if (!this.dropdown.contains(e.target) && !this.btn.contains(e.target)) {
+                this.closeDropdown();
             }
         });
-        
+
         // Handle visibility change for connection management
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && !this.isConnected) {
                 this.connectWebSocket();
             }
         });
-        
-        console.log('Event listeners setup complete');
     }
-    
+
     connectWebSocket() {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             return; // Already connected
         }
+
         
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${protocol}//${window.location.host}/ws/notifications/`;
