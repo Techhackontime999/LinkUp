@@ -1315,6 +1315,31 @@ nav.premium-nav a.active::after {
     50% { transform: scale(1.1); }
 }
 
+/* Fix notification dropdown positioning and visibility */
+#notif-dropdown {
+    position: absolute !important;
+    right: 0 !important;
+    top: 100% !important;
+    margin-top: 0.5rem !important;
+    z-index: 9999 !important;
+    min-width: 24rem !important;
+    max-width: 24rem !important;
+}
+
+#notif-dropdown.hidden {
+    display: none !important;
+}
+
+#notif-dropdown.block {
+    display: block !important;
+}
+
+/* Ensure dropdown is above all other elements */
+.dropdown-premium {
+    z-index: 9999 !important;
+    position: absolute !important;
+}
+
 /* Premium Dropdown Styles */
 [data-theme="dark"] .dropdown-premium {
     background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
