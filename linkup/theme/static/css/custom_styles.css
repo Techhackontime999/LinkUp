@@ -1317,9 +1317,10 @@ nav.premium-nav a.active::after {
 
 /* Fix notification dropdown positioning and visibility */
 #notif-dropdown {
-    position: fixed !important;
-    right: 2rem !important;
-    top: 4rem !important;
+    position: absolute !important;
+    right: 0 !important;
+    top: 100% !important;
+    margin-top: 0.5rem !important;
     z-index: 9999 !important;
     min-width: 24rem !important;
     max-width: 24rem !important;
@@ -1341,7 +1342,7 @@ nav.premium-nav a.active::after {
 /* Ensure dropdown is above all other elements */
 .dropdown-premium {
     z-index: 9999 !important;
-    position: fixed !important;
+    position: absolute !important;
 }
 
 /* Dark mode dropdown fixes */
