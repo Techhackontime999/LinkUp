@@ -47,14 +47,38 @@ class NotificationSystem {
     }
     
     setupEventListeners() {
+        console.log('Setting up event listeners...');
+        
         // Toggle dropdown
         if (this.btn) {
+            console.log('Adding click listener to notification button');
             this.btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 console.log('Notification button clicked!');
-                this.toggleDropdown();
+                
+                // Simple direct toggle
+                if (this.dropdown) {
+                    const isHidden = this.dropdown.classList.contains('hidden');
+                    console.log('Current dropdown state - hidden:', isHidden);
+                    
+                    if (isHidden) {
+                        console.log('Showing dropdown...');
+                        this.dropdown.classList.remove('hidden');
+                        this.dropdown.classList.add('block');
+                        this.btn.setAttribute('aria-expanded', 'true');
+                    } else {
+                        console.log('Hiding dropdown...');
+                        this.dropdown.classList.add('hidden');
+                        this.dropdown.classList.remove('block');
+                        this.btn.setAttribute('aria-expanded', 'false');
+                    }
+                } else {
+                    console.error('Dropdown element not found!');
+                }
             });
+        } else {
+            console.error('Notification button not found!');
         }
         
         // Mark all as read
@@ -74,7 +98,10 @@ class NotificationSystem {
         // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
             if (this.dropdown && !this.dropdown.contains(e.target) && !this.btn.contains(e.target)) {
-                this.closeDropdown();
+                this.dropdown.classList.add('hidden');
+                this.dropdown.classList.remove('block');
+                this.btn.setAttribute('aria-expanded', 'false');
+                console.log('Clicked outside - dropdown closed');
             }
         });
         
@@ -84,6 +111,8 @@ class NotificationSystem {
                 this.connectWebSocket();
             }
         });
+        
+        console.log('Event listeners setup complete');
     }
     
     connectWebSocket() {
