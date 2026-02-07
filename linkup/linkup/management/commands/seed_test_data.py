@@ -811,7 +811,7 @@ class Command(BaseCommand):
 
     def create_comments_and_likes_bulk(self, posts, users):
         """Create comments and likes using bulk operations"""
-        from feed.models import Comment
+        from feed.models import Comment, Post
         
         comments = []
         post_likes = {}
