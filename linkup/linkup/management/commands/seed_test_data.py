@@ -183,7 +183,7 @@ class Command(BaseCommand):
             first_name = self.fake.first_name()
             last_name = self.fake.last_name()
             username = f"{first_name.lower()}_{last_name.lower()}_{i}"
-            email = f"{username}@{self.fake.free_email_domain()}"
+            email = self.fake.email()
             
             user = User.objects.create_user(
                 username=username,
@@ -198,7 +198,7 @@ class Command(BaseCommand):
                 f"{self.fake.job()} at {self.fake.company()}",
                 f"Senior {self.fake.job()}",
                 f"{self.fake.job()} | {self.fake.catch_phrase()}",
-                f"Experienced {self.fake.job()} in {self.fake.industry()}"
+                f"Experienced {self.fake.job()} in {random.choice(['Technology', 'Finance', 'Healthcare', 'Education', 'Retail'])}"
             ])
             
             user.profile.bio = self.fake.text(max_nb_chars=200)
