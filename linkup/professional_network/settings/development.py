@@ -12,11 +12,16 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-# Database - SQLite for development
+# Database - SQLite for development (optimized for performance)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            'timeout': 20,  # Increase timeout to reduce locking issues
+            'check_same_thread': False,  # Allow multiple threads
+        },
+        'CONN_MAX_AGE': 60,  # Connection pooling
     }
 }
 
