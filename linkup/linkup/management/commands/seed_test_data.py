@@ -760,7 +760,7 @@ class Command(BaseCommand):
                 requirements=self.fake.text(max_nb_chars=400),
                 salary_range=salary_range,
                 posted_by=random.choice(users),
-                status='active',
+                is_active=True,
                 created_at=self.fake.date_time_between(start_date='-60d', end_date='now')
             ))
         
