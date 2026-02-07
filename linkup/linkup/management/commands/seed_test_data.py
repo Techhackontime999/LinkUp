@@ -653,11 +653,11 @@ class Command(BaseCommand):
                 experiences.append(Experience(
                     user=user,
                     company=self.fake.company(),
-                    position=random.choice(['Software Engineer', 'Senior Developer', 'Product Manager', 'Data Scientist', 'Team Lead']),
+                    title=random.choice(['Software Engineer', 'Senior Developer', 'Product Manager', 'Data Scientist', 'Team Lead']),
                     description=self.fake.text(max_nb_chars=300),
                     start_date=start_date,
                     end_date=end_date,
-                    current=end_date is None
+                    is_current=end_date is None
                 ))
             
             # 1-2 education entries per user
@@ -668,7 +668,7 @@ class Command(BaseCommand):
                 
                 educations.append(Education(
                     user=user,
-                    institution=self.fake.company() + ' University',
+                    school=self.fake.company() + ' University',
                     degree=random.choice(['Bachelor', 'Master', 'PhD']) + ' in ' + random.choice(['Computer Science', 'Engineering', 'Business', 'Data Science']),
                     field_of_study=random.choice(['Computer Science', 'Engineering', 'Business Administration', 'Data Science']),
                     start_date=start_date,
