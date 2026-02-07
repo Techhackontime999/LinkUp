@@ -474,43 +474,47 @@ class Command(BaseCommand):
         
         # Create connections
         for user in users:
-            # Each user has 5-20 connections
-            num_connections = random.randint(5, min(20, len(users) - 1))
-            potential_friends = [u for u in users if u != user]
-            friends = random.sample(potential_friends, num_connections)
-            
-            for friend in friends:
-                # Avoid duplicate connections
-                if not Connection.objects.filter(
-                    user=user, friend=friend
-                ).exists() and not Connection.objects.filter(
-                    user=friend, friend=user
-                ).exists():
-                    status = random.choice(['accepted', 'pending', 'accepted', 'accepted'])  # More accepted
-                    Connection.objects.create(
-                        user=user,
-                        friend=friend,
-                        status=status,
-                        created_at=self.fake.date_time_between(start_date='-1y', end_date='now')
-                    )
+            # Each user has 5-20 connections, but ensure we don't exceed available users
+            max_connections = min(20, len(users) - 1)
+            if max_connections > 0:
+                num_connections = random.randint(min(5, max_connections), max_connections)
+                potential_friends = [u for u in users if u != user]
+                friends = random.sample(potential_friends, num_connections)
+                
+                for friend in friends:
+                    # Avoid duplicate connections
+                    if not Connection.objects.filter(
+                        user=user, friend=friend
+                    ).exists() and not Connection.objects.filter(
+                        user=friend, friend=user
+                    ).exists():
+                        status = random.choice(['accepted', 'pending', 'accepted', 'accepted'])  # More accepted
+                        Connection.objects.create(
+                            user=user,
+                            friend=friend,
+                            status=status,
+                            created_at=self.fake.date_time_between(start_date='-1y', end_date='now')
+                        )
         
         # Create follows
         for user in users:
-            # Each user follows 10-30 other users
-            num_follows = random.randint(10, min(30, len(users) - 1))
-            potential_follows = [u for u in users if u != user]
-            follows = random.sample(potential_follows, num_follows)
-            
-            for follow_user in follows:
-                # Avoid duplicate follows
-                if not Follow.objects.filter(
-                    follower=user, followed=follow_user
-                ).exists():
-                    Follow.objects.create(
-                        follower=user,
-                        followed=follow_user,
-                        created_at=self.fake.date_time_between(start_date='-1y', end_date='now')
-                    )
+            # Each user follows 10-30 other users, but ensure we don't exceed available users
+            max_follows = min(30, len(users) - 1)
+            if max_follows > 0:
+                num_follows = random.randint(min(10, max_follows), max_follows)
+                potential_follows = [u for u in users if u != user]
+                follows = random.sample(potential_follows, num_follows)
+                
+                for follow_user in follows:
+                    # Avoid duplicate follows
+                    if not Follow.objects.filter(
+                        follower=user, followed=follow_user
+                    ).exists():
+                        Follow.objects.create(
+                            follower=user,
+                            followed=follow_user,
+                            created_at=self.fake.date_time_between(start_date='-1y', end_date='now')
+                        )
 
     def create_comments_and_likes(self, posts, users):
         """Create comments and likes on posts"""
@@ -561,44 +565,45 @@ class Command(BaseCommand):
         from messaging.models import Message
         
         # Create conversations between random pairs of users
-        num_conversations = min(30, len(users) // 2)
-        
-        for _ in range(num_conversations):
-            user1, user2 = random.sample(users, 2)
+        if len(users) >= 2:
+            num_conversations = min(30, len(users) // 2)
             
-            # Create 1-10 messages per conversation
-            num_messages = random.randint(1, 10)
-            for i in range(num_messages):
-                sender = user1 if i % 2 == 0 else user2
-                recipient = user2 if i % 2 == 0 else user1
+            for _ in range(num_conversations):
+                user1, user2 = random.sample(users, 2)
                 
-                message_templates = [
-                    "Hi {name}, hope you're doing well!",
-                    "Thanks for connecting! I'd love to learn more about your work at {company}.",
-                    "Great post earlier! Really enjoyed your thoughts on {topic}.",
-                    "Would you be interested in discussing {opportunity}?",
-                    "Quick question about your experience with {skill}.",
-                    "Congratulations on your recent achievement!",
-                    "I saw you're looking for {role}. I might know someone perfect for this.",
-                    "Let's catch up sometime soon! Are you available next week?"
-                ]
-                
-                content = random.choice(message_templates).format(
-                    name=recipient.first_name,
-                    company=self.fake.company(),
-                    topic=random.choice(['AI', 'remote work', 'leadership', 'innovation']),
-                    opportunity=random.choice(['collaboration', 'a potential project', 'career opportunities']),
-                    skill=random.choice(['Python', 'product management', 'design thinking', 'data analysis']),
-                    role=random.choice(['developers', 'designers', 'product managers'])
-                )
-                
-                Message.objects.create(
-                    sender=sender,
-                    recipient=recipient,
-                    content=content,
-                    status=random.choice(['sent', 'delivered', 'read']),
-                    created_at=self.fake.date_time_between(start_date='-30d', end_date='now')
-                )
+                # Create 1-10 messages per conversation
+                num_messages = random.randint(1, 10)
+                for i in range(num_messages):
+                    sender = user1 if i % 2 == 0 else user2
+                    recipient = user2 if i % 2 == 0 else user1
+                    
+                    message_templates = [
+                        "Hi {name}, hope you're doing well!",
+                        "Thanks for connecting! I'd love to learn more about your work at {company}.",
+                        "Great post earlier! Really enjoyed your thoughts on {topic}.",
+                        "Would you be interested in discussing {opportunity}?",
+                        "Quick question about your experience with {skill}.",
+                        "Congratulations on your recent achievement!",
+                        "I saw you're looking for {role}. I might know someone perfect for this.",
+                        "Let's catch up sometime soon! Are you available next week?"
+                    ]
+                    
+                    content = random.choice(message_templates).format(
+                        name=recipient.first_name,
+                        company=self.fake.company(),
+                        topic=random.choice(['AI', 'remote work', 'leadership', 'innovation']),
+                        opportunity=random.choice(['collaboration', 'a potential project', 'career opportunities']),
+                        skill=random.choice(['Python', 'product management', 'design thinking', 'data analysis']),
+                        role=random.choice(['developers', 'designers', 'product managers'])
+                    )
+                    
+                    Message.objects.create(
+                        sender=sender,
+                        recipient=recipient,
+                        content=content,
+                        status=random.choice(['sent', 'delivered', 'read']),
+                        created_at=self.fake.date_time_between(start_date='-30d', end_date='now')
+                    )
 
     def create_applications(self, jobs, users):
         """Create job applications"""
