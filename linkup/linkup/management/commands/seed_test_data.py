@@ -766,6 +766,10 @@ class Command(BaseCommand):
         
         # Bulk create
         created_jobs = Job.objects.bulk_create(jobs, batch_size=100)
+        
+        # Ensure all jobs are active (bulk_create might not respect default values)
+        Job.objects.all().update(is_active=True)
+        
         return created_jobs
 
     def create_connections_and_follows_bulk(self, users):
