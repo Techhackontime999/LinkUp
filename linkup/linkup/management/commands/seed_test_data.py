@@ -5,6 +5,10 @@ from datetime import timedelta, datetime
 import random
 import faker
 from django.db import transaction
+import urllib.request
+import os
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 
 User = get_user_model()
 
@@ -175,6 +179,9 @@ class Command(BaseCommand):
             user.profile.headline = profile_data['headline']
             user.profile.bio = profile_data['bio']
             user.profile.location = profile_data['location']
+            # Add avatar for professional profiles (80% chance)
+            if random.random() < 0.8:
+                user.profile.avatar = self.get_fake_avatar(user.id)
             user.profile.save()
             users.append(user)
 
@@ -203,10 +210,57 @@ class Command(BaseCommand):
             
             user.profile.bio = self.fake.text(max_nb_chars=200)
             user.profile.location = f"{self.fake.city()}, {self.fake.state_abbr()}"
+            # Add avatar for random users (60% chance)
+            if random.random() < 0.6:
+                user.profile.avatar = self.get_fake_avatar(user.id)
             user.profile.save()
             users.append(user)
 
         return users
+
+    def get_fake_avatar(self, user_id):
+        """Generate a fake avatar image using a profile picture service"""
+        try:
+            # Use a service that provides profile pictures
+            avatar_url = f"https://picsum.photos/200/200?random={user_id}"
+            
+            # Download the avatar
+            urllib.request.urlretrieve(avatar_url, "temp_avatar.jpg")
+            
+            # Read the downloaded avatar
+            with open("temp_avatar.jpg", 'rb') as f:
+                avatar_data = f.read()
+            
+            # Clean up temp file
+            if os.path.exists("temp_avatar.jpg"):
+                os.remove("temp_avatar.jpg")
+            
+            return ContentFile(avatar_data, f"avatar_{user_id}.jpg")
+        except Exception as e:
+            self.stdout.write(self.style.WARNING(f'Could not download avatar: {e}'))
+            return None
+
+    def get_fake_image(self, width=800, height=600):
+        """Generate a fake image using Lorem Picsum"""
+        try:
+            # Use Lorem Picsum for random professional images
+            image_url = f"https://picsum.photos/{width}/{height}?random={random.randint(1, 1000)}"
+            
+            # Download the image
+            urllib.request.urlretrieve(image_url, "temp_image.jpg")
+            
+            # Read the downloaded image
+            with open("temp_image.jpg", 'rb') as f:
+                image_data = f.read()
+            
+            # Clean up temp file
+            if os.path.exists("temp_image.jpg"):
+                os.remove("temp_image.jpg")
+            
+            return ContentFile(image_data, f"post_image_{random.randint(1000, 9999)}.jpg")
+        except Exception as e:
+            self.stdout.write(self.style.WARNING(f'Could not download image: {e}'))
+            return None
 
     def create_experiences_and_education(self, users):
         """Create work experiences and education for users"""
@@ -318,9 +372,15 @@ class Command(BaseCommand):
             ], random.randint(2, 4))
             content += ' ' + ' '.join(hashtags)
             
+            # Randomly add image to post (30% chance)
+            post_image = None
+            if random.random() < 0.3:  # 30% of posts will have images
+                post_image = self.get_fake_image()
+            
             post = Post.objects.create(
                 user=user,
                 content=content,
+                image=post_image,
                 created_at=self.fake.date_time_between(start_date='-6m', end_date='now')
             )
             posts.append(post)
