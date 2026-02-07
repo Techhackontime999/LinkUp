@@ -7,7 +7,6 @@ from django.http import HttpRequest
 from django.template.response import TemplateResponse
 from typing import List, Dict
 from .admin_dashboard import DashboardStats
-from .admin_urls import urlpatterns as admin_urlpatterns
 
 
 class LinkUpAdminSite(AdminSite):
@@ -18,7 +17,8 @@ class LinkUpAdminSite(AdminSite):
     index_title = "Welcome to LinkUp Administration"
     
     def get_urls(self):
-        from django.urls import path, include
+        from django.urls import path
+        from . import admin_views
         urls = super().get_urls()
         custom_urls = [
             path('seed-test-data/', self.admin_view(admin_views.SeedTestDataView.as_view()), name='seed_test_data'),
