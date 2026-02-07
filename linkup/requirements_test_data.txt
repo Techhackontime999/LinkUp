@@ -1,0 +1,2 @@
+# Additional requirements for test data seeding
+faker>=18.0.0
