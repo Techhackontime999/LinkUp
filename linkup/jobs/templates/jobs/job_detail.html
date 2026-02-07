@@ -70,15 +70,17 @@
                     {% else %}
                     <a href="{% url 'jobs:apply_job' job.pk %}" class="btn-premium px-8 py-2.5 shadow-purple-200">Apply
                         Now</a>
-                    <button
-                        class="px-6 py-2.5 border-2 border-gray-200 text-gray-700 rounded-xl font-bold hover:border-purple-300 hover:text-purple-600 transition-all flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                        </svg>
-                        Save
-                    </button>
+                    <form action="{% url 'jobs:save_job' job.pk %}" method="post" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="px-6 py-2.5 border-2 border-gray-200 text-gray-700 rounded-xl font-bold hover:border-purple-300 hover:text-purple-600 transition-all flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                            </svg>
+                            Save Job
+                        </button>
+                    </form>
                     {% endif %}
                 </div>
             </div>

@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.db import IntegrityError
 from django.db.models import Q
 from django.core.paginator import Paginator
-from .models import Job, Application
+from .models import Job, Application, SavedJob
 from .forms import JobForm, ApplicationForm, JobSearchForm
 
 @login_required
@@ -140,7 +140,7 @@ def my_jobs(request):
 
 @login_required
 def my_applications(request):
-    """View for applications submitted by the current user"""
+    """View for applications submitted by current user"""
     applications = Application.objects.filter(applicant=request.user).select_related('job').order_by('-applied_at')
     
     # Pagination
@@ -149,3 +149,37 @@ def my_applications(request):
     page_obj = paginator.get_page(page_number)
     
     return render(request, 'jobs/my_applications.html', {'page_obj': page_obj})
+
+@login_required
+def saved_jobs(request):
+    """View for jobs saved by current user"""
+    saved_jobs = SavedJob.objects.filter(user=request.user).select_related('job').order_by('-saved_at')
+    
+    # Pagination
+    paginator = Paginator(saved_jobs, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'jobs/saved_jobs.html', {'page_obj': page_obj})
+
+@login_required
+def save_job(request, pk):
+    """Save/unsave a job"""
+    job = get_object_or_404(Job, pk=pk)
+    saved_job, created = SavedJob.objects.get_or_create(
+        job=job,
+        user=request.user
+    )
+    
+    if created:
+        messages.success(request, f'Job "{job.title}" saved successfully!')
+    else:
+        saved_job.delete()
+        messages.info(request, f'Job "{job.title}" removed from saved jobs.')
+    
+    return redirect('jobs:job_detail', pk=pk)
+
+@login_required
+def job_alerts(request):
+    """View for job alerts (placeholder for future implementation)"""
+    return render(request, 'jobs/job_alerts.html')

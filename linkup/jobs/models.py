@@ -57,3 +57,17 @@ class Application(models.Model):
     class Meta:
         unique_together = ('job', 'applicant')
         ordering = ['-applied_at']
+
+
+class SavedJob(models.Model):
+    """Model for users to save jobs they're interested in"""
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='saved_by')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='saved_jobs')
+    saved_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} saved {self.job.title}"
+
+    class Meta:
+        unique_together = ('job', 'user')
+        ordering = ['-saved_at']

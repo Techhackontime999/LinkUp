@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-6">
+    <!-- Left Sidebar -->
+    <div class="hidden lg:block lg:col-span-3">
+        <div class="premium-card p-6 animate-fade-in">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">Job Alerts</h3>
+            <div class="space-y-4">
+                <a href="{% url 'jobs:job_list' %}" class="btn-premium w-full text-center block text-sm">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    Browse Jobs
+                </a>
+                <div class="border-t border-gray-100 pt-4">
+                    <p class="text-xs text-gray-500 uppercase font-semibold mb-2">Quick Links</p>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li><a href="{% url 'jobs:my_applications' %}" class="hover:text-purple-600">My Applications</a></li>
+                        <li><a href="{% url 'jobs:saved_jobs' %}" class="hover:text-purple-600">Saved Jobs</a></li>
+                        <li><a href="{% url 'jobs:my_jobs' %}" class="hover:text-purple-600">My Postings</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="lg:col-span-9">
+        <div class="premium-card p-8 animate-fade-in">
+            <div class="text-center">
+                <div class="mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 mx-auto text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800 mb-4">Job Alerts Coming Soon!</h1>
+                <p class="text-gray-600 mb-6 max-w-md mx-auto">
+                    We're working on a smart job alert system that will notify you when new jobs matching your preferences are posted. 
+                    Stay tuned for this exciting feature!
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                    <div class="text-center p-4 bg-purple-50 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-purple-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <h3 class="font-semibold text-gray-800 mb-1">Smart Matching</h3>
+                        <p class="text-sm text-gray-600">Get notified about jobs that match your skills and preferences</p>
+                    </div>
+                    
+                    <div class="text-center p-4 bg-blue-50 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-blue-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        <h3 class="font-semibold text-gray-800 mb-1">Email Notifications</h3>
+                        <p class="text-sm text-gray-600">Receive daily or weekly email digests of new opportunities</p>
+                    </div>
+                    
+                    <div class="text-center p-4 bg-green-50 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-green-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                        <h3 class="font-semibold text-gray-800 mb-1">Custom Filters</h3>
+                        <p class="text-sm text-gray-600">Set specific criteria for the types of jobs you want to see</p>
+                    </div>
+                </div>
+                
+                <div class="mt-8">
+                    <a href="{% url 'jobs:job_list' %}" class="btn-premium">
+                        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        Browse Available Jobs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
