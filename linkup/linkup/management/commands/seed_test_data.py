@@ -395,20 +395,72 @@ class Command(BaseCommand):
         job_titles = [
             'Senior Software Engineer', 'Product Manager', 'UX Designer', 'Data Scientist',
             'DevOps Engineer', 'Frontend Developer', 'Backend Developer', 'Full Stack Developer',
-            'Marketing Manager', 'Sales Representative', 'Business Analyst', 'Project Manager'
+            'Marketing Manager', 'Sales Representative', 'Business Analyst', 'Project Manager',
+            'Technical Lead', 'Engineering Manager', 'Product Designer', 'Machine Learning Engineer',
+            'Cloud Architect', 'Cybersecurity Analyst', 'Mobile Developer', 'QA Engineer',
+            'Data Analyst', 'Marketing Specialist', 'Content Writer', 'HR Manager',
+            'Financial Analyst', 'Operations Manager', 'Customer Success Manager', 'Sales Engineer'
+        ]
+        
+        companies = [
+            'TechCorp Solutions', 'InnovateTech Inc', 'DataDriven Systems', 'CloudFirst Technologies',
+            'AI Innovations Lab', 'Digital Transformation Co', 'NextGen Software', 'FutureProof Systems',
+            'SmartTech Solutions', 'Agile Development Group', 'Enterprise Software Inc', 'StartupHub',
+            'GrowthEngine Technologies', 'Innovation Labs', 'TechVentures', 'Digital Dynamics',
+            'Sparkle Solutions', 'NovaTech Inc', 'Apex Innovations', 'Pulse Technologies',
+            'Fusion Systems', 'Catalyst Software', 'Nexus Innovations', 'Luminate Technologies',
+            'Aurora Solutions', 'Pinnacle Software', 'Zephyr Innovations', 'Flux Technologies'
+        ]
+        
+        job_descriptions = [
+            "We are seeking a talented {title} to join our growing team. You will work on cutting-edge projects and collaborate with cross-functional teams.",
+            "Join our innovative company as a {title}. This role offers excellent growth opportunities and chance to make a real impact.",
+            "Looking for an experienced {title} to help us build future of technology. Competitive salary and great benefits included.",
+            "Our fast-growing company needs a skilled {title}. You'll work with modern technologies and amazing team members.",
+            "Exciting opportunity for a {title} to join our dynamic team. Remote-friendly environment with flexible work hours."
+        ]
+        
+        requirements_templates = [
+            "Bachelor's degree in relevant field or equivalent experience\n3+ years of experience in {field}\nStrong problem-solving skills\nExcellent communication abilities",
+            "5+ years of professional experience\nProficiency in {skill1} and {skill2}\nExperience with {skill3}\nTeam player with leadership potential",
+            "Master's degree preferred\n2+ years in similar role\nExpert knowledge of {field}\nAbility to work in fast-paced environment"
         ]
         
         for _ in range(num_jobs):
             poster = random.choice(users)
+            title = random.choice(job_titles)
+            company = random.choice(companies)
+            
+            # Generate realistic description
+            description = random.choice(job_descriptions).format(title=title)
+            
+            # Generate requirements with specific skills
+            requirements = random.choice(requirements_templates).format(
+                field=random.choice(['software development', 'data analysis', 'product management', 'UX design', 'cloud computing']),
+                skill1=random.choice(['Python', 'JavaScript', 'React', 'Django', 'AWS', 'Docker', 'Kubernetes']),
+                skill2=random.choice(['PostgreSQL', 'MongoDB', 'Redis', 'MySQL', 'GraphQL', 'REST APIs']),
+                skill3=random.choice(['Agile', 'Scrum', 'CI/CD', 'Microservices', 'DevOps'])
+            )
+            
+            # Generate realistic salary ranges based on job type
+            if 'Senior' in title or 'Lead' in title or 'Manager' in title:
+                salary_range = f"${random.randint(120, 200)}k - ${random.randint(150, 250)}k"
+            elif 'Engineer' in title or 'Developer' in title:
+                salary_range = f"${random.randint(80, 140)}k - ${random.randint(100, 180)}k"
+            elif 'Analyst' in title or 'Specialist' in title:
+                salary_range = f"${random.randint(60, 100)}k - ${random.randint(80, 120)}k"
+            else:
+                salary_range = f"${random.randint(70, 120)}k - ${random.randint(90, 150)}k"
+            
             job = Job.objects.create(
-                title=random.choice(job_titles),
-                company=self.fake.company(),
+                title=title,
+                company=company,
                 location=f"{self.fake.city()}, {self.fake.state_abbr()}",
                 workplace_type=random.choice(['remote', 'onsite', 'hybrid']),
                 job_type=random.choice(['full-time', 'part-time', 'contract', 'internship']),
-                description=self.fake.text(max_nb_chars=500),
-                requirements=self.fake.text(max_nb_chars=300),
-                salary_range=f"${random.randint(60, 200)}k - ${random.randint(80, 300)}k",
+                description=description,
+                requirements=requirements,
+                salary_range=salary_range,
                 posted_by=poster,
                 created_at=self.fake.date_time_between(start_date='-3m', end_date='now')
             )

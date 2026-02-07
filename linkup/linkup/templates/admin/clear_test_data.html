@@ -1,0 +1,283 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:clear_test_data' %}">Clear Test Data</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module">
+        <h1>🗑️ Clear Test Data</h1>
+        
+        <div class="alert alert-warning" style="background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+            <h3>⚠️ Warning: This action is irreversible!</h3>
+            <p>This will permanently delete ALL test data from your database:</p>
+            <ul>
+                <li>All non-staff users and their profiles</li>
+                <li>All posts, comments, and likes</li>
+                <li>All job postings and applications</li>
+                <li>All connections and follows</li>
+                <li>All messages and notifications</li>
+                <li>All work experiences and education records</li>
+            </ul>
+            <p><strong>Staff and superuser accounts will be preserved.</strong></p>
+        </div>
+        
+        <form method="post" id="clear-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="confirm" id="id_confirm" required>
+                    I understand that this action cannot be undone and I want to delete all test data
+                </label>
+            </div>
+            
+            <div class="submit-row">
+                <button type="submit" class="default" id="clear-button" disabled>
+                    🗑️ Clear All Test Data
+                </button>
+                <a href="{% url 'admin:index' %}" class="button">
+                    ❌ Cancel
+                </a>
+            </div>
+        </form>
+        
+        <!-- Progress indicator -->
+        <div id="progress-container" style="display: none; margin-top: 20px;">
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%">
+                    Clearing test data... Please wait...
+                </div>
+            </div>
+            <div id="progress-output" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto;"></div>
+        </div>
+        
+        <!-- Current stats -->
+        <div class="module">
+            <h2>📊 Current Data Overview</h2>
+            <p>Before clearing, you may want to review your current data:</p>
+            <button type="button" class="button" id="stats-button">
+                📊 View Current Stats
+            </button>
+            <div id="stats-container" style="display: none; margin-top: 20px;">
+                <div id="stats-content"></div>
+            </div>
+        </div>
+        
+        <div class="module">
+            <h2>🔄 Alternative Options</h2>
+            <p>Instead of clearing all data, consider these options:</p>
+            <ul>
+                <li><a href="{% url 'admin:seed_test_data' %}">Seed new data without clearing</a> - Add more data to existing content</li>
+                <li><a href="/admin/">Manage individual models</a> - Delete specific items manually</li>
+                <li><a href="/admin/auth/user/">Manage users</a> - Delete specific users</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+.alert-warning {
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.submit-row {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.submit-row button,
+.submit-row a.button {
+    margin-right: 10px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.submit-row .default {
+    background: #dc3545;
+    color: white;
+}
+
+.submit-row .default:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+.submit-row .button {
+    background: #f8f9fa;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.progress {
+    height: 20px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background-color: #dc3545;
+    color: white;
+    text-align: center;
+    line-height: 20px;
+}
+
+.progress-bar-striped {
+    background-image: linear-gradient(45deg, rgba(255,255,255,.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.15) 50%, rgba(255,255,255,.15) 75%, transparent 75%, transparent);
+    background-size: 1rem 1rem;
+}
+
+.progress-bar-animated {
+    animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+    0% { background-position-x: 1rem; }
+}
+
+.module {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.module h2 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.module ul {
+    padding-left: 20px;
+}
+
+.module li {
+    margin-bottom: 5px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const clearForm = document.getElementById('clear-form');
+    const clearButton = document.getElementById('clear-button');
+    const confirmCheckbox = document.getElementById('id_confirm');
+    const statsButton = document.getElementById('stats-button');
+    const progressContainer = document.getElementById('progress-container');
+    const progressOutput = document.getElementById('progress-output');
+    const statsContainer = document.getElementById('stats-container');
+    const statsContent = document.getElementById('stats-content');
+    
+    // Enable/disable clear button based on confirmation
+    confirmCheckbox.addEventListener('change', function() {
+        clearButton.disabled = !this.checked;
+    });
+    
+    // Stats button
+    statsButton.addEventListener('click', function() {
+        fetch('/admin/test-data-stats/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const stats = data.stats;
+                    statsContent.innerHTML = `
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                            <div><strong>Users:</strong> ${stats.users}</div>
+                            <div><strong>Posts:</strong> ${stats.posts}</div>
+                            <div><strong>Comments:</strong> ${stats.comments}</div>
+                            <div><strong>Jobs:</strong> ${stats.jobs}</div>
+                            <div><strong>Applications:</strong> ${stats.applications}</div>
+                            <div><strong>Connections:</strong> ${stats.connections}</div>
+                            <div><strong>Follows:</strong> ${stats.follows}</div>
+                            <div><strong>Messages:</strong> ${stats.messages}</div>
+                            <div><strong>Notifications:</strong> ${stats.notifications}</div>
+                            <div><strong>Experiences:</strong> ${stats.experiences}</div>
+                            <div><strong>Educations:</strong> ${stats.educations}</div>
+                        </div>
+                        <p style="margin-top: 15px; color: #dc3545;">
+                            <strong>⚠️ All of the above data will be permanently deleted!</strong>
+                        </p>
+                    `;
+                    statsContainer.style.display = 'block';
+                } else {
+                    alert('Error loading stats: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error loading stats');
+            });
+    });
+    
+    // Form submission
+    clearForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!confirm('Are you absolutely sure? This will delete ALL test data and cannot be undone!')) {
+            return;
+        }
+        
+        const formData = new FormData(clearForm);
+        
+        // Show progress
+        progressContainer.style.display = 'block';
+        progressOutput.textContent = 'Starting data cleanup...\n';
+        clearButton.disabled = true;
+        confirmCheckbox.disabled = true;
+        
+        fetch(clearForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            progressOutput.textContent += '\n' + (data.output || data.message);
+            
+            if (data.success) {
+                progressOutput.innerHTML += '\n\n✅ <strong>Success!</strong> All test data has been cleared. Redirecting...';
+                setTimeout(() => {
+                    window.location.href = '/admin/';
+                }, 2000);
+            } else {
+                progressOutput.innerHTML += '\n\n❌ <strong>Error:</strong> ' + data.message;
+                clearButton.disabled = false;
+                confirmCheckbox.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            progressOutput.innerHTML += '\n\n❌ <strong>Error:</strong> ' + error.message;
+            clearButton.disabled = false;
+            confirmCheckbox.disabled = false;
+        });
+    });
+});
+</script>
+{% endblock %}
