@@ -51,7 +51,8 @@ def job_list(request):
 def job_detail(request, pk):
     job = get_object_or_404(Job, pk=pk)
     has_applied = Application.objects.filter(job=job, applicant=request.user).exists()
-    return render(request, 'jobs/job_detail.html', {'job': job, 'has_applied': has_applied})
+    is_saved = SavedJob.objects.filter(job=job, user=request.user).exists()
+    return render(request, 'jobs/job_detail.html', {'job': job, 'has_applied': has_applied, 'is_saved': is_saved})
 
 @login_required
 def job_create(request):

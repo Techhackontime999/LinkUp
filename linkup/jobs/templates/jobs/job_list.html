@@ -38,14 +38,63 @@
 
     <!-- Main Content -->
     <div class="lg:col-span-9">
+        <!-- Search Form -->
+        <div class="premium-card p-6 mb-6 animate-fade-in">
+            <form method="get" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="md:col-span-2">
+                        <input type="text" name="query" value="{{ search_form.query.value|default:'' }}" 
+                               placeholder="Search jobs by title, company, or keywords..." 
+                               class="form-input w-full">
+                    </div>
+                    <div>
+                        <input type="text" name="location" value="{{ search_form.location.value|default:'' }}" 
+                               placeholder="Location" 
+                               class="form-input w-full">
+                    </div>
+                    <div>
+                        <button type="submit" class="btn-premium w-full">
+                            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            Search Jobs
+                        </button>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-4">
+                    <div>
+                        <select name="workplace_type" class="form-select">
+                            <option value="">Any Workplace Type</option>
+                            {% for value, label in search_form.workplace_type.field.choices %}
+                                {% if value != '' %}
+                                    <option value="{{ value }}" {% if search_form.workplace_type.value == value %}selected{% endif %}>{{ label }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <select name="job_type" class="form-select">
+                            <option value="">Any Job Type</option>
+                            {% for value, label in search_form.job_type.field.choices %}
+                                {% if value != '' %}
+                                    <option value="{{ value }}" {% if search_form.job_type.value == value %}selected{% endif %}>{{ label }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex gap-2">
+                        <a href="{% url 'jobs:job_list' %}" class="text-sm text-gray-600 hover:text-purple-600">Clear Filters</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold text-gray-800">Explore Jobs</h1>
             <div class="flex space-x-2">
-                <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">All Jobs</span>
-                <span
-                    class="px-3 py-1 bg-white text-gray-600 border border-gray-200 rounded-full text-xs font-semibold hover:border-purple-300 cursor-pointer">Remote</span>
-                <span
-                    class="px-3 py-1 bg-white text-gray-600 border border-gray-200 rounded-full text-xs font-semibold hover:border-purple-300 cursor-pointer">Full-time</span>
+                <a href="{% url 'jobs:job_list' %}" class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">All Jobs</a>
+                <a href="?workplace_type=remote" class="px-3 py-1 bg-white text-gray-600 border border-gray-200 rounded-full text-xs font-semibold hover:border-purple-300">Remote</a>
+                <a href="?job_type=full-time" class="px-3 py-1 bg-white text-gray-600 border border-gray-200 rounded-full text-xs font-semibold hover:border-purple-300">Full-time</a>
             </div>
         </div>
 
