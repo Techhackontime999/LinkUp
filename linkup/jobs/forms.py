@@ -153,14 +153,14 @@ class JobSearchForm(forms.Form):
         })
     )
     workplace_type = forms.ChoiceField(
-        choices=[('', 'Any')] + Job.WORKPLACE_TYPE_CHOICES,
+        choices=[('', 'Any Workplace Type')] + list(Job.WORKPLACE_TYPE_CHOICES),
         required=False,
         widget=forms.Select(attrs={
             'class': 'w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white'
         })
     )
     job_type = forms.ChoiceField(
-        choices=[('', 'Any')] + Job.JOB_TYPE_CHOICES,
+        choices=[('', 'Any Job Type')] + list(Job.JOB_TYPE_CHOICES),
         required=False,
         widget=forms.Select(attrs={
             'class': 'w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white'
