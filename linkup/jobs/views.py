@@ -9,15 +9,15 @@ from .forms import JobForm, ApplicationForm, JobSearchForm
 
 @login_required
 def job_list(request):
-    search_form = JobSearchForm(request.GET)
+    search_form = JobSearchForm(request.GET or None)
     jobs = Job.objects.filter(is_active=True).select_related('posted_by')
     
-    # Apply search filters
-    if search_form.is_valid():
-        query = search_form.cleaned_data.get('query')
-        location = search_form.cleaned_data.get('location')
-        workplace_type = search_form.cleaned_data.get('workplace_type')
-        job_type = search_form.cleaned_data.get('job_type')
+    # Apply search filters - only if form has data
+    if request.GET:
+        query = request.GET.get('query')
+        location = request.GET.get('location')
+        workplace_type = request.GET.get('workplace_type')
+        job_type = request.GET.get('job_type')
         
         if query:
             jobs = jobs.filter(
@@ -144,12 +144,18 @@ def my_applications(request):
     """View for applications submitted by current user"""
     applications = Application.objects.filter(applicant=request.user).select_related('job').order_by('-applied_at')
     
+    # Calculate pending count
+    pending_count = applications.filter(status='pending').count()
+    
     # Pagination
     paginator = Paginator(applications, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    return render(request, 'jobs/my_applications.html', {'page_obj': page_obj})
+    return render(request, 'jobs/my_applications.html', {
+        'page_obj': page_obj,
+        'pending_count': pending_count
+    })
 
 @login_required
 def saved_jobs(request):

@@ -22,7 +22,7 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Pending</span>
-                            <span class="font-semibold text-yellow-600">{{ page_obj|selectattr:"status"|selectattr:"status","equalto":"pending"|list|length }}</span>
+                            <span class="font-semibold text-yellow-600">{{ pending_count }}</span>
                         </div>
                     </div>
                 </div>

@@ -99,6 +99,7 @@
         </div>
 
         <div class="space-y-4">
+            <!-- Debug: Total jobs: {{ page_obj.paginator.count }} -->
             {% for job in page_obj %}
             <div class="post-card animate-fade-in hover:shadow-lg transition-shadow">
                 <div class="flex items-start">
@@ -138,10 +139,12 @@
                             </div>
                             <div class="text-right">
                                 <span
-                                    class="px-2 py-1 bg-green-50 text-green-700 text-xs font-bold rounded capitalize">{{
-                                    job.get_job_type_display }}</span>
-                                <p class="mt-2 text-sm font-semibold text-purple-600">{{
-                                    job.salary_range|default:"Competitive Salary" }}</p>
+                                    class="px-2 py-1 bg-green-50 text-green-700 text-xs font-bold rounded capitalize">
+                                    {% if job.job_type %}{{ job.get_job_type_display }}{% else %}N/A{% endif %}
+                                </span>
+                                <p class="mt-2 text-sm font-semibold text-purple-600">
+                                    {% if job.salary_range %}{{ job.salary_range }}{% else %}Competitive Salary{% endif %}
+                                </p>
                             </div>
                         </div>
                     </div>
