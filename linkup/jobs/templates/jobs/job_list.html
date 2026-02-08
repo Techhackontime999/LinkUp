@@ -145,6 +145,11 @@
                                 <p class="mt-2 text-sm font-semibold text-purple-600">
                                     {% if job.salary_range %}{{ job.salary_range }}{% else %}Competitive Salary{% endif %}
                                 </p>
+                                <div class="mt-3">
+                                    <a href="{% url 'jobs:job_detail' job.pk %}" class="btn-premium text-sm px-4 py-2">
+                                        View Details
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
