@@ -140,7 +140,7 @@ class JobSearchForm(forms.Form):
         max_length=255,
         required=False,
         widget=forms.TextInput(attrs={
-            'class': 'w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none',
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500',
             'placeholder': 'Search jobs by title, company, or keywords...'
         })
     )
@@ -148,7 +148,7 @@ class JobSearchForm(forms.Form):
         max_length=255,
         required=False,
         widget=forms.TextInput(attrs={
-            'class': 'w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none',
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500',
             'placeholder': 'Location'
         })
     )
@@ -156,13 +156,13 @@ class JobSearchForm(forms.Form):
         choices=[('', 'Any Workplace Type')] + list(Job.WORKPLACE_TYPE_CHOICES),
         required=False,
         widget=forms.Select(attrs={
-            'class': 'w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white'
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white'
         })
     )
     job_type = forms.ChoiceField(
         choices=[('', 'Any Job Type')] + list(Job.JOB_TYPE_CHOICES),
         required=False,
         widget=forms.Select(attrs={
-            'class': 'w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white'
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white'
         })
     )
