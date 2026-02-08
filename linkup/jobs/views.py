@@ -9,10 +9,11 @@ from .forms import JobForm, ApplicationForm, JobSearchForm
 
 @login_required
 def job_list(request):
-    search_form = JobSearchForm(request.GET or None)
+    # Initialize search form with GET parameters
+    search_form = JobSearchForm(request.GET)
     jobs = Job.objects.filter(is_active=True).select_related('posted_by')
     
-    # Apply search filters - only if form has data
+    # Apply search filters using GET parameters directly
     if request.GET:
         query = request.GET.get('query')
         location = request.GET.get('location')
