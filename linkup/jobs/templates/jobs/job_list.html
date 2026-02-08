@@ -11,26 +11,26 @@
                     Job</a>
                 <div class="border-t border-gray-100 pt-4">
                     <p class="text-xs text-gray-500 uppercase font-semibold mb-2">My Activity</p>
-                    <ul class="space-y-2 text-sm text-gray-600">
-                        <li><a href="{% url 'jobs:my_applications' %}" class="hover:text-purple-600 transition-colors flex items-center">
+                    <div class="space-y-2">
+                        <a href="{% url 'jobs:my_applications' %}" class="block px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-purple-50 hover:text-purple-600 transition-colors flex items-center">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             Applied Jobs
-                        </a></li>
-                        <li><a href="{% url 'jobs:saved_jobs' %}" class="hover:text-purple-600 transition-colors flex items-center">
+                        </a>
+                        <a href="{% url 'jobs:saved_jobs' %}" class="block px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-purple-50 hover:text-purple-600 transition-colors flex items-center">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                             </svg>
                             Saved Jobs
-                        </a></li>
-                        <li><a href="{% url 'jobs:job_alerts' %}" class="hover:text-purple-600 transition-colors flex items-center">
+                        </a>
+                        <a href="{% url 'jobs:job_alerts' %}" class="block px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-purple-50 hover:text-purple-600 transition-colors flex items-center">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
                             Job Alerts
-                        </a></li>
-                    </ul>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
