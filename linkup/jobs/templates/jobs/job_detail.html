@@ -47,12 +47,8 @@
                         </span>
                     </div>
                     <div class="flex gap-2">
-                        <span
-                            class="px-3 py-1 bg-purple-50 text-purple-700 text-xs font-bold rounded-full border border-purple-100 uppercase">{{
-                            job.get_job_type_display }}</span>
-                        <span
-                            class="px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full border border-green-100">{{
-                            job.salary_range|default:"Competitive Salary" }}</span>
+                        <span class="px-3 py-1 bg-purple-50 text-purple-700 text-xs font-bold rounded-full border border-purple-100 uppercase">{{ job.get_job_type_display }}</span>
+                        <span class="px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full border border-green-100">{{ job.salary_range|default:"Competitive Salary" }}</span>
                     </div>
                 </div>
 
