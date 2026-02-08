@@ -9,41 +9,39 @@ class JobForm(forms.ModelForm):
                  'description', 'requirements', 'salary_range']
         widgets = {
             'title': forms.TextInput(attrs={
-                'class': 'form-input form-field-enhanced',
+                'class': 'w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none',
                 'placeholder': 'e.g., Senior Software Engineer',
-                'data-validation': '{"minLength": 3, "required": true}'
+                'required': True
             }),
             'company': forms.TextInput(attrs={
-                'class': 'form-input form-field-enhanced',
+                'class': 'w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none',
                 'placeholder': 'Company Name',
-                'data-validation': '{"minLength": 2, "required": true}'
+                'required': True
             }),
             'location': forms.TextInput(attrs={
-                'class': 'form-input form-field-enhanced',
+                'class': 'w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none',
                 'placeholder': 'City, Country or Remote',
-                'data-validation': '{"required": true}'
+                'required': True
             }),
             'workplace_type': forms.Select(attrs={
-                'class': 'form-select form-field-enhanced',
-                'data-validation': '{"required": true}'
+                'class': 'w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white'
             }),
             'job_type': forms.Select(attrs={
-                'class': 'form-select form-field-enhanced',
-                'data-validation': '{"required": true}'
+                'class': 'w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white'
             }),
             'description': forms.Textarea(attrs={
-                'class': 'form-textarea form-field-enhanced',
-                'rows': 6,
+                'class': 'w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none resize-none',
+                'rows': 5,
                 'placeholder': 'Describe the role, responsibilities, and what makes this opportunity exciting...',
-                'data-validation': '{"minLength": 50, "required": true}'
+                'required': True
             }),
             'requirements': forms.Textarea(attrs={
-                'class': 'form-textarea form-field-enhanced',
+                'class': 'w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none resize-none',
                 'rows': 4,
                 'placeholder': 'List the required skills, experience, and qualifications...'
             }),
             'salary_range': forms.TextInput(attrs={
-                'class': 'form-input form-field-enhanced',
+                'class': 'w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none',
                 'placeholder': 'e.g., $80,000 - $120,000 or Competitive'
             }),
         }

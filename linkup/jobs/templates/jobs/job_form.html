@@ -7,61 +7,90 @@
             <h1 class="text-3xl font-extrabold text-gray-900 mb-2">Post a New Opportunity</h1>
             <p class="text-gray-500 mb-8">Reach the right talent in our professional network.</p>
 
-            <form action="" method="post" class="space-y-6">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="mb-4 p-4 rounded-lg {% if message.tags == 'error' %}bg-red-50 text-red-700{% elif message.tags == 'success' %}bg-green-50 text-green-700{% else %}bg-blue-50 text-blue-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post" class="space-y-6">
                 {% csrf_token %}
+
+                {% if form.errors %}
+                    <div class="mb-4 p-4 bg-red-50 text-red-700 rounded-lg">
+                        <p class="font-bold">Please correct the following errors:</p>
+                        <ul class="mt-2">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li>{{ field|title }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="space-y-2">
                         <label class="block text-sm font-bold text-gray-700">Job Title</label>
-                        <input type="text" name="title" required placeholder="e.g. Senior Frontend Engineer"
-                            class="w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none">
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <p class="text-red-500 text-sm">{{ form.title.errors.0 }}</p>
+                        {% endif %}
                     </div>
                     <div class="space-y-2">
                         <label class="block text-sm font-bold text-gray-700">Company Name</label>
-                        <input type="text" name="company" required placeholder="e.g. Google"
-                            class="w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none">
+                        {{ form.company }}
+                        {% if form.company.errors %}
+                            <p class="text-red-500 text-sm">{{ form.company.errors.0 }}</p>
+                        {% endif %}
                     </div>
                     <div class="space-y-2">
                         <label class="block text-sm font-bold text-gray-700">Location</label>
-                        <input type="text" name="location" required placeholder="e.g. New York, NY"
-                            class="w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none">
+                        {{ form.location }}
+                        {% if form.location.errors %}
+                            <p class="text-red-500 text-sm">{{ form.location.errors.0 }}</p>
+                        {% endif %}
                     </div>
                     <div class="space-y-2">
                         <label class="block text-sm font-bold text-gray-700">Workplace Type</label>
-                        <select name="workplace_type"
-                            class="w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white">
-                            <option value="on-site">On-site</option>
-                            <option value="remote">Remote</option>
-                            <option value="hybrid">Hybrid</option>
-                        </select>
+                        {{ form.workplace_type }}
+                        {% if form.workplace_type.errors %}
+                            <p class="text-red-500 text-sm">{{ form.workplace_type.errors.0 }}</p>
+                        {% endif %}
                     </div>
                     <div class="space-y-2">
                         <label class="block text-sm font-bold text-gray-700">Job Type</label>
-                        <select name="job_type"
-                            class="w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white">
-                            <option value="full-time">Full-time</option>
-                            <option value="part-time">Part-time</option>
-                            <option value="contract">Contract</option>
-                        </select>
+                        {{ form.job_type }}
+                        {% if form.job_type.errors %}
+                            <p class="text-red-500 text-sm">{{ form.job_type.errors.0 }}</p>
+                        {% endif %}
                     </div>
                 </div>
 
                 <div class="space-y-2">
                     <label class="block text-sm font-bold text-gray-700">Salary Range (Optional)</label>
-                    <input type="text" name="salary_range" placeholder="e.g. $120k - $150k"
-                        class="w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none">
+                    {{ form.salary_range }}
+                    {% if form.salary_range.errors %}
+                        <p class="text-red-500 text-sm">{{ form.salary_range.errors.0 }}</p>
+                    {% endif %}
                 </div>
 
                 <div class="space-y-2">
                     <label class="block text-sm font-bold text-gray-700">Job Description</label>
-                    <textarea name="description" rows="5" required placeholder="What will they do? What's the impact?"
-                        class="w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none resize-none"></textarea>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <p class="text-red-500 text-sm">{{ form.description.errors.0 }}</p>
+                    {% endif %}
                 </div>
 
                 <div class="space-y-2">
                     <label class="block text-sm font-bold text-gray-700">Requirements</label>
-                    <textarea name="requirements" rows="4" required placeholder="Skills, experience, etc."
-                        class="w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none resize-none"></textarea>
+                    {{ form.requirements }}
+                    {% if form.requirements.errors %}
+                        <p class="text-red-500 text-sm">{{ form.requirements.errors.0 }}</p>
+                    {% endif %}
                 </div>
 
                 <div class="flex items-center justify-between pt-8 border-t border-gray-100">
