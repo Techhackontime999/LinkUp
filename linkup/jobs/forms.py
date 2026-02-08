@@ -140,7 +140,7 @@ class JobSearchForm(forms.Form):
         max_length=255,
         required=False,
         widget=forms.TextInput(attrs={
-            'class': 'form-input form-field-enhanced',
+            'class': 'w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none',
             'placeholder': 'Search jobs by title, company, or keywords...'
         })
     )
@@ -148,17 +148,21 @@ class JobSearchForm(forms.Form):
         max_length=255,
         required=False,
         widget=forms.TextInput(attrs={
-            'class': 'form-input form-field-enhanced',
+            'class': 'w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none',
             'placeholder': 'Location'
         })
     )
     workplace_type = forms.ChoiceField(
         choices=[('', 'Any')] + Job.WORKPLACE_TYPE_CHOICES,
         required=False,
-        widget=forms.Select(attrs={'class': 'form-select form-field-enhanced'})
+        widget=forms.Select(attrs={
+            'class': 'w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white'
+        })
     )
     job_type = forms.ChoiceField(
         choices=[('', 'Any')] + Job.JOB_TYPE_CHOICES,
         required=False,
-        widget=forms.Select(attrs={'class': 'form-select form-field-enhanced'})
+        widget=forms.Select(attrs={
+            'class': 'w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all outline-none bg-white'
+        })
     )

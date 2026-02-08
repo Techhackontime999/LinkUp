@@ -49,14 +49,10 @@
             <form method="get" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="md:col-span-2">
-                        <input type="text" name="query" value="{{ request.GET.query|default:'' }}" 
-                               placeholder="Search jobs by title, company, or keywords..." 
-                               class="form-input w-full">
+                        {{ search_form.query }}
                     </div>
                     <div>
-                        <input type="text" name="location" value="{{ request.GET.location|default:'' }}" 
-                               placeholder="Location" 
-                               class="form-input w-full">
+                        {{ search_form.location }}
                     </div>
                     <div>
                         <button type="submit" class="btn-premium w-full">
@@ -69,24 +65,10 @@
                 </div>
                 <div class="flex flex-wrap gap-4">
                     <div>
-                        <select name="workplace_type" class="form-select">
-                            <option value="">Any Workplace Type</option>
-                            {% for value, label in search_form.workplace_type.field.choices %}
-                                {% if value != '' %}
-                                    <option value="{{ value }}" {% if request.GET.workplace_type == value %}selected{% endif %}>{{ label }}</option>
-                                {% endif %}
-                            {% endfor %}
-                        </select>
+                        {{ search_form.workplace_type }}
                     </div>
                     <div>
-                        <select name="job_type" class="form-select">
-                            <option value="">Any Job Type</option>
-                            {% for value, label in search_form.job_type.field.choices %}
-                                {% if value != '' %}
-                                    <option value="{{ value }}" {% if request.GET.job_type == value %}selected{% endif %}>{{ label }}</option>
-                                {% endif %}
-                            {% endfor %}
-                        </select>
+                        {{ search_form.job_type }}
                     </div>
                     <div class="flex gap-2">
                         <a href="{% url 'jobs:job_list' %}" class="text-sm text-gray-600 hover:text-purple-600">Clear Filters</a>
