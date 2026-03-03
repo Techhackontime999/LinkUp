@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Multi-Agent AI Chat - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-lg p-6 mb-8 text-white">
+            <h1 class="text-3xl font-bold mb-2">🤖 Multi-Agent AI Chat</h1>
+            <p class="text-blue-100">Ask multiple AI agents and compare their responses</p>
+        </div>
+
+        <!-- Agent Selection -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Select AI Agents</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <label class="flex items-center space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 cursor-pointer transition">
+                    <input type="checkbox" name="agent" value="ChatGPT-4" checked class="w-5 h-5 text-blue-600">
+                    <div>
+                        <div class="font-semibold">ChatGPT-4</div>
+                        <div class="text-sm text-gray-600">OpenAI</div>
+                    </div>
+                </label>
+                
+                <label class="flex items-center space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 cursor-pointer transition">
+                    <input type="checkbox" name="agent" value="Gemini-Pro" checked class="w-5 h-5 text-blue-600">
+                    <div>
+                        <div class="font-semibold">Gemini Pro</div>
+                        <div class="text-sm text-gray-600">Google</div>
+                    </div>
+                </label>
+                
+                <label class="flex items-center space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 cursor-pointer transition">
+                    <input type="checkbox" name="agent" value="Claude-3" checked class="w-5 h-5 text-blue-600">
+                    <div>
+                        <div class="font-semibold">Claude 3</div>
+                        <div class="text-sm text-gray-600">Anthropic</div>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <!-- Question Input -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Ask Your Question</h2>
+            <textarea 
+                id="question-input" 
+                rows="4" 
+                class="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                placeholder="Enter your question here... (e.g., 'What are the best practices for web security?')"
+            ></textarea>
+            
+            <div class="mt-4 flex space-x-4">
+                <button 
+                    onclick="askAgents()" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition"
+                >
+                    Ask All Selected Agents
+                </button>
+                
+                <button 
+                    onclick="startDiscussion()" 
+                    class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition"
+                >
+                    Start Agent Discussion
+                </button>
+                
+                <button 
+                    onclick="buildConsensus()" 
+                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition"
+                >
+                    Build Consensus
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="hidden bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
+            <div class="flex items-center">
+                <svg class="animate-spin h-5 w-5 mr-3 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-blue-700 font-semibold">AI agents are thinking...</span>
+            </div>
+        </div>
+
+        <!-- Responses Container -->
+        <div id="responses-container"></div>
+    </div>
+</div>
+
+<script>
+function getSelectedAgents() {
+    const checkboxes = document.querySelectorAll('input[name="agent"]:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
+}
+
+function showLoading() {
+    document.getElementById('loading').classList.remove('hidden');
+}
+
+function hideLoading() {
+    document.getElementById('loading').classList.add('hidden');
+}
+
+async function askAgents() {
+    const question = document.getElementById('question-input').value.trim();
+    const selectedAgents = getSelectedAgents();
+    
+    if (!question) {
+        alert('Please enter a question');
+        return;
+    }
+    
+    if (selectedAgents.length === 0) {
+        alert('Please select at least one agent');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const response = await fetch('/ai-agents/api/ask-multiple/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                question: question,
+                agents: selectedAgents
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            displayResponses(data.question, data.responses);
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+async function startDiscussion() {
+    const topic = document.getElementById('question-input').value.trim();
+    const selectedAgents = getSelectedAgents();
+    
+    if (!topic) {
+        alert('Please enter a discussion topic');
+        return;
+    }
+    
+    if (selectedAgents.length < 2) {
+        alert('Please select at least 2 agents for a discussion');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const response = await fetch('/ai-agents/api/discussion/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                topic: topic,
+                agents: selectedAgents,
+                rounds: 2
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            displayDiscussion(data.topic, data.discussion);
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+async function buildConsensus() {
+    const question = document.getElementById('question-input').value.trim();
+    const selectedAgents = getSelectedAgents();
+    
+    if (!question) {
+        alert('Please enter a question');
+        return;
+    }
+    
+    if (selectedAgents.length < 2) {
+        alert('Please select at least 2 agents to build consensus');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const response = await fetch('/ai-agents/api/consensus/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                question: question,
+                agents: selectedAgents
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            displayConsensus(data.result);
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+function displayResponses(question, responses) {
+    const container = document.getElementById('responses-container');
+    
+    let html = `
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Question: ${escapeHtml(question)}</h2>
+            <div class="grid grid-cols-1 gap-6">
+    `;
+    
+    for (const [agent, response] of Object.entries(responses)) {
+        html += `
+            <div class="border-l-4 border-blue-500 pl-4">
+                <h3 class="font-semibold text-lg mb-2">${escapeHtml(agent)}</h3>
+                <p class="text-gray-700 whitespace-pre-wrap">${escapeHtml(response)}</p>
+            </div>
+        `;
+    }
+    
+    html += `
+            </div>
+        </div>
+    `;
+    
+    container.innerHTML = html;
+}
+
+function displayDiscussion(topic, discussion) {
+    const container = document.getElementById('responses-container');
+    
+    let html = `
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Discussion: ${escapeHtml(topic)}</h2>
+            <div class="space-y-4">
+    `;
+    
+    for (const message of discussion) {
+        html += `
+            <div class="border-l-4 border-purple-500 pl-4 py-2">
+                <div class="flex items-center mb-2">
+                    <span class="font-semibold">${escapeHtml(message.agent)}</span>
+                    <span class="ml-2 text-sm text-gray-500">Round ${message.round}</span>
+                </div>
+                <p class="text-gray-700 whitespace-pre-wrap">${escapeHtml(message.message)}</p>
+            </div>
+        `;
+    }
+    
+    html += `
+            </div>
+        </div>
+    `;
+    
+    container.innerHTML = html;
+}
+
+function displayConsensus(result) {
+    const container = document.getElementById('responses-container');
+    
+    let html = `
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Question: ${escapeHtml(result.question)}</h2>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">Individual Perspectives:</h3>
+                <div class="space-y-4">
+    `;
+    
+    for (const [agent, response] of Object.entries(result.individual_responses)) {
+        html += `
+            <div class="border-l-4 border-gray-400 pl-4">
+                <h4 class="font-semibold mb-1">${escapeHtml(agent)}</h4>
+                <p class="text-gray-700 text-sm whitespace-pre-wrap">${escapeHtml(response)}</p>
+            </div>
+        `;
+    }
+    
+    html += `
+                </div>
+            </div>
+            
+            <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+                <h3 class="text-lg font-semibold mb-2 text-green-800">Consensus:</h3>
+                <p class="text-gray-800 whitespace-pre-wrap">${escapeHtml(result.consensus)}</p>
+            </div>
+        </div>
+    `;
+    
+    container.innerHTML = html;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
+{% endblock %}

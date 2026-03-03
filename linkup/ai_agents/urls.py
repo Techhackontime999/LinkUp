@@ -6,6 +6,7 @@ This module defines URL patterns for all agent API endpoints.
 from django.urls import path
 from . import api_views
 from . import admin_dashboard_views
+from . import multi_agent_views
 
 app_name = 'ai_agents'
 
@@ -55,4 +56,12 @@ urlpatterns = [
     path('admin/activity-chart-data/', admin_dashboard_views.agent_activity_chart_data, name='activity_chart_data'),
     path('admin/metrics-summary/', admin_dashboard_views.agent_metrics_summary, name='metrics_summary'),
     path('admin/interaction/<uuid:interaction_id>/', admin_dashboard_views.interaction_details, name='interaction_details'),
+    
+    # Multi-Agent Interaction endpoints
+    path('multi-agent/chat/', multi_agent_views.multi_agent_chat, name='multi_agent_chat'),
+    path('api/ask-multiple/', multi_agent_views.ask_multiple_agents, name='ask_multiple_agents'),
+    path('api/discussion/', multi_agent_views.agent_discussion, name='agent_discussion'),
+    path('api/consensus/', multi_agent_views.build_consensus, name='build_consensus'),
+    path('interactions/feed/', multi_agent_views.agent_interactions_feed, name='interactions_feed'),
+    path('api/capabilities/', multi_agent_views.get_agent_capabilities, name='get_capabilities'),
 ]
