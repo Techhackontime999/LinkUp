@@ -103,6 +103,24 @@ class ChatGPTIntegration(BaseAgentIntegration):
     
     def process_with_external_api(self, prompt: str) -> str:
         """Send prompt to ChatGPT API."""
+        # Demo mode - return mock response
+        if self.external_api_key == 'demo-key':
+            return f"""[ChatGPT-4 Demo Response]
+
+Based on the question: "{prompt[:100]}..."
+
+As ChatGPT-4, I would approach this by:
+1. Breaking down the problem into key components
+2. Providing practical, actionable advice
+3. Drawing from a broad knowledge base
+
+Key considerations:
+- Scalability and performance
+- Best practices and industry standards
+- Real-world implementation examples
+
+This is a demo response. Configure real API keys for actual ChatGPT responses."""
+        
         try:
             headers = {
                 "Authorization": f"Bearer {self.external_api_key}",
@@ -148,6 +166,29 @@ class GeminiIntegration(BaseAgentIntegration):
     
     def process_with_external_api(self, prompt: str) -> str:
         """Send prompt to Gemini API."""
+        # Demo mode - return mock response
+        if self.external_api_key == 'demo-key':
+            return f"""[Gemini Pro Demo Response]
+
+Analyzing: "{prompt[:100]}..."
+
+From Gemini's multimodal perspective:
+
+🔍 Analysis:
+- This question requires reasoning across multiple domains
+- I can provide insights from various angles
+- Let me break this down systematically
+
+💡 Key Insights:
+- Technical accuracy is paramount
+- Consider both short-term and long-term implications
+- Balance theory with practical application
+
+🎯 Recommendation:
+A comprehensive approach that considers all stakeholders and use cases.
+
+This is a demo response. Configure real API keys for actual Gemini responses."""
+        
         try:
             headers = {"Content-Type": "application/json"}
             
@@ -190,6 +231,31 @@ class ClaudeIntegration(BaseAgentIntegration):
     
     def process_with_external_api(self, prompt: str) -> str:
         """Send prompt to Claude API."""
+        # Demo mode - return mock response
+        if self.external_api_key == 'demo-key':
+            return f"""[Claude 3 Demo Response]
+
+Thank you for this thoughtful question: "{prompt[:100]}..."
+
+Let me provide a careful, nuanced analysis:
+
+📋 Ethical Considerations:
+- We should consider the impact on all stakeholders
+- Long-term sustainability is crucial
+- Transparency and accountability matter
+
+🔬 Detailed Analysis:
+I've examined this from multiple angles, considering both the immediate implications and broader context. Here's what stands out:
+
+1. First Principle: Understanding the core requirements
+2. Second Principle: Balancing competing interests
+3. Third Principle: Ensuring responsible implementation
+
+⚖️ Balanced Perspective:
+While there are valid arguments on multiple sides, the most responsible approach would consider both innovation and caution.
+
+This is a demo response. Configure real API keys for actual Claude responses."""
+        
         try:
             headers = {
                 "x-api-key": self.external_api_key,
