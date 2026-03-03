@@ -594,3 +594,146 @@ class DashboardStatsPropertyTests(HypothesisTestCase):
             # Clean up
             User.objects.filter(username='test_cache_user').delete()
             cache.clear()
+    
+    @given(st.integers(min_value=1, max_value=10))
+    @settings(max_examples=3, deadline=None)
+    def test_dashboard_chart_data_consistency_property(self, num_days):
+        """
+        **Property 3: Dashboard Chart Data Consistency**
+        **Validates: Requirements 2.5**
+        
+        For any time period, the chart data returned by the dashboard should 
+        contain data points that match the actual database counts for those 
+        time periods.
+        
+        This property verifies that:
+        1. Chart data contains correct number of data points (30 days)
+        2. Each data point matches the actual count for that date
+        3. Labels are properly formatted dates
+        4. Data arrays have consistent lengths
+        """
+        # Clear cache to ensure fresh data
+        cache.clear()
+        
+        # Create test user
+        user = User.objects.create(
+            username='test_chart_user',
+            email='testchart@example.com'
+        )
+        
+        try:
+            # Create users and posts on specific dates
+            created_users = []
+            created_posts = []
+            
+            for i in range(num_days):
+                # Create user with specific date
+                test_user = User.objects.create(
+                    username=f'chart_test_user_{i}',
+                    email=f'charttest{i}@example.com'
+                )
+                # Set date_joined to i days ago
+                test_user.date_joined = timezone.now() - timedelta(days=i)
+                test_user.save()
+                created_users.append(test_user)
+                
+                # Create post with specific date
+                try:
+                    from feed.models import Post
+                    post = Post.objects.create(
+                        user=user,
+                        content=f'Chart test post {i}'
+                    )
+                    post.created_at = timezone.now() - timedelta(days=i)
+                    post.save()
+                    created_posts.append(post)
+                except ImportError:
+                    pass
+            
+            # Clear cache and get chart data
+            DashboardStats.clear_cache()
+            chart_data = DashboardStats.get_chart_data()
+            
+            # Verify chart data structure
+            self.assertIn('labels', chart_data, "Chart data should contain 'labels'")
+            self.assertIn('user_registrations', chart_data, "Chart data should contain 'user_registrations'")
+            self.assertIn('post_creations', chart_data, "Chart data should contain 'post_creations'")
+            
+            # Verify data arrays have consistent lengths
+            self.assertEqual(
+                len(chart_data['labels']),
+                30,
+                "Chart should have 30 days of labels"
+            )
+            
+            self.assertEqual(
+                len(chart_data['user_registrations']),
+                30,
+                "Chart should have 30 days of user registration data"
+            )
+            
+            self.assertEqual(
+                len(chart_data['post_creations']),
+                30,
+                "Chart should have 30 days of post creation data"
+            )
+            
+            # Verify data consistency for specific dates
+            for i in range(min(num_days, 30)):
+                target_date = (timezone.now() - timedelta(days=29-i)).date()
+                
+                # Get actual count from database
+                actual_user_count = User.objects.filter(
+                    date_joined__date=target_date
+                ).count()
+                
+                # Get count from chart data
+                chart_user_count = chart_data['user_registrations'][i]
+                
+                self.assertEqual(
+                    chart_user_count,
+                    actual_user_count,
+                    f"User registration count for {target_date} should be {actual_user_count}, got {chart_user_count}"
+                )
+                
+                # Verify post counts if feed app exists
+                try:
+                    from feed.models import Post
+                    actual_post_count = Post.objects.filter(
+                        created_at__date=target_date
+                    ).count()
+                    
+                    chart_post_count = chart_data['post_creations'][i]
+                    
+                    self.assertEqual(
+                        chart_post_count,
+                        actual_post_count,
+                        f"Post creation count for {target_date} should be {actual_post_count}, got {chart_post_count}"
+                    )
+                except ImportError:
+                    # If feed app doesn't exist, verify post counts are 0
+                    self.assertEqual(
+                        chart_data['post_creations'][i],
+                        0,
+                        f"Post creation count should be 0 when feed app doesn't exist"
+                    )
+            
+            # Verify labels are properly formatted
+            for label in chart_data['labels']:
+                # Labels should be in MM/DD format
+                self.assertRegex(
+                    label,
+                    r'^\d{2}/\d{2}$',
+                    f"Label '{label}' should be in MM/DD format"
+                )
+            
+        finally:
+            # Clean up
+            User.objects.filter(username__contains='chart_test_user').delete()
+            try:
+                from feed.models import Post
+                Post.objects.filter(content__contains='Chart test post').delete()
+            except ImportError:
+                pass
+            User.objects.filter(username='test_chart_user').delete()
+            cache.clear()

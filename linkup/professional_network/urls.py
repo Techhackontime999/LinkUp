@@ -32,6 +32,9 @@ urlpatterns = [
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path("__reload__/", include("django_browser_reload.urls")),
     
+    # AI Agents REST API endpoints
+    path('api/', include('ai_agents.urls', namespace='ai_agents')),
+    
     # Health check endpoints
     path('health/', health_views.health_check, name='health_check'),
     path('health/db/', health_views.health_check_db, name='health_check_db'),

@@ -212,6 +212,23 @@
     <div class="dashboard-section">
         <h2>{% trans 'Quick Links' %}</h2>
         
+        <!-- AI Agent Platform Dashboard -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="color: white; margin-top: 0; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 10px;">🤖 AI Agent Platform</h3>
+            <p style="color: rgba(255,255,255,0.9); margin-bottom: 15px;">Monitor AI agent interactions, system health, and research analytics.</p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="/api/ai-agents/admin/dashboard" class="quick-link" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                    📊 AI Agent Dashboard
+                </a>
+                <a href="{% url 'admin:ai_agents_aiagent_changelist' %}" class="quick-link" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                    🤖 Manage Agents
+                </a>
+                <a href="{% url 'admin:ai_agents_agentinteraction_changelist' %}" class="quick-link" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                    💬 View Interactions
+                </a>
+            </div>
+        </div>
+        
         <!-- Test Data Management -->
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
             <h3 style="color: white; margin-top: 0; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 10px;">🌱 Test Data Management</h3>

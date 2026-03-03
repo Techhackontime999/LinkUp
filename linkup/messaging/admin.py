@@ -87,7 +87,7 @@ class MessageAdmin(admin.ModelAdmin, ExportCSVMixin):
     search_fields = ('sender__username', 'recipient__username', 'content')
     date_hierarchy = 'created_at'
     autocomplete_fields = ('sender', 'recipient')
-    readonly_fields = ('created_at',)
+    readonly_fields = ('timestamp',)
     actions = ['export_as_csv']
     list_per_page = 100
     
@@ -96,7 +96,7 @@ class MessageAdmin(admin.ModelAdmin, ExportCSVMixin):
             'fields': ('sender', 'recipient', 'content', 'attachment')
         }),
         ('Status', {
-            'fields': ('is_read', 'read_at', 'delivered_at', 'created_at'),
+            'fields': ('is_read', 'read_at', 'delivered_at', 'timestamp'),
             'classes': ('collapse',)
         }),
     )
@@ -112,6 +112,7 @@ class MessageAdmin(admin.ModelAdmin, ExportCSVMixin):
         """Return created_at as timestamp"""
         return obj.created_at
     timestamp.short_description = 'Timestamp'
+    timestamp.admin_order_field = 'created_at'
     
     def get_queryset(self, request):
         """Optimize queryset with select_related"""

@@ -1,0 +1,513 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/custom_admin.css' %}">
+<style>
+    .ai-dashboard-container {
+        padding: 20px;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .dashboard-header h1 {
+        margin: 0;
+        color: #333;
+    }
+
+    .refresh-button {
+        background: #0066cc;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.3s ease;
+    }
+
+    .refresh-button:hover {
+        background: #0052a3;
+    }
+
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .metric-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #0066cc;
+    }
+
+    .metric-card.warning {
+        border-left-color: #ffc107;
+    }
+
+    .metric-card.danger {
+        border-left-color: #dc3545;
+    }
+
+    .metric-card.success {
+        border-left-color: #28a745;
+    }
+
+    .metric-card h3 {
+        font-size: 14px;
+        color: #6c757d;
+        margin: 0 0 10px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .metric-card .metric-value {
+        font-size: 32px;
+        font-weight: bold;
+        color: #0066cc;
+        margin: 10px 0;
+    }
+
+    .metric-card .metric-label {
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+
+    .dashboard-section {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-section h2 {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0 0 15px 0;
+        color: #333;
+        border-bottom: 2px solid #0066cc;
+        padding-bottom: 10px;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin-top: 20px;
+    }
+
+    .interactions-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .interactions-table th {
+        background: #f8f9fa;
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+        color: #333;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .interactions-table td {
+        padding: 12px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .interactions-table tr:hover {
+        background: #f8f9fa;
+    }
+
+    .interaction-type-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+        background: #e9ecef;
+        color: #495057;
+    }
+
+    .interaction-type-badge.conversation {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .interaction-type-badge.collaboration {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .interaction-type-badge.negotiation {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .agent-link {
+        color: #0066cc;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .agent-link:hover {
+        text-decoration: underline;
+    }
+
+    .time-ago {
+        color: #6c757d;
+        font-size: 12px;
+    }
+
+    .error-message {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 15px;
+        border-radius: 6px;
+        border-left: 4px solid #dc3545;
+        margin-bottom: 20px;
+    }
+
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(0, 102, 204, 0.3);
+        border-radius: 50%;
+        border-top-color: #0066cc;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .stat-item {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+    }
+
+    .stat-item strong {
+        display: block;
+        color: #6c757d;
+        font-size: 12px;
+        margin-bottom: 5px;
+    }
+
+    .stat-item span {
+        font-size: 24px;
+        font-weight: bold;
+        color: #0066cc;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ai-dashboard-container">
+    <div class="dashboard-header">
+        <h1>🤖 {% trans 'AI Agent Platform Dashboard' %}</h1>
+        <button class="refresh-button" onclick="refreshDashboard()">
+            <span id="refresh-icon">🔄</span> {% trans 'Refresh' %}
+        </button>
+    </div>
+
+    {% if error %}
+    <div class="error-message">
+        <strong>{% trans 'Error:' %}</strong> {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- System Metrics -->
+    <div class="metrics-grid">
+        <div class="metric-card success">
+            <h3>{% trans 'Active Agents' %}</h3>
+            <div class="metric-value">{{ agent_stats.active|default:0 }}</div>
+            <div class="metric-label">
+                {{ agent_stats.total|default:0 }} {% trans 'total' %} | 
+                {{ agent_stats.new_last_7_days|default:0 }} {% trans 'new (7d)' %}
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <h3>{% trans 'Messages/Minute' %}</h3>
+            <div class="metric-value">{{ system_metrics.messages_per_minute|default:0|floatformat:0 }}</div>
+            <div class="metric-label">
+                {% trans 'Current rate' %}
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <h3>{% trans 'Avg Latency' %}</h3>
+            <div class="metric-value">{{ system_metrics.average_message_latency_ms|default:0|floatformat:0 }}</div>
+            <div class="metric-label">
+                {% trans 'milliseconds' %}
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <h3>{% trans 'WebSocket Connections' %}</h3>
+            <div class="metric-value">{{ system_metrics.websocket_connections|default:0 }}</div>
+            <div class="metric-label">
+                {% trans 'Active connections' %}
+            </div>
+        </div>
+
+        <div class="metric-card warning">
+            <h3>{% trans 'Suspended Agents' %}</h3>
+            <div class="metric-value">{{ agent_stats.suspended|default:0 }}</div>
+            <div class="metric-label">
+                {{ agent_stats.inactive|default:0 }} {% trans 'inactive' %}
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <h3>{% trans 'API Requests/Min' %}</h3>
+            <div class="metric-value">{{ system_metrics.total_api_requests_per_minute|default:0 }}</div>
+            <div class="metric-label">
+                {% trans 'All endpoints' %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Summary (Last 24 Hours) -->
+    <div class="dashboard-section">
+        <h2>📊 {% trans 'Activity Summary (Last 24 Hours)' %}</h2>
+        <div class="stats-row">
+            <div class="stat-item">
+                <strong>{% trans 'Total Messages' %}</strong>
+                <span>{{ activity_summary.total_messages|default:0 }}</span>
+            </div>
+            <div class="stat-item">
+                <strong>{% trans 'Total Interactions' %}</strong>
+                <span>{{ activity_summary.total_interactions|default:0 }}</span>
+            </div>
+            <div class="stat-item">
+                <strong>{% trans 'Unique Active Agents' %}</strong>
+                <span>{{ activity_summary.unique_active_agents|default:0 }}</span>
+            </div>
+            <div class="stat-item">
+                <strong>{% trans 'Avg Response Time' %}</strong>
+                <span>{{ activity_summary.avg_response_time_ms|default:0 }}ms</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Activity Chart -->
+    <div class="dashboard-section">
+        <h2>📈 {% trans 'Agent Activity (Last 24 Hours)' %}</h2>
+        <div class="chart-container">
+            <canvas id="activityChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Recent Interactions -->
+    <div class="dashboard-section">
+        <h2>💬 {% trans 'Recent Interactions' %}</h2>
+        {% if recent_interactions %}
+        <table class="interactions-table">
+            <thead>
+                <tr>
+                    <th>{% trans 'Agents' %}</th>
+                    <th>{% trans 'Type' %}</th>
+                    <th>{% trans 'Messages' %}</th>
+                    <th>{% trans 'Duration' %}</th>
+                    <th>{% trans 'Started' %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for interaction in recent_interactions %}
+                <tr onclick="viewInteractionDetails('{{ interaction.id }}')" style="cursor: pointer;">
+                    <td>
+                        <a href="{% url 'admin:ai_agents_aiagent_change' interaction.agent_1_name %}" class="agent-link" onclick="event.stopPropagation();">
+                            {{ interaction.agent_1_name }}
+                        </a>
+                        ↔️
+                        <a href="{% url 'admin:ai_agents_aiagent_change' interaction.agent_2_name %}" class="agent-link" onclick="event.stopPropagation();">
+                            {{ interaction.agent_2_name }}
+                        </a>
+                    </td>
+                    <td>
+                        <span class="interaction-type-badge {{ interaction.interaction_type|lower }}">
+                            {{ interaction.interaction_type }}
+                        </span>
+                    </td>
+                    <td>{{ interaction.message_count }}</td>
+                    <td>{{ interaction.duration_seconds }}s</td>
+                    <td>
+                        <span class="time-ago">{{ interaction.started_at|timesince }} ago</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>{% trans 'No recent interactions found.' %}</p>
+        {% endif %}
+    </div>
+
+    <!-- Agent Type Distribution -->
+    {% if agent_stats.by_type %}
+    <div class="dashboard-section">
+        <h2>🏷️ {% trans 'Agent Type Distribution' %}</h2>
+        <div class="stats-row">
+            {% for type_stat in agent_stats.by_type %}
+            <div class="stat-item">
+                <strong>{{ type_stat.agent_type }}</strong>
+                <span>{{ type_stat.count }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+let activityChart = null;
+
+// Initialize chart on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadActivityChart();
+});
+
+function loadActivityChart() {
+    fetch('/admin/ai-agents/activity-chart-data/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                renderActivityChart(data.data);
+            } else {
+                console.error('Error loading chart data:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading chart data:', error);
+        });
+}
+
+function renderActivityChart(data) {
+    const ctx = document.getElementById('activityChart').getContext('2d');
+    
+    // Destroy existing chart if it exists
+    if (activityChart) {
+        activityChart.destroy();
+    }
+    
+    activityChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.labels,
+            datasets: [
+                {
+                    label: 'Messages',
+                    data: data.message_counts,
+                    borderColor: '#0066cc',
+                    backgroundColor: 'rgba(0, 102, 204, 0.1)',
+                    tension: 0.4,
+                    yAxisID: 'y',
+                },
+                {
+                    label: 'Active Agents',
+                    data: data.active_agent_counts,
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    tension: 0.4,
+                    yAxisID: 'y',
+                },
+                {
+                    label: 'Avg Latency (ms)',
+                    data: data.avg_latencies,
+                    borderColor: '#ffc107',
+                    backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                    tension: 0.4,
+                    yAxisID: 'y1',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += context.parsed.y.toFixed(2);
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Messages / Agents'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Latency (ms)'
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                }
+            }
+        }
+    });
+}
+
+function refreshDashboard() {
+    const refreshIcon = document.getElementById('refresh-icon');
+    refreshIcon.innerHTML = '<span class="loading-spinner"></span>';
+    
+    // Reload the page
+    location.reload();
+}
+
+function viewInteractionDetails(interactionId) {
+    // Open interaction details in a new window or modal
+    window.open(`/admin/ai-agents/interaction/${interactionId}/`, '_blank');
+}
+</script>
+{% endblock %}

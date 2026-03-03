@@ -81,18 +81,18 @@ class PostAdminPropertyTests(TestCase):
                 image=test_image
             )
             
-            thumbnail_html = self.post_admin.image_preview(post_with_image)
+            thumbnail_html = self.post_admin.image_thumbnail(post_with_image)
             
             # Verify thumbnail contains img tag
             self.assertIn('<img', thumbnail_html, 
                          f"Post with image should display img tag in thumbnail. Got: {thumbnail_html}")
             
             # Verify thumbnail has proper styling constraints
-            self.assertIn('max-width:150px', thumbnail_html,
-                         f"Thumbnail should have max-width constraint. Got: {thumbnail_html}")
+            self.assertIn('width:50px', thumbnail_html,
+                         f"Thumbnail should have width constraint. Got: {thumbnail_html}")
             
             # Verify thumbnail has proper styling
-            self.assertIn('border-radius:6px', thumbnail_html,
+            self.assertIn('border-radius:4px', thumbnail_html,
                          f"Thumbnail should have border-radius styling. Got: {thumbnail_html}")
             
             # Verify src attribute is present
@@ -106,11 +106,11 @@ class PostAdminPropertyTests(TestCase):
                 # No image field set
             )
             
-            placeholder_html = self.post_admin.image_preview(post_without_image)
+            placeholder_html = self.post_admin.image_thumbnail(post_without_image)
             
-            # Verify placeholder is shown
-            self.assertEqual(placeholder_html, '-',
-                           f"Post without image should show placeholder '-'. Got: {placeholder_html}")
+            # Verify placeholder is shown (empty string)
+            self.assertEqual(placeholder_html, '',
+                           f"Post without image should show empty string. Got: {placeholder_html}")
             
             # Test 3: Post with empty image field should show placeholder
             post_empty_image = Post.objects.create(
@@ -119,11 +119,11 @@ class PostAdminPropertyTests(TestCase):
                 image=None
             )
             
-            empty_placeholder_html = self.post_admin.image_preview(post_empty_image)
+            empty_placeholder_html = self.post_admin.image_thumbnail(post_empty_image)
             
             # Verify placeholder is shown for empty image
-            self.assertEqual(empty_placeholder_html, '-',
-                           f"Post with empty image field should show placeholder '-'. Got: {empty_placeholder_html}")
+            self.assertEqual(empty_placeholder_html, '',
+                           f"Post with empty image field should show empty string. Got: {empty_placeholder_html}")
         
         finally:
             # Clean up
@@ -184,12 +184,12 @@ class PostAdminPropertyTests(TestCase):
                 )
             
             # Test like count calculation
-            calculated_likes = self.post_admin.total_likes_count(post)
+            calculated_likes = self.post_admin.like_count(post)
             self.assertEqual(calculated_likes, actual_likes,
                            f"Like count should be {actual_likes}, but got {calculated_likes}")
             
             # Test comment count calculation
-            calculated_comments = self.post_admin.total_comments_count(post)
+            calculated_comments = self.post_admin.comment_count(post)
             self.assertEqual(calculated_comments, actual_comments,
                            f"Comment count should be {actual_comments}, but got {calculated_comments}")
             
@@ -201,8 +201,8 @@ class PostAdminPropertyTests(TestCase):
                                   f"Comment count should be non-negative, got {calculated_comments}")
             
             # Test consistency - calling the method multiple times should return same result
-            likes_second_call = self.post_admin.total_likes_count(post)
-            comments_second_call = self.post_admin.total_comments_count(post)
+            likes_second_call = self.post_admin.like_count(post)
+            comments_second_call = self.post_admin.comment_count(post)
             
             self.assertEqual(calculated_likes, likes_second_call,
                            f"Like count should be consistent across calls: {calculated_likes} vs {likes_second_call}")
@@ -258,7 +258,7 @@ class CommentAdminPropertyTests(TestCase):
             )
             
             # Get the preview
-            preview = self.comment_admin.short_content(comment)
+            preview = self.comment_admin.content_preview(comment)
             
             # Verify preview length is appropriate
             if len(comment_content) <= 100:

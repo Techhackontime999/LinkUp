@@ -22,6 +22,9 @@ application = ProtocolTypeRouter({
     # WebSocket handler will be added later via routing and consumers
     "websocket": AuthMiddlewareStack(
         # WebSocket URL routing for apps
-        URLRouter(__import__('messaging.routing', fromlist=['websocket_urlpatterns']).websocket_urlpatterns)
+        URLRouter(
+            __import__('messaging.routing', fromlist=['websocket_urlpatterns']).websocket_urlpatterns +
+            __import__('ai_agents.routing', fromlist=['websocket_urlpatterns']).websocket_urlpatterns
+        )
     ),
 })

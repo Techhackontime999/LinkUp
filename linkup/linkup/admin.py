@@ -5,7 +5,9 @@ from django.contrib import admin
 from django.contrib.admin import AdminSite
 from django.http import HttpRequest
 from django.template.response import TemplateResponse
+from django.utils.safestring import mark_safe
 from typing import List, Dict
+import json
 from .admin_dashboard import DashboardStats
 
 
@@ -19,11 +21,13 @@ class LinkUpAdminSite(AdminSite):
     def get_urls(self):
         from django.urls import path
         from . import admin_views
+        from ai_agents import admin_dashboard_views
         urls = super().get_urls()
         custom_urls = [
             path('seed-test-data/', self.admin_view(admin_views.SeedTestDataView.as_view()), name='seed_test_data'),
             path('clear-test-data/', self.admin_view(admin_views.ClearTestDataView.as_view()), name='clear_test_data'),
             path('test-data-stats/', self.admin_view(admin_views.TestDataStatsView.as_view()), name='test_data_stats'),
+            path('ai-agents-dashboard/', self.admin_view(admin_dashboard_views.agent_dashboard), name='ai_agents_dashboard'),
         ]
         return custom_urls + urls
     
@@ -58,7 +62,7 @@ class LinkUpAdminSite(AdminSite):
             'job_stats': job_stats,
             'network_stats': network_stats,
             'recent_actions': recent_actions,
-            'chart_data': chart_data,
+            'chart_data': mark_safe(json.dumps(chart_data)),
         }
         
         if extra_context:
