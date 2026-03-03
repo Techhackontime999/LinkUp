@@ -183,4 +183,9 @@ def query_interactions(
         
         return {
             'status': 'SUCCESS',
-          
+            'interactions': interactions,
+            'count': len(interactions),
+            'page': page,
+            'total_pages': total_pages,
+            'total_count': total_count
+        }
