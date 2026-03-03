@@ -189,3 +189,19 @@ def query_interactions(
             'total_pages': total_pages,
             'total_count': total_count
         }
+    except Exception as e:
+        import logging
+        logger = logging.getLogger('ai_agents.interaction_logger')
+        logger.error(f'Failed to query interactions: {str(e)}')
+        
+        return {
+            'status': 'FAILED',
+            'error': str(e)
+        }
+
+
+# This class will be used to extend InteractionLogger in services.py
+class InteractionLogger:
+    """Extension methods for InteractionLogger"""
+    log_agent_action = staticmethod(log_agent_action)
+    query_interactions = staticmethod(query_interactions)
