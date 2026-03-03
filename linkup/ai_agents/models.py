@@ -500,7 +500,7 @@ class ResearchMetric(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='metrics',
+        related_name='research_metrics',
         help_text="Interaction this metric is associated with (optional)"
     )
     value = models.FloatField(
