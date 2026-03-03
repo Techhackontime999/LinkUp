@@ -3093,46 +3093,77 @@ class InteractionLogger:
                     # Define CSV columns
                     fieldnames = [
                         'id', 'session_id', 'agent_1_id', 'agent_1_name',
-                        'agent_2_id', 'agent_2_name', '
+                        'agent_2_id', 'agent_2_name', 'interaction_type',
+                        'started_at', 'ended_at', 'message_count',
+                        'total_duration_seconds', 'outcome', 'tags', 'metrics'
+                    ]
+
+                    writer = csv.DictWriter(output, fieldnames=fieldnames)
+                    writer.writeheader()
+
+                    for interaction in interactions:
+                        import json
+                        writer.writerow({
+                            'id': interaction['id'],
+                            'session_id': interaction['session_id'],
+                            'agent_1_id': interaction['agent_1']['id'],
+                            'agent_1_name': interaction['agent_1']['name'],
+                            'agent_2_id': interaction['agent_2']['id'],
+                            'agent_2_name': interaction['agent_2']['name'],
+                            'interaction_type': interaction['interaction_type'],
+                            'started_at': interaction['started_at'],
+                            'ended_at': interaction['ended_at'] or '',
+                            'message_count': interaction['message_count'],
+                            'total_duration_seconds': interaction['total_duration_seconds'],
+                            'outcome': interaction['outcome'],
+                            'tags': json.dumps(interaction['tags']),
+                            'metrics': json.dumps(interaction['metrics'])
+                        })
+
+                data = output.getvalue()
+            else:
+                return {
+                    'status': 'FAILED',
+                    'error': f'Unsupported format: {format}'
+                }
+            
+            return {
+                'status': 'SUCCESS',
+                'data': data,
+                'format': format,
+                'count': len(interactions)
+            }
+            
+        except Exception as e:
             import logging
             logger = logging.getLogger('ai_agents.interaction_logger')
-            logger.error(f'Failed to anonymize data: {str(e)}')
+            logger.error(f'Failed to export interactions: {str(e)}')
             
             return {
                 'status': 'FAILED',
                 'error': str(e)
             }
-    }
-            
-        except Exception as e:mized_count': anonymized_count,
-                'pseudonym_map': pseudonym_map
+    
+    @staticmethod
+    def anonymize_data(interaction_ids: List[str]) -> Dict[str, Any]:
+        """
+        Anonymize interaction data for privacy-preserving research.
         
-                    interaction.metrics['agent_1_pseudonym'] = get_pseudonym(str(interaction.agent_1_id))
-                    interaction.metrics['agent_2_pseudonym'] = get_pseudonym(str(interaction.agent_2_id))
-                
-                # Mark as archived (anonymized data)
-                interaction.is_archived = True
-                interaction.save()
-                
-                anonymized_count += 1
+        Args:
+            interaction_ids: List of interaction IDs to anonymize
+        
+        Returns:
+            Dictionary containing:
+                - status: 'SUCCESS' or 'FAILED'
+                - anonymized_count: Number of interactions anonymized
+                - pseudonym_map: Mapping of agent IDs to pseudonyms
+                - error: Error message (on failure)
+        
+        Requirements: 12.1, 12.2, 12.3, 12.4, 12.5
+        """
+        try:
+            from .models import AgentInteraction
             
-            return {
-                'status': 'SUCCESS',
-                'anony              # Store pseudonyms in metrics
-                    interaction.metrics['anonymized'] = True                nonlocal pseudonym_counter
-                if agent_id not in pseudonym_map:
-                    pseudonym_map[agent_id] = f'Agent_{pseudonym_counter:03d}'
-                    pseudonym_counter += 1
-                return pseudonym_map[agent_id]
-            
-            # Anonymize interactions
-            anonymized_count = 0
-            
-            for interaction in interactions:
-                # Replace agent identifiers with pseudonyms in metrics
-                if interaction.metrics:
-      r:
-nteractions
             interactions = AgentInteraction.objects.filter(
                 id__in=interaction_ids
             )
@@ -3147,7 +3178,45 @@ nteractions
             pseudonym_map = {}
             pseudonym_counter = 1
             
-            def get_pseudonym(agent_id: str) -> st 12.3, 12.4, 12.5
+            def get_pseudonym(agent_id: str) -> str:
+                nonlocal pseudonym_counter
+                if agent_id not in pseudonym_map:
+                    pseudonym_map[agent_id] = f'Agent_{pseudonym_counter:03d}'
+                    pseudonym_counter += 1
+                return pseudonym_map[agent_id]
+            
+            # Anonymize interactions
+            anonymized_count = 0
+            
+            for interaction in interactions:
+                # Replace agent identifiers with pseudonyms in metrics
+                if interaction.metrics:
+                    # Store pseudonyms in metrics
+                    interaction.metrics['anonymized'] = True
+                    interaction.metrics['agent_1_pseudonym'] = get_pseudonym(str(interaction.agent_1_id))
+                    interaction.metrics['agent_2_pseudonym'] = get_pseudonym(str(interaction.agent_2_id))
+                
+                # Mark as archived (anonymized data)
+                interaction.is_archived = True
+                interaction.save()
+                
+                anonymized_count += 1
+            
+            return {
+                'status': 'SUCCESS',
+                'anonymized_count': anonymized_count,
+                'pseudonym_map': pseudonym_map
+            }
+            
+        except Exception as e:
+            import logging
+            logger = logging.getLogger('ai_agents.interaction_logger')
+            logger.error(f'Failed to anonymize data: {str(e)}')
+            
+            return {
+                'status': 'FAILED',
+                'error': str(e)
+            }
         """
         try:
             from .models import AgentInteraction
