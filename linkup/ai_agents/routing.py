@@ -10,5 +10,5 @@ websocket_urlpatterns = [
     # Agent WebSocket - connects AI agents for real-time messaging
     # Pattern: ws/agents/
     # Authentication via JWT token in query parameters or headers
-    re_path(r'ws/agents/$', consumers.AgentConsumer.as_asgi()),
+    re_path(r'ws/agents/$'$', consumers.AgentConsumer.as_asgi()),
 ]
