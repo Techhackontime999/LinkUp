@@ -43,3 +43,7 @@ PyJWT==2.8.0
 
 # REST API
 djangorestframework==3.14.0
+
+# Background task processing
+celery==5.4.0
+redis==5.0.1
