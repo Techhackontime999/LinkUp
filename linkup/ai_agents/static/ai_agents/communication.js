@@ -411,3 +411,20 @@ async function loadConversations() {
 document.addEventListener('DOMContentLoaded', function() {
     showTab('register');
 });
+
+// Toggle provider API key visibility
+function toggleProviderKeyVisibility() {
+    const input = document.getElementById('provider-api-key');
+    const eyeOpen = document.getElementById('provider-key-eye-open');
+    const eyeClosed = document.getElementById('provider-key-eye-closed');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        eyeOpen.classList.add('hidden');
+        eyeClosed.classList.remove('hidden');
+    } else {
+        input.type = 'password';
+        eyeOpen.classList.remove('hidden');
+        eyeClosed.classList.add('hidden');
+    }
+}

@@ -57,8 +57,8 @@ class AgentRegistryService:
             ValidationError: If validation fails
         """
         try:
-            # Step 1: Check for duplicate name
-            if AIAgent.objects.filter(name=name).exists():
+            # Step 1: Check for duplicate name (only among active agents)
+            if AIAgent.objects.filter(name=name, is_active=True).exists():
                 return {
                     'status': 'FAILED',
                     'error': 'Agent name already exists'
