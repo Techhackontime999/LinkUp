@@ -197,6 +197,12 @@
                                     aria-label="{% if agent.is_suspended %}Activate{% else %}Suspend{% endif %} {{ agent.name }}">
                                 {% if agent.is_suspended %}Activate{% else %}Suspend{% endif %}
                             </button>
+                            <button type="button" 
+                                    onclick="deleteModel('{{ agent.id }}', '{{ agent.name|escapejs }}')"
+                                    class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                                    aria-label="Delete {{ agent.name }}">
+                                Delete
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -262,6 +268,24 @@
 </div>
 
 <script>
+// CSRF Token Helper
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+const csrftoken = getCookie('csrftoken');
+
 // Checkbox selection handling
 document.addEventListener('DOMContentLoaded', function() {
     const selectAll = document.getElementById('select-all');
@@ -269,10 +293,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const bulkActions = document.getElementById('bulk-actions');
     const selectedCount = document.getElementById('selected-count');
 
-    selectAll.addEventListener('change', function() {
-        checkboxes.forEach(cb => cb.checked = this.checked);
-        updateBulkActions();
-    });
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            checkboxes.forEach(cb => cb.checked = this.checked);
+            updateBulkActions();
+        });
+    }
 
     checkboxes.forEach(cb => {
         cb.addEventListener('change', updateBulkActions);
@@ -280,20 +306,63 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateBulkActions() {
         const selected = document.querySelectorAll('.model-checkbox:checked');
-        selectedCount.textContent = selected.length;
-        if (selected.length > 0) {
-            bulkActions.classList.remove('hidden');
-        } else {
-            bulkActions.classList.add('hidden');
+        if (selectedCount) {
+            selectedCount.textContent = selected.length;
+        }
+        if (bulkActions) {
+            if (selected.length > 0) {
+                bulkActions.classList.remove('hidden');
+            } else {
+                bulkActions.classList.add('hidden');
+            }
         }
     }
 });
 
+// Toggle Status Function (Fixed to use POST)
 function toggleStatus(agentId, suspend) {
     const action = suspend ? 'suspend' : 'activate';
-    if (confirm(`Are you sure you want to ${action} this model?`)) {
-        window.location.href = `/api/admin/ai-models/${agentId}/toggle-status/`;
+    
+    if (!confirm(`Are you sure you want to ${action} this model?`)) {
+        return;
     }
+    
+    // Create a form and submit it
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/api/admin/ai-models/${agentId}/toggle-status/`;
+    
+    // Add CSRF token
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = csrftoken;
+    form.appendChild(csrfInput);
+    
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Delete Model Function (Fixed to use POST)
+function deleteModel(agentId, agentName) {
+    if (!confirm(`Are you sure you want to delete "${agentName}"? This will deactivate the model.`)) {
+        return;
+    }
+    
+    // Create a form and submit it
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/api/admin/ai-models/${agentId}/delete/`;
+    
+    // Add CSRF token
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = csrftoken;
+    form.appendChild(csrfInput);
+    
+    document.body.appendChild(form);
+    form.submit();
 }
 
 function bulkActivate() {
