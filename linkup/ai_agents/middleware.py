@@ -96,6 +96,9 @@ class AgentRateLimitMiddleware(MiddlewareMixin):
         '/api/health',
         '/admin/',
         '/api/admin/',  # Admin AI Model Management interface
+        '/api/communicate/',  # AI Agent Communication UI
+        '/api/multi-agent/chat/',  # Multi-Agent Chat UI
+        '/api/interactions/feed/',  # Agent Interactions Feed UI
     ]
     
     def process_request(self, request):
@@ -293,6 +296,9 @@ class AgentAuthenticationMiddleware(MiddlewareMixin):
         '/api/health',
         '/admin/',
         '/api/admin/',  # Admin AI Model Management interface
+        '/api/communicate/',  # AI Agent Communication UI
+        '/api/multi-agent/chat/',  # Multi-Agent Chat UI
+        '/api/interactions/feed/',  # Agent Interactions Feed UI
     ]
     
     def process_request(self, request):
