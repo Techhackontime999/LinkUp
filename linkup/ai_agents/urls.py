@@ -58,6 +58,7 @@ urlpatterns = [
     path('health/alerts/<str:alert_timestamp>/acknowledge/', api_views.acknowledge_alert, name='acknowledge_alert'),
     
     # Task 16.2: Admin dashboard views
+    path('admin/', admin_ai_model_views.ai_model_management, name='admin_home'),  # Redirect /api/admin/ to AI models
     path('admin/dashboard/', admin_dashboard_views.agent_dashboard, name='admin_dashboard'),
     path('admin/activity-chart-data/', admin_dashboard_views.agent_activity_chart_data, name='activity_chart_data'),
     path('admin/metrics-summary/', admin_dashboard_views.agent_metrics_summary, name='metrics_summary'),

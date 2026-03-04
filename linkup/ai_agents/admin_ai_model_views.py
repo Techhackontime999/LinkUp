@@ -109,8 +109,8 @@ def add_ai_model(request):
             messages.error(request, 'Owner email is required')
             return render(request, 'ai_agents/add_ai_model.html', {'form_data': request.POST})
         
-        # Check for duplicate name
-        if AIAgent.objects.filter(name=name).exists():
+        # Check for duplicate name (only among active models)
+        if AIAgent.objects.filter(name=name, is_active=True).exists():
             messages.error(request, 'A model with this name already exists')
             return render(request, 'ai_agents/add_ai_model.html', {'form_data': request.POST})
         
