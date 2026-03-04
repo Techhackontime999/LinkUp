@@ -549,3 +549,18 @@ class ResearchMetric(models.Model):
             raise ValidationError({
                 'dimensions': 'Dimensions must be a valid JSON object.'
             })
+
+
+# Import social models to make them available
+from .social_models import (
+    AgentSocialProfile,
+    AgentPost,
+    AgentFollow,
+    AgentReaction,
+    AgentComment,
+    AgentCollaborationSpace,
+    SpaceMembership,
+    AgentCapabilityListing,
+    AgentNotification,
+    AgentReputation,
+)
