@@ -1,0 +1,122 @@
+# Implementation Plan
+
+- [-] 1. Write bug condition exploration test
+  - **Property 1: Fault Condition** - API Key Field Display and Storage
+  - **CRITICAL**: This test MUST FAIL on unfixed code - failure confirms the bug exists
+  - **DO NOT attempt to fix the test or the code when it fails**
+  - **NOTE**: This test encodes the expected behavior - it will validate the fix when it passes after implementation
+  - **GOAL**: Surface counterexamples that demonstrate the bug exists
+  - **Scoped PBT Approach**: Scope the property to concrete failing cases - forms missing API key field and backend not processing it
+  - Test that add_ai_model.html contains an input field with name="api_key" in the Provider Configuration section
+  - Test that edit_ai_model.html contains an input field with name="api_key" in the Provider Configuration section
+  - Test that add_ai_model POST handler extracts api_key from request.POST and stores in agent.metadata['api_key']
+  - Test that edit_ai_model POST handler extracts api_key from request.POST and updates agent.metadata['api_key']
+  - Test that edit form populates the api_key field with value from agent.metadata.get('api_key', '')
+  - Run test on UNFIXED code
+  - **EXPECTED OUTCOME**: Test FAILS (this is correct - it proves the bug exists)
+  - Document counterexamples found: HTML templates missing api_key input field, backend handlers not extracting/storing api_key
+  - Mark task complete when test is written, run, and failure is documented
+  - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
+
+- [ ] 2. Write preservation property tests (BEFORE implementing fix)
+  - **Property 2: Preservation** - Existing Form and Metadata Behavior
+  - **IMPORTANT**: Follow observation-first methodology
+  - Observe behavior on UNFIXED code for form submissions without API key field
+  - Test that basic form submission (name, agent_type, owner_email only) creates agent successfully
+  - Test that provider and endpoint_url are stored in agent.metadata['provider'] and agent.metadata['endpoint_url']
+  - Test that platform API key generation (api_key_hash) and AgentAPIKey creation work correctly
+  - Test that empty/missing api_key field does not affect form submission or agent creation
+  - Test that existing metadata fields are preserved during updates
+  - Write property-based tests capturing observed behavior patterns across various form submission combinations
+  - Property-based testing generates many test cases for stronger guarantees
+  - Run tests on UNFIXED code
+  - **EXPECTED OUTCOME**: Tests PASS (this confirms baseline behavior to preserve)
+  - Mark task complete when tests are written, run, and passing on unfixed code
+  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
+
+- [ ] 3. Fix for API key form field missing
+
+  - [ ] 3.1 Add API key field to add_ai_model.html
+    - Open linkup/templates/ai_agents/add_ai_model.html
+    - Locate the "Provider Configuration (Optional)" section
+    - After the "Endpoint URL" field, add new form field div
+    - Label: "API Key" (no required indicator)
+    - Input type: password (to mask the key)
+    - Input name: "api_key"
+    - Input id: "api_key"
+    - Placeholder: "Enter your AI provider API key"
+    - Help text: "Your API key for authenticating with the AI provider (e.g., Google Gemini, OpenAI)"
+    - Use same styling classes as other fields in the section
+    - _Bug_Condition: isBugCondition(input) where input.formType = 'add_ai_model' AND NOT hasAPIKeyField(input.formHTML)_
+    - _Expected_Behavior: hasAPIKeyField(result.formHTML) = true_
+    - _Preservation: Existing form fields must continue to work exactly as before_
+    - _Requirements: 2.1, 2.2_
+
+  - [ ] 3.2 Add API key field to edit_ai_model.html
+    - Open linkup/templates/ai_agents/edit_ai_model.html
+    - Locate the "Provider Configuration" section
+    - After the "Endpoint URL" field, add new form field div
+    - Label: "API Key"
+    - Input type: password (to mask the key)
+    - Input name: "api_key"
+    - Input id: "api_key"
+    - Value: `{{ agent.metadata.api_key|default:'' }}`
+    - Placeholder: "Enter your AI provider API key"
+    - Help text: "Your API key for authenticating with the AI provider. Leave empty to keep existing value."
+    - Use same styling classes as other fields in the section
+    - _Bug_Condition: isBugCondition(input) where input.formType = 'edit_ai_model' AND NOT hasAPIKeyField(input.formHTML)_
+    - _Expected_Behavior: hasAPIKeyField(result.formHTML) = true AND result.editForm.displays(existingAPIKey)_
+    - _Preservation: Existing form fields must continue to work exactly as before_
+    - _Requirements: 2.1, 2.3_
+
+  - [ ] 3.3 Update add_ai_model POST handler
+    - Open linkup/ai_agents/admin_ai_model_views.py
+    - Locate the add_ai_model function POST handler
+    - After the endpoint_url extraction, add: `api_key = request.POST.get('api_key', '').strip()`
+    - In the metadata dictionary construction, after endpoint_url assignment, add: `if api_key: metadata['api_key'] = api_key`
+    - _Bug_Condition: NOT capturesAPIKey(input.backendHandler) for add_ai_model_
+    - _Expected_Behavior: result.agent.metadata['api_key'] == formSubmission.api_key (if provided)_
+    - _Preservation: Backend must continue to store provider and endpoint_url in agent.metadata, platform API key generation must remain unchanged_
+    - _Requirements: 2.2, 2.4, 3.1, 3.2, 3.3_
+
+  - [ ] 3.4 Update edit_ai_model POST handler
+    - Open linkup/ai_agents/admin_ai_model_views.py
+    - Locate the edit_ai_model function POST handler
+    - After the endpoint_url extraction, add: `api_key = request.POST.get('api_key', '').strip()`
+    - In the metadata dictionary handling, after endpoint_url assignment, add: `if api_key: metadata['api_key'] = api_key`
+    - Ensure existing metadata is preserved if api_key is empty
+    - _Bug_Condition: NOT capturesAPIKey(input.backendHandler) for edit_ai_model_
+    - _Expected_Behavior: result.agent.metadata['api_key'] == formSubmission.api_key (if provided)_
+    - _Preservation: All existing metadata fields must be preserved when updating_
+    - _Requirements: 2.3, 2.5, 3.1, 3.2, 3.4, 3.5_
+
+  - [ ] 3.5 Verify bug condition exploration test now passes
+    - **Property 1: Expected Behavior** - API Key Field Display and Storage
+    - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
+    - The test from task 1 encodes the expected behavior
+    - When this test passes, it confirms the expected behavior is satisfied
+    - Run bug condition exploration test from step 1
+    - **EXPECTED OUTCOME**: Test PASSES (confirms bug is fixed)
+    - Verify add_ai_model.html contains api_key input field
+    - Verify edit_ai_model.html contains api_key input field with value population
+    - Verify add_ai_model POST handler stores api_key in metadata
+    - Verify edit_ai_model POST handler updates api_key in metadata
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
+
+  - [ ] 3.6 Verify preservation tests still pass
+    - **Property 2: Preservation** - Existing Form and Metadata Behavior
+    - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
+    - Run preservation property tests from step 2
+    - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
+    - Confirm basic form submissions work identically
+    - Confirm provider/endpoint_url metadata storage unchanged
+    - Confirm platform API key generation unchanged
+    - Confirm optional field behavior preserved
+    - Confirm all tests still pass after fix (no regressions)
+
+- [ ] 4. Checkpoint - Ensure all tests pass
+  - Run all tests (exploration + preservation)
+  - Verify all tests pass
+  - Manually test the forms in the browser to confirm UI works correctly
+  - Test full flow: create agent with API key → verify stored → edit agent → verify displayed → update key → verify updated
+  - Ask the user if questions arise
