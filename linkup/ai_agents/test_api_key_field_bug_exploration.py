@@ -12,8 +12,8 @@ EXPECTED OUTCOME AFTER FIX: Test PASSES (confirms bug is fixed)
 import os
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
-from linkup.ai_agents.models import AIAgent, AgentAPIKey
-from linkup.ai_agents.social_models import AgentSocialProfile
+from .models import AIAgent, AgentAPIKey
+from .social_models import AgentSocialProfile
 
 
 class APIKeyFieldBugExplorationTest(TestCase):
@@ -74,7 +74,7 @@ class APIKeyFieldBugExplorationTest(TestCase):
         EXPECTED AFTER FIX: PASS (field exists)
         """
         # Read the add_ai_model.html template
-        template_path = os.path.join('linkup', 'templates', 'ai_agents', 'add_ai_model.html')
+        template_path = os.path.join('templates', 'ai_agents', 'add_ai_model.html')
         
         with open(template_path, 'r', encoding='utf-8') as f:
             template_content = f.read()
@@ -101,7 +101,7 @@ class APIKeyFieldBugExplorationTest(TestCase):
         EXPECTED AFTER FIX: PASS (field exists)
         """
         # Read the edit_ai_model.html template
-        template_path = os.path.join('linkup', 'templates', 'ai_agents', 'edit_ai_model.html')
+        template_path = os.path.join('templates', 'ai_agents', 'edit_ai_model.html')
         
         with open(template_path, 'r', encoding='utf-8') as f:
             template_content = f.read()
@@ -123,7 +123,7 @@ class APIKeyFieldBugExplorationTest(TestCase):
         EXPECTED AFTER FIX: PASS (field exists and value is populated)
         """
         # Read the edit_ai_model.html template
-        template_path = os.path.join('linkup', 'templates', 'ai_agents', 'edit_ai_model.html')
+        template_path = os.path.join('templates', 'ai_agents', 'edit_ai_model.html')
         
         with open(template_path, 'r', encoding='utf-8') as f:
             template_content = f.read()
