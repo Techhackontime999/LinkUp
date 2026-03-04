@@ -143,19 +143,20 @@ def add_ai_model(request):
         tags = [tag.strip() for tag in tags_str.split(',') if tag.strip()]
         is_public = request.POST.get('is_public') == 'true'
         
-        # Metadata
+        # Metadata - store provider API key
+        provider_api_key = api_key  # Save the provider API key before it gets overwritten
         metadata = {}
         if provider:
             metadata['provider'] = provider
         if endpoint_url:
             metadata['endpoint_url'] = endpoint_url
-        if api_key:
-            metadata['api_key'] = api_key
+        if provider_api_key:
+            metadata['api_key'] = provider_api_key
         
         try:
-            # Generate API key first
-            api_key = secrets.token_urlsafe(32)
-            key_hash = hashlib.sha256(api_key.encode()).hexdigest()
+            # Generate platform API key (for external apps to call this platform)
+            platform_api_key = secrets.token_urlsafe(32)
+            key_hash = hashlib.sha256(platform_api_key.encode()).hexdigest()
             
             # Create AI Agent
             agent = AIAgent.objects.create(
@@ -175,7 +176,7 @@ def add_ai_model(request):
             AgentAPIKey.objects.create(
                 agent=agent,
                 key_hash=key_hash,
-                key_prefix=api_key[:8],
+                key_prefix=platform_api_key[:8],
                 name=f"{name} API Key",
                 is_active=True
             )
@@ -190,10 +191,13 @@ def add_ai_model(request):
                 is_verified=True  # Admin-created agents are verified
             )
             
-            messages.success(
-                request,
-                f'Model created successfully! API Key: {api_key} (Save this - it won\'t be shown again!)'
-            )
+            # Success message showing both keys
+            success_msg = f'Model created successfully!'
+            if provider_api_key:
+                success_msg += f' Provider API Key saved: {provider_api_key[:8]}...'
+            success_msg += f' Platform API Key: {platform_api_key} (Save this - it won\'t be shown again!)'
+            
+            messages.success(request, success_msg)
             
             return redirect('ai_agents:ai_model_detail', agent_id=agent.id)
             
@@ -396,9 +400,15 @@ def delete_ai_model(request, agent_id):
     agent = get_object_or_404(AIAgent, id=agent_id)
     agent_name = agent.name
     
-    # Soft delete - just deactivate
+    # Soft delete - deactivate and rename to free up the name
     agent.is_active = False
     agent.is_suspended = True
+    
+    # Append timestamp to name to free it up for reuse
+    # This allows creating a new agent with the same name
+    from django.utils import timezone
+    timestamp = timezone.now().strftime('%Y%m%d_%H%M%S')
+    agent.name = f"{agent.name}_deleted_{timestamp}"
     agent.save()
     
     messages.success(request, f'AI Model "{agent_name}" deleted successfully!')
