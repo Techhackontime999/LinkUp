@@ -99,6 +99,7 @@ def add_ai_model(request):
         owner_email = request.POST.get('owner_email', '').strip()
         provider = request.POST.get('provider', '')
         endpoint_url = request.POST.get('endpoint_url', '')
+        api_key = request.POST.get('api_key', '').strip()
         
         # Validate required fields
         if not name or len(name) < 3:
@@ -148,6 +149,8 @@ def add_ai_model(request):
             metadata['provider'] = provider
         if endpoint_url:
             metadata['endpoint_url'] = endpoint_url
+        if api_key:
+            metadata['api_key'] = api_key
         
         try:
             # Generate API key first
@@ -266,12 +269,15 @@ def edit_ai_model(request, agent_id):
         # Update metadata
         provider = request.POST.get('provider', '')
         endpoint_url = request.POST.get('endpoint_url', '')
-        if provider or endpoint_url:
+        api_key = request.POST.get('api_key', '').strip()
+        if provider or endpoint_url or api_key:
             metadata = agent.metadata or {}
             if provider:
                 metadata['provider'] = provider
             if endpoint_url:
                 metadata['endpoint_url'] = endpoint_url
+            if api_key:
+                metadata['api_key'] = api_key
             agent.metadata = metadata
         
         agent.save()

@@ -11,6 +11,7 @@ EXPECTED OUTCOME AFTER FIX: Tests PASS (confirms no regressions)
 """
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 from .models import AIAgent, AgentAPIKey
 from .social_models import AgentSocialProfile
 
@@ -72,7 +73,7 @@ class APIKeyFieldPreservationTest(TestCase):
         
         PRESERVATION: This behavior must remain unchanged after fix.
         """
-        response = self.client.post('/ai-agents/admin/models/add/', {
+        response = self.client.post(reverse('ai_agents:add_ai_model'), {
             'name': 'BasicAgent',
             'agent_type': 'conversational',
             'owner_email': 'basic@example.com',
@@ -96,7 +97,7 @@ class APIKeyFieldPreservationTest(TestCase):
         PRESERVATION: This behavior must remain unchanged after fix.
         Validates Requirements 3.1, 3.2
         """
-        response = self.client.post('/ai-agents/admin/models/add/', {
+        response = self.client.post(reverse('ai_agents:add_ai_model'), {
             'name': 'ProviderTestAgent',
             'agent_type': 'conversational',
             'owner_email': 'provider@example.com',
@@ -124,7 +125,7 @@ class APIKeyFieldPreservationTest(TestCase):
         PRESERVATION: This behavior must remain unchanged after fix.
         Validates Requirement 3.4
         """
-        response = self.client.post('/ai-agents/admin/models/add/', {
+        response = self.client.post(reverse('ai_agents:add_ai_model'), {
             'name': 'PlatformKeyAgent',
             'agent_type': 'conversational',
             'owner_email': 'platformkey@example.com',
@@ -154,7 +155,7 @@ class APIKeyFieldPreservationTest(TestCase):
         PRESERVATION: This behavior must remain unchanged after fix.
         Validates Requirement 3.3
         """
-        response = self.client.post('/ai-agents/admin/models/add/', {
+        response = self.client.post(reverse('ai_agents:add_ai_model'), {
             'name': 'MinimalAgent',
             'agent_type': 'conversational',
             'owner_email': 'minimal@example.com',
@@ -179,7 +180,7 @@ class APIKeyFieldPreservationTest(TestCase):
         """
         # Update agent with new provider
         response = self.client.post(
-            f'/ai-agents/admin/models/{self.test_agent.id}/edit/',
+            reverse('ai_agents:edit_ai_model', kwargs={'agent_id': self.test_agent.id}),
             {
                 'description': 'Updated description',
                 'version': '1.0.1',
@@ -212,7 +213,7 @@ class APIKeyFieldPreservationTest(TestCase):
         
         PRESERVATION: This behavior must remain unchanged after fix.
         """
-        response = self.client.post('/ai-agents/admin/models/add/', {
+        response = self.client.post(reverse('ai_agents:add_ai_model'), {
             'name': 'CapabilitiesAgent',
             'agent_type': 'conversational',
             'owner_email': 'capabilities@example.com',
@@ -241,7 +242,7 @@ class APIKeyFieldPreservationTest(TestCase):
         
         PRESERVATION: This behavior must remain unchanged after fix.
         """
-        response = self.client.post('/ai-agents/admin/models/add/', {
+        response = self.client.post(reverse('ai_agents:add_ai_model'), {
             'name': 'SocialAgent',
             'agent_type': 'conversational',
             'owner_email': 'social@example.com',

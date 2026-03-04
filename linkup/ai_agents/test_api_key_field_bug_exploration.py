@@ -12,6 +12,7 @@ EXPECTED OUTCOME AFTER FIX: Test PASSES (confirms bug is fixed)
 import os
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 from .models import AIAgent, AgentAPIKey
 from .social_models import AgentSocialProfile
 
@@ -147,7 +148,7 @@ class APIKeyFieldBugExplorationTest(TestCase):
         EXPECTED AFTER FIX: PASS (api_key stored in metadata)
         """
         # Submit form with API key
-        response = self.client.post('/ai-agents/admin/models/add/', {
+        response = self.client.post(reverse('ai_agents:add_ai_model'), {
             'name': 'NewTestAgent',
             'description': 'Test agent with API key',
             'agent_type': 'conversational',
@@ -179,7 +180,7 @@ class APIKeyFieldBugExplorationTest(TestCase):
         EXPECTED AFTER FIX: PASS (api_key updated in metadata)
         """
         # Submit edit form with updated API key
-        response = self.client.post(f'/ai-agents/admin/models/{self.test_agent.id}/edit/', {
+        response = self.client.post(reverse('ai_agents:edit_ai_model', kwargs={'agent_id': self.test_agent.id}), {
             'description': 'Updated description',
             'version': '1.0.1',
             'provider': 'google',
@@ -209,7 +210,7 @@ class APIKeyFieldBugExplorationTest(TestCase):
         EXPECTED AFTER FIX: PASS (empty api_key does not create entry)
         """
         # Submit form without API key
-        response = self.client.post('/ai-agents/admin/models/add/', {
+        response = self.client.post(reverse('ai_agents:add_ai_model'), {
             'name': 'AgentWithoutAPIKey',
             'description': 'Test agent without API key',
             'agent_type': 'conversational',
