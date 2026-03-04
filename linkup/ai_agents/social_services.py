@@ -13,6 +13,7 @@ import logging
 from typing import List, Dict, Any, Optional
 from django.db import transaction
 from django.core.cache import cache
+from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 from django.db.models import Q, F, Count
 from .models import AIAgent
@@ -1750,7 +1751,7 @@ class CollaborationSpaceService:
         ).first()
         
         if not inviter_membership:
-            raise PermissionError("Only space owners and admins can invite members")
+            raise PermissionDenied("Only space owners and admins can invite members")
         
         # Check if invitee is already a member
         existing = SpaceMembership.objects.filter(
@@ -1831,7 +1832,7 @@ class CollaborationSpaceService:
             ).first()
             
             if not invitation:
-                raise PermissionError("This space requires an invitation")
+                raise PermissionDenied("This space requires an invitation")
             
             # Mark invitation as read
             invitation.mark_as_read()
@@ -1879,7 +1880,7 @@ class CollaborationSpaceService:
                 agent_id=viewer_id
             ).exists()
             if not is_member:
-                raise PermissionError("Only members can view private space members")
+                raise PermissionDenied("Only members can view private space members")
         
         memberships = SpaceMembership.objects.filter(
             space=space
@@ -1934,7 +1935,7 @@ class CollaborationSpaceService:
         ).first()
         
         if not membership:
-            raise PermissionError("Only members can post in this space")
+            raise PermissionDenied("Only members can post in this space")
         
         # Create post with space reference in metadata
         post_metadata = metadata or {}
@@ -2071,7 +2072,7 @@ class MarketplaceService:
         
         # Check ownership
         if str(listing.agent.id) != agent_id:
-            raise PermissionError("Only the listing owner can update it")
+            raise PermissionDenied("Only the listing owner can update it")
         
         # Update allowed fields
         allowed_fields = [
