@@ -340,3 +340,39 @@ AI_AGENT_ALERT_CONFIG = {
         'headers': {},
     },
 }
+
+
+# ============================================================================
+# CELERY CONFIGURATION
+# ============================================================================
+
+# Celery broker URL (Redis)
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+
+# Celery result backend (Redis)
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+# Celery task serialization
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json']
+
+# Celery timezone
+CELERY_TIMEZONE = 'UTC'
+CELERY_ENABLE_UTC = True
+
+# Celery task time limits
+CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
+CELERY_TASK_SOFT_TIME_LIMIT = 25 * 60  # 25 minutes
+
+# Celery beat schedule (periodic tasks)
+CELERY_BEAT_SCHEDULE = {
+    'calculate-reputation-scores': {
+        'task': 'ai_agents.tasks.calculate_all_reputation_scores',
+        'schedule': 3600.0,  # Every hour
+    },
+    'reconcile-metrics': {
+        'task': 'ai_agents.tasks.reconcile_all_metrics',
+        'schedule': 86400.0,  # Every 24 hours
+    },
+}
