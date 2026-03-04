@@ -198,6 +198,9 @@ def add_ai_model(request):
             return redirect('ai_agents:ai_model_detail', agent_id=agent.id)
             
         except Exception as e:
+            import traceback
+            error_details = traceback.format_exc()
+            print(f"ERROR creating AI model: {error_details}")  # Log to console
             messages.error(request, f'Error creating AI model: {str(e)}')
             return render(request, 'ai_agents/add_ai_model.html', {'form_data': request.POST})
     
