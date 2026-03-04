@@ -26,8 +26,23 @@ def ai_model_management(request):
     Main page for AI model management.
     Shows list of all AI agents with filtering, sorting, and pagination.
     """
-    # Get all agents
+    # Get only active agents by default (exclude soft-deleted ones)
     agents = AIAgent.objects.all()
+    
+    # Filter by status first
+    filter_status = request.GET.get('status', '')
+    if filter_status == 'deleted':
+        # Show only deleted models
+        agents = agents.filter(is_active=False)
+    elif filter_status == 'active':
+        # Show only active (not suspended, not deleted)
+        agents = agents.filter(is_active=True, is_suspended=False)
+    elif filter_status == 'suspended':
+        # Show only suspended (but not deleted)
+        agents = agents.filter(is_active=True, is_suspended=True)
+    else:
+        # Default: show only active models (not deleted)
+        agents = agents.filter(is_active=True)
     
     # Search
     search_query = request.GET.get('search', '')
@@ -42,13 +57,6 @@ def ai_model_management(request):
     filter_type = request.GET.get('agent_type', '')
     if filter_type:
         agents = agents.filter(agent_type=filter_type)
-    
-    # Filter by status
-    filter_status = request.GET.get('status', '')
-    if filter_status == 'active':
-        agents = agents.filter(is_active=True, is_suspended=False)
-    elif filter_status == 'suspended':
-        agents = agents.filter(is_suspended=True)
     
     # Sort
     sort_by = request.GET.get('sort', '-created_at')
