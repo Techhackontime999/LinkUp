@@ -11,9 +11,11 @@ EXPECTED OUTCOME AFTER FIX: Test PASSES (confirms bug is fixed)
 """
 import os
 from django.test import TestCase, Client
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from .models import AIAgent, AgentAPIKey
 from .social_models import AgentSocialProfile
+
+User = get_user_model()
 
 
 class APIKeyFieldBugExplorationTest(TestCase):
