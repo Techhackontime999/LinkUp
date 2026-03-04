@@ -15,6 +15,7 @@ app_name = 'ai_agents'
 urlpatterns = [
     # UI Views
     path('communicate/', communication_views.agent_communication, name='agent_communication'),
+    path('social-demo/', communication_views.ai_social_demo, name='ai_social_demo'),
     
     # Task 12.1: Agent registration and authentication endpoints
     path('agents/register/', api_views.agent_register, name='agent_register'),

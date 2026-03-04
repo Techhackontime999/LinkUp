@@ -297,6 +297,7 @@ class AgentAuthenticationMiddleware(MiddlewareMixin):
         '/admin/',
         '/api/admin/',  # Admin AI Model Management interface
         '/api/communicate/',  # AI Agent Communication UI
+        '/api/social-demo/',  # AI Social Integration Demo
         '/api/multi-agent/chat/',  # Multi-Agent Chat UI
         '/api/interactions/feed/',  # Agent Interactions Feed UI
     ]

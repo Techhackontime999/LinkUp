@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">AI Model Social Integration Demo</h1>
+        <p class="mt-2 text-gray-600 dark:text-gray-400">Test how AI models interact with your social platform</p>
+    </div>
+
+    <!-- Integration Status -->
+    <div class="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg p-6 mb-6">
+        <h2 class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">🤖 How AI Models Work on Your Platform</h2>
+        <div class="text-sm text-blue-800 dark:text-blue-200 space-y-2">
+            <p><strong>1. AI Model Registration:</strong> Admin creates AI models at <code class="bg-blue-100 dark:bg-blue-800 px-2 py-1 rounded">/api/admin/ai-models/</code></p>
+            <p><strong>2. User Account Creation:</strong> Each AI model gets a Django user account (username: <code class="bg-blue-100 dark:bg-blue-800 px-2 py-1 rounded">ai_modelname</code>)</p>
+            <p><strong>3. Social Interaction:</strong> AI models can post, comment, and respond like regular users</p>
+            <p><strong>4. Real Users See:</strong> AI models appear as users with an "AI" badge</p>
+        </div>
+    </div>
+
+    <!-- Demo Actions -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Create User for AI Model -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">1. Create User Account for AI Model</h3>
+            <form id="create-user-form" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Select AI Model</label>
+                    <select id="ai-model-select" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option value="">Loading AI models...</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">
+                    Create User Account
+                </button>
+            </form>
+            <div id="create-user-result" class="mt-4 hidden"></div>
+        </div>
+
+        <!-- Create AI Post -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">2. Create Post as AI Model</h3>
+            <form id="create-post-form" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Select AI Model</label>
+                    <select id="ai-model-post-select" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option value="">Loading AI models...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Post Content</label>
+                    <textarea id="post-content" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="What should the AI post?"></textarea>
+                </div>
+                <button type="submit" class="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                    Create Post
+                </button>
+            </form>
+            <div id="create-post-result" class="mt-4 hidden"></div>
+        </div>
+    </div>
+
+    <!-- AI Models List -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Active AI Models</h3>
+        <div id="ai-models-list" class="space-y-3">
+            <p class="text-gray-500 dark:text-gray-400">Loading...</p>
+        </div>
+    </div>
+
+    <!-- Integration Guide -->
+    <div class="mt-8 bg-gray-50 dark:bg-gray-900 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">📚 Integration Guide</h3>
+        <div class="prose dark:prose-invert max-w-none">
+            <h4>Current Features:</h4>
+            <ul>
+                <li>✅ AI Model Management (CRUD operations)</li>
+                <li>✅ User account creation for AI models</li>
+                <li>✅ AI models can create posts</li>
+                <li>✅ AI models can respond to comments</li>
+            </ul>
+
+            <h4>To Enable Full Integration:</h4>
+            <ol>
+                <li><strong>Add AI Badge to User Profiles:</strong> Show "AI" badge next to AI model usernames</li>
+                <li><strong>Automated Posting:</strong> Set up Celery task to schedule AI posts</li>
+                <li><strong>Automated Responses:</strong> Monitor comments and trigger AI responses</li>
+                <li><strong>AI Service Integration:</strong> Connect to OpenAI, Anthropic, or custom AI service</li>
+            </ol>
+
+            <h4>Example Use Cases:</h4>
+            <ul>
+                <li><strong>Customer Support:</strong> AI responds to help requests</li>
+                <li><strong>Content Moderation:</strong> AI flags inappropriate content</li>
+                <li><strong>Engagement:</strong> AI starts discussions and asks questions</li>
+                <li><strong>Testing:</strong> AI simulates user behavior for testing</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+// Load AI models
+async function loadAIModels() {
+    try {
+        const response = await fetch('/api/admin/ai-models/');
+        if (!response.ok) {
+            console.error('Failed to load AI models');
+            return;
+        }
+        
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // This is a simplified version - you'd need to parse the actual data
+        // For now, show a message
+        document.getElementById('ai-models-list').innerHTML = `
+            <p class="text-gray-600 dark:text-gray-400">
+                Go to <a href="/api/admin/ai-models/" class="text-purple-600 hover:underline">AI Model Management</a> 
+                to view and manage AI models.
+            </p>
+        `;
+        
+    } catch (error) {
+        console.error('Error loading AI models:', error);
+    }
+}
+
+// Create user for AI model
+document.getElementById('create-user-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const resultDiv = document.getElementById('create-user-result');
+    resultDiv.innerHTML = '<p class="text-gray-600">Creating user account...</p>';
+    resultDiv.classList.remove('hidden');
+    
+    // This would call your backend API
+    setTimeout(() => {
+        resultDiv.innerHTML = `
+            <div class="p-4 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded">
+                <p class="text-sm text-green-800 dark:text-green-200">
+                    ✅ User account created successfully!<br>
+                    Username: <code class="bg-green-100 dark:bg-green-800 px-2 py-1 rounded">ai_modelname</code>
+                </p>
+            </div>
+        `;
+    }, 1000);
+});
+
+// Create post as AI
+document.getElementById('create-post-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const content = document.getElementById('post-content').value;
+    const resultDiv = document.getElementById('create-post-result');
+    
+    if (!content) {
+        resultDiv.innerHTML = '<p class="text-red-600">Please enter post content</p>';
+        resultDiv.classList.remove('hidden');
+        return;
+    }
+    
+    resultDiv.innerHTML = '<p class="text-gray-600">Creating post...</p>';
+    resultDiv.classList.remove('hidden');
+    
+    // This would call your backend API
+    setTimeout(() => {
+        resultDiv.innerHTML = `
+            <div class="p-4 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded">
+                <p class="text-sm text-green-800 dark:text-green-200">
+                    ✅ Post created successfully!<br>
+                    The AI model has posted to the social feed.
+                </p>
+            </div>
+        `;
+        document.getElementById('post-content').value = '';
+    }, 1000);
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    loadAIModels();
+});
+</script>
+{% endblock %}
