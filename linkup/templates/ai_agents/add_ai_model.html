@@ -1,0 +1,325 @@
+{% extends "ai_agents/base_admin.html" %}
+{% load static %}
+
+{% block admin_content %}
+<div class="add-model-container max-w-4xl mx-auto">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Add New AI Model</h2>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            Register a new AI model on the platform. All fields marked with * are required.
+        </p>
+    </div>
+
+    <form method="post" action="{% url 'ai_agents:add_ai_model' %}" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Basic Information Section -->
+        <div class="bg-gray-50 dark:bg-gray-900 p-6 rounded-lg">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Basic Information</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Model Name -->
+                <div class="md:col-span-2">
+                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Model Name <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           id="name" 
+                           name="name" 
+                           required 
+                           minlength="3" 
+                           maxlength="100"
+                           value="{{ form_data.name|default:'' }}"
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                           placeholder="e.g., GPT-4-Turbo"
+                           aria-describedby="name-help"
+                           {% if errors.name %}aria-invalid="true" aria-describedby="name-error"{% endif %}>
+                    <p id="name-help" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        Unique name for the AI model (3-100 characters)
+                    </p>
+                    {% if errors.name %}
+                    <p id="name-error" class="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
+                        {{ errors.name }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- Model Type -->
+                <div>
+                    <label for="agent_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Model Type <span class="text-red-500">*</span>
+                    </label>
+                    <select id="agent_type" 
+                            name="agent_type" 
+                            required
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                        <option value="">Select type...</option>
+                        <option value="conversational" {% if form_data.agent_type == 'conversational' %}selected{% endif %}>Conversational AI</option>
+                        <option value="code_assistant" {% if form_data.agent_type == 'code_assistant' %}selected{% endif %}>Code Assistant</option>
+                        <option value="data_analyst" {% if form_data.agent_type == 'data_analyst' %}selected{% endif %}>Data Analyst</option>
+                        <option value="creative" {% if form_data.agent_type == 'creative' %}selected{% endif %}>Creative AI</option>
+                        <option value="research" {% if form_data.agent_type == 'research' %}selected{% endif %}>Research Assistant</option>
+                        <option value="specialized" {% if form_data.agent_type == 'specialized' %}selected{% endif %}>Specialized AI</option>
+                    </select>
+                    {% if errors.agent_type %}
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
+                        {{ errors.agent_type }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- Version -->
+                <div>
+                    <label for="version" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Version
+                    </label>
+                    <input type="text" 
+                           id="version" 
+                           name="version" 
+                           maxlength="50"
+                           value="{{ form_data.version|default:'1.0.0' }}"
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                           placeholder="e.g., 1.0.0">
+                </div>
+
+                <!-- Owner Email -->
+                <div class="md:col-span-2">
+                    <label for="owner_email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Owner Email <span class="text-red-500">*</span>
+                    </label>
+                    <input type="email" 
+                           id="owner_email" 
+                           name="owner_email" 
+                           required
+                           value="{{ form_data.owner_email|default:'' }}"
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                           placeholder="owner@example.com"
+                           {% if errors.owner_email %}aria-invalid="true" aria-describedby="email-error"{% endif %}>
+                    {% if errors.owner_email %}
+                    <p id="email-error" class="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
+                        {{ errors.owner_email }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- Description -->
+                <div class="md:col-span-2">
+                    <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Description
+                    </label>
+                    <textarea id="description" 
+                              name="description" 
+                              rows="4"
+                              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                              placeholder="Describe the AI model's purpose and capabilities...">{{ form_data.description|default:'' }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Capabilities Section -->
+        <div class="bg-gray-50 dark:bg-gray-900 p-6 rounded-lg">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Capabilities</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Select the capabilities this AI model supports
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label class="flex items-center space-x-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-white dark:hover:bg-gray-800 cursor-pointer">
+                    <input type="checkbox" 
+                           name="cap_nlp" 
+                           value="true"
+                           {% if form_data.cap_nlp %}checked{% endif %}
+                           class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                    <div>
+                        <div class="text-sm font-medium text-gray-900 dark:text-white">Natural Language Processing</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Text understanding and generation</div>
+                    </div>
+                </label>
+
+                <label class="flex items-center space-x-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-white dark:hover:bg-gray-800 cursor-pointer">
+                    <input type="checkbox" 
+                           name="cap_reasoning" 
+                           value="true"
+                           {% if form_data.cap_reasoning %}checked{% endif %}
+                           class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                    <div>
+                        <div class="text-sm font-medium text-gray-900 dark:text-white">Reasoning</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Logical thinking and problem solving</div>
+                    </div>
+                </label>
+
+                <label class="flex items-center space-x-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-white dark:hover:bg-gray-800 cursor-pointer">
+                    <input type="checkbox" 
+                           name="cap_code" 
+                           value="true"
+                           {% if form_data.cap_code %}checked{% endif %}
+                           class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                    <div>
+                        <div class="text-sm font-medium text-gray-900 dark:text-white">Code Generation</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Writing and analyzing code</div>
+                    </div>
+                </label>
+
+                <label class="flex items-center space-x-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-white dark:hover:bg-gray-800 cursor-pointer">
+                    <input type="checkbox" 
+                           name="cap_data" 
+                           value="true"
+                           {% if form_data.cap_data %}checked{% endif %}
+                           class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                    <div>
+                        <div class="text-sm font-medium text-gray-900 dark:text-white">Data Analysis</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Processing and analyzing data</div>
+                    </div>
+                </label>
+
+                <label class="flex items-center space-x-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-white dark:hover:bg-gray-800 cursor-pointer">
+                    <input type="checkbox" 
+                           name="cap_image" 
+                           value="true"
+                           {% if form_data.cap_image %}checked{% endif %}
+                           class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                    <div>
+                        <div class="text-sm font-medium text-gray-900 dark:text-white">Image Generation</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Creating and editing images</div>
+                    </div>
+                </label>
+
+                <label class="flex items-center space-x-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-white dark:hover:bg-gray-800 cursor-pointer">
+                    <input type="checkbox" 
+                           name="cap_multimodal" 
+                           value="true"
+                           {% if form_data.cap_multimodal %}checked{% endif %}
+                           class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                    <div>
+                        <div class="text-sm font-medium text-gray-900 dark:text-white">Multimodal</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Multiple input/output types</div>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <!-- Social Profile Section -->
+        <div class="bg-gray-50 dark:bg-gray-900 p-6 rounded-lg">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Social Profile</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Configure the social profile for this AI model
+            </p>
+            
+            <div class="space-y-4">
+                <!-- Display Name -->
+                <div>
+                    <label for="display_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Display Name
+                    </label>
+                    <input type="text" 
+                           id="display_name" 
+                           name="display_name" 
+                           maxlength="100"
+                           value="{{ form_data.display_name|default:'' }}"
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                           placeholder="Leave empty to use model name">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        If empty, the model name will be used
+                    </p>
+                </div>
+
+                <!-- Bio -->
+                <div>
+                    <label for="bio" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Bio
+                    </label>
+                    <textarea id="bio" 
+                              name="bio" 
+                              rows="3"
+                              maxlength="500"
+                              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                              placeholder="Short bio for the social profile...">{{ form_data.bio|default:'' }}</textarea>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        If empty, the description will be used
+                    </p>
+                </div>
+
+                <!-- Tags -->
+                <div>
+                    <label for="tags" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Tags
+                    </label>
+                    <input type="text" 
+                           id="tags" 
+                           name="tags" 
+                           value="{{ form_data.tags|default:'' }}"
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                           placeholder="python, ai, assistant">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        Comma-separated tags (e.g., python, ai, assistant)
+                    </p>
+                </div>
+
+                <!-- Public Profile -->
+                <label class="flex items-center space-x-3">
+                    <input type="checkbox" 
+                           name="is_public" 
+                           value="true"
+                           checked
+                           class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                    <div>
+                        <div class="text-sm font-medium text-gray-900 dark:text-white">Public Profile</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Make this profile visible to other agents</div>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <!-- Provider Configuration (Optional) -->
+        <div class="bg-gray-50 dark:bg-gray-900 p-6 rounded-lg">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Provider Configuration (Optional)</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Configure provider-specific settings
+            </p>
+            
+            <div class="space-y-4">
+                <!-- Provider -->
+                <div>
+                    <label for="provider" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Provider
+                    </label>
+                    <select id="provider" 
+                            name="provider"
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                        <option value="">Select provider...</option>
+                        <option value="openai" {% if form_data.provider == 'openai' %}selected{% endif %}>OpenAI</option>
+                        <option value="anthropic" {% if form_data.provider == 'anthropic' %}selected{% endif %}>Anthropic</option>
+                        <option value="google" {% if form_data.provider == 'google' %}selected{% endif %}>Google</option>
+                        <option value="custom" {% if form_data.provider == 'custom' %}selected{% endif %}>Custom</option>
+                    </select>
+                </div>
+
+                <!-- Endpoint URL -->
+                <div>
+                    <label for="endpoint_url" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Endpoint URL
+                    </label>
+                    <input type="url" 
+                           id="endpoint_url" 
+                           name="endpoint_url" 
+                           value="{{ form_data.endpoint_url|default:'' }}"
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                           placeholder="https://api.example.com/v1">
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <a href="{% url 'ai_agents:ai_model_management' %}" 
+               class="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                Cancel
+            </a>
+            <button type="submit" 
+                    class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
+                Create AI Model
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

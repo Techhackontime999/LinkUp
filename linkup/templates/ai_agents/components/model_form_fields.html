@@ -1,0 +1,112 @@
+{% comment %}
+Reusable form field components for AI model forms
+Usage: {% include "ai_agents/components/model_form_fields.html" with field_type="name" %}
+{% endcomment %}
+
+{% if field_type == "name" %}
+<!-- Model Name Field -->
+<div class="{% if col_span %}{{ col_span }}{% else %}md:col-span-2{% endif %}">
+    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        Model Name <span class="text-red-500">*</span>
+    </label>
+    <input type="text" 
+           id="name" 
+           name="name" 
+           required 
+           minlength="3" 
+           maxlength="100"
+           value="{{ form_data.name|default:'' }}"
+           {% if readonly %}readonly disabled{% endif %}
+           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white {% if readonly %}bg-gray-100 dark:bg-gray-800 cursor-not-allowed{% endif %}"
+           placeholder="e.g., GPT-4-Turbo"
+           aria-describedby="name-help"
+           {% if errors.name %}aria-invalid="true" aria-describedby="name-error"{% endif %}>
+    <p id="name-help" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+        Unique name for the AI model (3-100 characters)
+    </p>
+    {% if errors.name %}
+    <p id="name-error" class="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
+        {{ errors.name }}
+    </p>
+    {% endif %}
+</div>
+{% endif %}
+
+{% if field_type == "agent_type" %}
+<!-- Model Type Field -->
+<div>
+    <label for="agent_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        Model Type <span class="text-red-500">*</span>
+    </label>
+    <select id="agent_type" 
+            name="agent_type" 
+            required
+            {% if readonly %}disabled{% endif %}
+            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white {% if readonly %}bg-gray-100 dark:bg-gray-800 cursor-not-allowed{% endif %}">
+        <option value="">Select type...</option>
+        <option value="conversational" {% if form_data.agent_type == 'conversational' %}selected{% endif %}>Conversational AI</option>
+        <option value="code_assistant" {% if form_data.agent_type == 'code_assistant' %}selected{% endif %}>Code Assistant</option>
+        <option value="data_analyst" {% if form_data.agent_type == 'data_analyst' %}selected{% endif %}>Data Analyst</option>
+        <option value="creative" {% if form_data.agent_type == 'creative' %}selected{% endif %}>Creative AI</option>
+        <option value="research" {% if form_data.agent_type == 'research' %}selected{% endif %}>Research Assistant</option>
+        <option value="specialized" {% if form_data.agent_type == 'specialized' %}selected{% endif %}>Specialized AI</option>
+    </select>
+    {% if errors.agent_type %}
+    <p class="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
+        {{ errors.agent_type }}
+    </p>
+    {% endif %}
+</div>
+{% endif %}
+
+{% if field_type == "version" %}
+<!-- Version Field -->
+<div>
+    <label for="version" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        Version
+    </label>
+    <input type="text" 
+           id="version" 
+           name="version" 
+           maxlength="50"
+           value="{{ form_data.version|default:'1.0.0' }}"
+           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+           placeholder="e.g., 1.0.0">
+</div>
+{% endif %}
+
+{% if field_type == "owner_email" %}
+<!-- Owner Email Field -->
+<div class="{% if col_span %}{{ col_span }}{% else %}md:col-span-2{% endif %}">
+    <label for="owner_email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        Owner Email <span class="text-red-500">*</span>
+    </label>
+    <input type="email" 
+           id="owner_email" 
+           name="owner_email" 
+           required
+           value="{{ form_data.owner_email|default:'' }}"
+           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+           placeholder="owner@example.com"
+           {% if errors.owner_email %}aria-invalid="true" aria-describedby="email-error"{% endif %}>
+    {% if errors.owner_email %}
+    <p id="email-error" class="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
+        {{ errors.owner_email }}
+    </p>
+    {% endif %}
+</div>
+{% endif %}
+
+{% if field_type == "description" %}
+<!-- Description Field -->
+<div class="{% if col_span %}{{ col_span }}{% else %}md:col-span-2{% endif %}">
+    <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        Description
+    </label>
+    <textarea id="description" 
+              name="description" 
+              rows="4"
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+              placeholder="Describe the AI model's purpose and capabilities...">{{ form_data.description|default:'' }}</textarea>
+</div>
+{% endif %}

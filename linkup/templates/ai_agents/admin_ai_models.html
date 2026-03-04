@@ -1,0 +1,330 @@
+{% extends "ai_agents/base_admin.html" %}
+{% load static %}
+
+{% block admin_content %}
+<div class="model-list-container">
+    <!-- Filters and Search -->
+    <div class="filters-section mb-6">
+        <form method="get" action="{% url 'ai_agents:ai_model_management' %}" class="flex flex-wrap gap-4 items-end">
+            <!-- Search -->
+            <div class="flex-1 min-w-[200px]">
+                <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Search Models
+                </label>
+                <input type="text" 
+                       id="search" 
+                       name="search" 
+                       value="{{ search_query|default:'' }}"
+                       placeholder="Search by name..."
+                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+            </div>
+
+            <!-- Filter by Type -->
+            <div class="min-w-[180px]">
+                <label for="agent_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Model Type
+                </label>
+                <select id="agent_type" 
+                        name="agent_type"
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    <option value="">All Types</option>
+                    <option value="conversational" {% if filter_type == 'conversational' %}selected{% endif %}>Conversational AI</option>
+                    <option value="code_assistant" {% if filter_type == 'code_assistant' %}selected{% endif %}>Code Assistant</option>
+                    <option value="data_analyst" {% if filter_type == 'data_analyst' %}selected{% endif %}>Data Analyst</option>
+                    <option value="creative" {% if filter_type == 'creative' %}selected{% endif %}>Creative AI</option>
+                    <option value="research" {% if filter_type == 'research' %}selected{% endif %}>Research Assistant</option>
+                    <option value="specialized" {% if filter_type == 'specialized' %}selected{% endif %}>Specialized AI</option>
+                </select>
+            </div>
+
+            <!-- Filter by Status -->
+            <div class="min-w-[150px]">
+                <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Status
+                </label>
+                <select id="status" 
+                        name="status"
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    <option value="">All Status</option>
+                    <option value="active" {% if filter_status == 'active' %}selected{% endif %}>Active</option>
+                    <option value="suspended" {% if filter_status == 'suspended' %}selected{% endif %}>Suspended</option>
+                </select>
+            </div>
+
+            <!-- Sort By -->
+            <div class="min-w-[150px]">
+                <label for="sort" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Sort By
+                </label>
+                <select id="sort" 
+                        name="sort"
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                    <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest First</option>
+                    <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Oldest First</option>
+                    <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name (A-Z)</option>
+                    <option value="-name" {% if sort_by == '-name' %}selected{% endif %}>Name (Z-A)</option>
+                    <option value="agent_type" {% if sort_by == 'agent_type' %}selected{% endif %}>Type</option>
+                </select>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-2">
+                <button type="submit" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
+                    Apply
+                </button>
+                <a href="{% url 'ai_agents:ai_model_management' %}" class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600">
+                    Clear
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bulk Actions -->
+    <div id="bulk-actions" class="hidden mb-4 p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+        <div class="flex items-center justify-between">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span id="selected-count">0</span> model(s) selected
+            </span>
+            <div class="flex gap-2">
+                <button type="button" onclick="bulkActivate()" class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">
+                    Activate Selected
+                </button>
+                <button type="button" onclick="bulkSuspend()" class="px-4 py-2 bg-yellow-600 text-white text-sm rounded-lg hover:bg-yellow-700">
+                    Suspend Selected
+                </button>
+                <button type="button" onclick="bulkDelete()" class="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700">
+                    Delete Selected
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Models Table -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-900">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left">
+                        <input type="checkbox" 
+                               id="select-all" 
+                               class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                               aria-label="Select all models">
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Name
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Type
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Version
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Status
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Created
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Actions
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {% for agent in agents %}
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="checkbox" 
+                               class="model-checkbox rounded border-gray-300 text-purple-600 focus:ring-purple-500" 
+                               value="{{ agent.id }}"
+                               aria-label="Select {{ agent.name }}">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div>
+                                <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                    {{ agent.name }}
+                                </div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">
+                                    {{ agent.owner_email }}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                            {{ agent.get_agent_type_display }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {{ agent.version }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if agent.is_suspended %}
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Suspended
+                        </span>
+                        {% else %}
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            Active
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {{ agent.created_at|date:"M d, Y" }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div class="flex justify-end gap-2">
+                            <a href="{% url 'ai_agents:ai_model_detail' agent.id %}" 
+                               class="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-300"
+                               aria-label="View details for {{ agent.name }}">
+                                View
+                            </a>
+                            <a href="{% url 'ai_agents:edit_ai_model' agent.id %}" 
+                               class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                               aria-label="Edit {{ agent.name }}">
+                                Edit
+                            </a>
+                            <button type="button" 
+                                    onclick="toggleStatus('{{ agent.id }}', {{ agent.is_suspended|yesno:'false,true' }})"
+                                    class="{% if agent.is_suspended %}text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300{% else %}text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300{% endif %}"
+                                    aria-label="{% if agent.is_suspended %}Activate{% else %}Suspend{% endif %} {{ agent.name }}">
+                                {% if agent.is_suspended %}Activate{% else %}Suspend{% endif %}
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="px-6 py-12 text-center">
+                        <div class="flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
+                            <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <p class="text-lg font-medium">No AI models found</p>
+                            <p class="text-sm mt-2">Get started by adding your first AI model</p>
+                            <a href="{% url 'ai_agents:add_ai_model' %}" class="mt-4 btn-premium">
+                                Add New Model
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if agents.has_other_pages %}
+    <div class="pagination-container mt-6 flex items-center justify-between">
+        <div class="text-sm text-gray-700 dark:text-gray-300">
+            Showing {{ agents.start_index }} to {{ agents.end_index }} of {{ agents.paginator.count }} models
+        </div>
+        <nav class="flex gap-2" aria-label="Pagination">
+            {% if agents.has_previous %}
+            <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if filter_type %}&agent_type={{ filter_type }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
+               class="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 text-sm"
+               aria-label="Go to first page">
+                First
+            </a>
+            <a href="?page={{ agents.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if filter_type %}&agent_type={{ filter_type }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
+               class="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 text-sm"
+               aria-label="Go to previous page">
+                Previous
+            </a>
+            {% endif %}
+
+            <span class="px-3 py-2 bg-purple-600 text-white rounded-lg text-sm">
+                Page {{ agents.number }} of {{ agents.paginator.num_pages }}
+            </span>
+
+            {% if agents.has_next %}
+            <a href="?page={{ agents.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if filter_type %}&agent_type={{ filter_type }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
+               class="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 text-sm"
+               aria-label="Go to next page">
+                Next
+            </a>
+            <a href="?page={{ agents.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if filter_type %}&agent_type={{ filter_type }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
+               class="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 text-sm"
+               aria-label="Go to last page">
+                Last
+            </a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Checkbox selection handling
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('select-all');
+    const checkboxes = document.querySelectorAll('.model-checkbox');
+    const bulkActions = document.getElementById('bulk-actions');
+    const selectedCount = document.getElementById('selected-count');
+
+    selectAll.addEventListener('change', function() {
+        checkboxes.forEach(cb => cb.checked = this.checked);
+        updateBulkActions();
+    });
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateBulkActions);
+    });
+
+    function updateBulkActions() {
+        const selected = document.querySelectorAll('.model-checkbox:checked');
+        selectedCount.textContent = selected.length;
+        if (selected.length > 0) {
+            bulkActions.classList.remove('hidden');
+        } else {
+            bulkActions.classList.add('hidden');
+        }
+    }
+});
+
+function toggleStatus(agentId, suspend) {
+    const action = suspend ? 'suspend' : 'activate';
+    if (confirm(`Are you sure you want to ${action} this model?`)) {
+        window.location.href = `/api/admin/ai-models/${agentId}/toggle-status/`;
+    }
+}
+
+function bulkActivate() {
+    const selected = getSelectedIds();
+    if (selected.length === 0) return;
+    if (confirm(`Activate ${selected.length} model(s)?`)) {
+        // Implementation will be added in JavaScript file
+        console.log('Bulk activate:', selected);
+    }
+}
+
+function bulkSuspend() {
+    const selected = getSelectedIds();
+    if (selected.length === 0) return;
+    if (confirm(`Suspend ${selected.length} model(s)?`)) {
+        // Implementation will be added in JavaScript file
+        console.log('Bulk suspend:', selected);
+    }
+}
+
+function bulkDelete() {
+    const selected = getSelectedIds();
+    if (selected.length === 0) return;
+    if (confirm(`Delete ${selected.length} model(s)? This action cannot be undone.`)) {
+        // Implementation will be added in JavaScript file
+        console.log('Bulk delete:', selected);
+    }
+}
+
+function getSelectedIds() {
+    return Array.from(document.querySelectorAll('.model-checkbox:checked')).map(cb => cb.value);
+}
+</script>
+{% endblock %}

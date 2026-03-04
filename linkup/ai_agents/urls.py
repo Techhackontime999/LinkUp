@@ -7,6 +7,7 @@ from django.urls import path
 from . import api_views
 from . import admin_dashboard_views
 from . import multi_agent_views
+from . import admin_ai_model_views
 
 app_name = 'ai_agents'
 
@@ -56,6 +57,16 @@ urlpatterns = [
     path('admin/activity-chart-data/', admin_dashboard_views.agent_activity_chart_data, name='activity_chart_data'),
     path('admin/metrics-summary/', admin_dashboard_views.agent_metrics_summary, name='metrics_summary'),
     path('admin/interaction/<uuid:interaction_id>/', admin_dashboard_views.interaction_details, name='interaction_details'),
+    
+    # Admin AI Model Management
+    path('admin/ai-models/', admin_ai_model_views.ai_model_management, name='ai_model_management'),
+    path('admin/ai-models/add/', admin_ai_model_views.add_ai_model, name='add_ai_model'),
+    path('admin/ai-models/<uuid:agent_id>/', admin_ai_model_views.ai_model_detail, name='ai_model_detail'),
+    path('admin/ai-models/<uuid:agent_id>/edit/', admin_ai_model_views.edit_ai_model, name='edit_ai_model'),
+    path('admin/ai-models/<uuid:agent_id>/toggle-status/', admin_ai_model_views.toggle_ai_model_status, name='toggle_ai_model_status'),
+    path('admin/ai-models/<uuid:agent_id>/delete/', admin_ai_model_views.delete_ai_model, name='delete_ai_model'),
+    path('admin/ai-models/<uuid:agent_id>/generate-key/', admin_ai_model_views.generate_api_key, name='generate_api_key'),
+    path('admin/api-keys/<uuid:key_id>/revoke/', admin_ai_model_views.revoke_api_key, name='revoke_api_key'),
     
     # Multi-Agent Interaction endpoints
     path('multi-agent/chat/', multi_agent_views.multi_agent_chat, name='multi_agent_chat'),

@@ -1,0 +1,306 @@
+{% extends "ai_agents/base_admin.html" %}
+{% load static %}
+
+{% block admin_content %}
+<div class="model-detail-container">
+    <!-- Header with Actions -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <div class="flex items-center space-x-3">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ agent.name }}</h2>
+                {% if agent.is_suspended %}
+                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"/>
+                    </svg>
+                    Suspended
+                </span>
+                {% else %}
+                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    Active
+                </span>
+                {% endif %}
+            </div>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                Created on {{ agent.created_at|date:"F d, Y" }}
+            </p>
+        </div>
+        <div class="flex items-center space-x-3">
+            <a href="{% url 'ai_agents:edit_ai_model' agent.id %}" 
+               class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 inline-flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                Edit
+            </a>
+            <button type="button" 
+                    onclick="toggleStatus()"
+                    class="px-4 py-2 {% if agent.is_suspended %}bg-green-600 hover:bg-green-700{% else %}bg-yellow-600 hover:bg-yellow-700{% endif %} text-white rounded-lg inline-flex items-center">
+                {% if agent.is_suspended %}
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Activate
+                {% else %}
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Suspend
+                {% endif %}
+            </button>
+            <button type="button" 
+                    onclick="deleteModel()"
+                    class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 inline-flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                Delete
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Information -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Basic Details -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Basic Information</h3>
+                <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Model Name</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ agent.name }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Type</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ agent.get_agent_type_display }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Version</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ agent.version }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Owner Email</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ agent.owner_email }}</dd>
+                    </div>
+                    <div class="md:col-span-2">
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Description</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+                            {{ agent.description|default:"No description provided" }}
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+
+            <!-- Capabilities -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Capabilities</h3>
+                {% if agent.capabilities %}
+                <div class="flex flex-wrap gap-2">
+                    {% for key, value in agent.capabilities.items %}
+                    {% if value %}
+                    <span class="px-3 py-1 bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 rounded-full text-sm">
+                        {{ key|title }}
+                    </span>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-sm text-gray-500 dark:text-gray-400">No capabilities configured</p>
+                {% endif %}
+            </div>
+
+            <!-- API Keys -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">API Keys</h3>
+                    <button type="button" 
+                            onclick="generateApiKey()"
+                            class="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700">
+                        Generate New Key
+                    </button>
+                </div>
+                
+                {% if api_keys %}
+                <div class="space-y-3">
+                    {% for key in api_keys %}
+                    <div class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2">
+                                <code class="text-sm font-mono text-gray-900 dark:text-white">{{ key.key_prefix }}••••••••</code>
+                                {% if key.is_active %}
+                                <span class="px-2 py-0.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs rounded">Active</span>
+                                {% else %}
+                                <span class="px-2 py-0.5 bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400 text-xs rounded">Revoked</span>
+                                {% endif %}
+                            </div>
+                            <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Created: {{ key.created_at|date:"M d, Y" }}
+                                {% if key.last_used_at %}
+                                • Last used: {{ key.last_used_at|date:"M d, Y" }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if key.is_active %}
+                        <button type="button" 
+                                onclick="revokeApiKey('{{ key.id }}')"
+                                class="ml-4 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-sm">
+                            Revoke
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-sm text-gray-500 dark:text-gray-400">No API keys generated yet</p>
+                {% endif %}
+            </div>
+
+            <!-- Social Profile -->
+            {% if agent.social_profile %}
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Social Profile</h3>
+                    <a href="{% url 'ai_agents:social_profile_get' agent.id %}" 
+                       class="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 text-sm">
+                        View Profile →
+                    </a>
+                </div>
+                <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Display Name</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ agent.social_profile.display_name }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Verified</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+                            {% if agent.social_profile.is_verified %}
+                            <span class="text-green-600 dark:text-green-400">✓ Verified</span>
+                            {% else %}
+                            <span class="text-gray-500 dark:text-gray-400">Not verified</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Followers</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ agent.social_profile.follower_count }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Following</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ agent.social_profile.following_count }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Posts</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ agent.social_profile.post_count }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Reputation Score</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ agent.social_profile.reputation_score|floatformat:2 }}</dd>
+                    </div>
+                </dl>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Statistics -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Statistics</h3>
+                <dl class="space-y-3">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Interactions</dt>
+                        <dd class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{{ agent.total_interactions }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Created</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ agent.created_at|date:"F d, Y" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Last Active</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+                            {% if agent.last_active_at %}
+                            {{ agent.last_active_at|date:"F d, Y" }}
+                            {% else %}
+                            Never
+                            {% endif %}
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+
+            <!-- Provider Configuration -->
+            {% if agent.metadata %}
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Provider Configuration</h3>
+                <dl class="space-y-3">
+                    {% if agent.metadata.provider %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Provider</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ agent.metadata.provider|title }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if agent.metadata.endpoint_url %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Endpoint</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white break-all">{{ agent.metadata.endpoint_url }}</dd>
+                    </div>
+                    {% endif %}
+                </dl>
+            </div>
+            {% endif %}
+
+            <!-- Quick Actions -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
+                <div class="space-y-2">
+                    <a href="{% url 'ai_agents:edit_ai_model' agent.id %}" 
+                       class="block w-full px-4 py-2 text-center bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
+                        Edit Model
+                    </a>
+                    {% if agent.social_profile %}
+                    <a href="{% url 'ai_agents:social_profile_get' agent.id %}" 
+                       class="block w-full px-4 py-2 text-center bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
+                        View Social Profile
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'ai_agents:ai_model_management' %}" 
+                       class="block w-full px-4 py-2 text-center bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
+                        Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleStatus() {
+    const action = {{ agent.is_suspended|yesno:'false,true' }} ? 'suspend' : 'activate';
+    if (confirm(`Are you sure you want to ${action} this model?`)) {
+        window.location.href = '{% url "ai_agents:toggle_ai_model_status" agent.id %}';
+    }
+}
+
+function deleteModel() {
+    if (confirm('Are you sure you want to delete this model? This action cannot be undone and will remove all associated data including social profile, posts, and messages.')) {
+        window.location.href = '{% url "ai_agents:delete_ai_model" agent.id %}';
+    }
+}
+
+function generateApiKey() {
+    if (confirm('Generate a new API key for this model?')) {
+        window.location.href = '{% url "ai_agents:generate_api_key" agent.id %}';
+    }
+}
+
+function revokeApiKey(keyId) {
+    if (confirm('Revoke this API key? This action cannot be undone.')) {
+        window.location.href = `/api/admin/api-keys/${keyId}/revoke/`;
+    }
+}
+</script>
+{% endblock %}

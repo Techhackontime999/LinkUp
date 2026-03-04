@@ -1,0 +1,440 @@
+/* Admin AI Model Management Styles */
+
+/* Admin Container */
+.admin-container {
+    min-height: calc(100vh - 200px);
+}
+
+/* Admin Header */
+.admin-header {
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.dark .admin-header {
+    border-bottom-color: #374151;
+}
+
+/* Admin Navigation */
+.admin-nav {
+    position: sticky;
+    top: 64px;
+    background: white;
+    z-index: 40;
+}
+
+.dark .admin-nav {
+    background: #1f2937;
+}
+
+/* Messages Container */
+.messages-container {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Alert Styles */
+.alert {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Model List Table */
+.model-list-container table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.model-list-container tbody tr {
+    transition: all 0.2s ease;
+}
+
+.model-list-container tbody tr:hover {
+    transform: translateX(4px);
+}
+
+/* Filters Section */
+.filters-section {
+    background: linear-gradient(to right, #f9fafb, #f3f4f6);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+}
+
+.dark .filters-section {
+    background: linear-gradient(to right, #1f2937, #111827);
+    border-color: #374151;
+}
+
+/* Form Enhancements */
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="url"]:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
+}
+
+.dark input[type="text"]:focus,
+.dark input[type="email"]:focus,
+.dark input[type="url"]:focus,
+.dark textarea:focus,
+.dark select:focus {
+    box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.2);
+}
+
+/* Checkbox Enhancements */
+input[type="checkbox"]:checked {
+    background-color: #9333ea;
+    border-color: #9333ea;
+}
+
+input[type="checkbox"]:focus {
+    ring-color: #9333ea;
+    ring-offset-color: white;
+}
+
+.dark input[type="checkbox"]:focus {
+    ring-offset-color: #1f2937;
+}
+
+/* Button Styles */
+.btn-premium {
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.btn-premium:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.btn-premium:active {
+    transform: translateY(0);
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+}
+
+.status-badge svg {
+    margin-right: 0.25rem;
+}
+
+/* Suspended Model Indicator */
+.suspended-indicator {
+    position: relative;
+}
+
+.suspended-indicator::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(239, 68, 68, 0.1) 10px,
+        rgba(239, 68, 68, 0.1) 20px
+    );
+    pointer-events: none;
+}
+
+/* Pagination */
+.pagination-container nav a,
+.pagination-container nav span {
+    transition: all 0.2s ease;
+}
+
+.pagination-container nav a:hover {
+    transform: translateY(-1px);
+}
+
+/* API Key Display */
+code {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    background: #f3f4f6;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.dark code {
+    background: #374151;
+}
+
+/* Capability Tags */
+.capability-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+    color: white;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.capability-tag:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 6px -1px rgba(147, 51, 234, 0.3);
+}
+
+/* Model Detail Grid */
+.model-detail-container dl {
+    display: grid;
+    gap: 1rem;
+}
+
+.model-detail-container dt {
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.dark .model-detail-container dt {
+    color: #9ca3af;
+}
+
+.model-detail-container dd {
+    margin-top: 0.25rem;
+}
+
+/* Loading States */
+.loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #9333ea;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error States */
+.error-message {
+    color: #dc2626;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.dark .error-message {
+    color: #f87171;
+}
+
+input[aria-invalid="true"],
+textarea[aria-invalid="true"],
+select[aria-invalid="true"] {
+    border-color: #dc2626;
+}
+
+.dark input[aria-invalid="true"],
+.dark textarea[aria-invalid="true"],
+.dark select[aria-invalid="true"] {
+    border-color: #f87171;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .filters-section form {
+        flex-direction: column;
+    }
+
+    .filters-section form > div {
+        width: 100%;
+    }
+
+    .model-list-container table {
+        font-size: 0.875rem;
+    }
+
+    .model-list-container th,
+    .model-list-container td {
+        padding: 0.5rem;
+    }
+}
+
+/* Touch-Friendly Targets */
+@media (hover: none) and (pointer: coarse) {
+    button,
+    a,
+    input[type="checkbox"],
+    input[type="radio"] {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* Focus Indicators for Keyboard Navigation */
+*:focus-visible {
+    outline: 2px solid #9333ea;
+    outline-offset: 2px;
+}
+
+.dark *:focus-visible {
+    outline-color: #a855f7;
+}
+
+/* Skip to Content Link */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: #9333ea;
+    color: white;
+    padding: 8px;
+    text-decoration: none;
+    z-index: 100;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* Print Styles */
+@media print {
+    .admin-nav,
+    .filters-section,
+    .pagination-container,
+    button,
+    .btn-premium {
+        display: none !important;
+    }
+
+    .admin-container {
+        max-width: 100%;
+    }
+
+    .model-list-container table {
+        page-break-inside: avoid;
+    }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .btn-premium,
+    .status-badge,
+    .capability-tag {
+        border: 2px solid currentColor;
+    }
+
+    input,
+    textarea,
+    select {
+        border-width: 2px;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Dark Mode Specific Adjustments */
+.dark .bg-white {
+    background-color: #1f2937;
+}
+
+.dark .bg-gray-50 {
+    background-color: #111827;
+}
+
+.dark .border-gray-200 {
+    border-color: #374151;
+}
+
+.dark .text-gray-900 {
+    color: #f9fafb;
+}
+
+.dark .text-gray-600 {
+    color: #9ca3af;
+}
+
+.dark .text-gray-500 {
+    color: #6b7280;
+}
+
+/* Utility Classes */
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.break-words {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
