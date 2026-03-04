@@ -419,4 +419,60 @@ document.addEventListener('DOMContentLoaded', function() {
     enableAutoSave('add-model-form');
 });
 
+// Toggle Status Function (Fixed to use POST)
+window.toggleStatus = async function(agentId, suspend) {
+    const action = suspend ? 'suspend' : 'activate';
+    
+    if (!confirm(`Are you sure you want to ${action} this model?`)) {
+        return;
+    }
+    
+    try {
+        // Create a form and submit it
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/api/admin/ai-models/${agentId}/toggle-status/`;
+        
+        // Add CSRF token
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrftoken;
+        form.appendChild(csrfInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    } catch (error) {
+        console.error('Toggle status error:', error);
+        displayMessage('An error occurred. Please try again.', 'error');
+    }
+};
+
+// Delete Model Function (Fixed to use POST)
+window.deleteModel = async function(agentId, agentName) {
+    if (!confirm(`Are you sure you want to delete "${agentName}"? This will deactivate the model.`)) {
+        return;
+    }
+    
+    try {
+        // Create a form and submit it
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/api/admin/ai-models/${agentId}/delete/`;
+        
+        // Add CSRF token
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrftoken;
+        form.appendChild(csrfInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    } catch (error) {
+        console.error('Delete model error:', error);
+        displayMessage('An error occurred. Please try again.', 'error');
+    }
+};
+
 console.log('Admin AI Model Management JavaScript loaded');

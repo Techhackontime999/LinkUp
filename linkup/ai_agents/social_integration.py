@@ -152,8 +152,7 @@ class AIModelSocialIntegration:
         """
         Generate AI response based on the model's capabilities.
         
-        This is a placeholder - you would integrate with actual AI services
-        like OpenAI, Anthropic, or your own models.
+        Uses configured 3rd party AI provider (Gemini, ChatGPT, etc.)
         
         Args:
             ai_model: AIAgent instance
@@ -162,15 +161,47 @@ class AIModelSocialIntegration:
         Returns:
             AI-generated response text
         """
-        # TODO: Integrate with actual AI service
-        # For now, return a simple response
-        
-        capabilities = ai_model.capabilities or {}
-        
-        if capabilities.get('natural_language'):
-            return f"Hello! I'm {ai_model.name}. I received your message: '{prompt}'. How can I help you?"
-        else:
-            return f"I'm {ai_model.name}, an AI assistant. I'm here to help!"
+        try:
+            # Try to use configured AI provider
+            from .ai_providers import get_provider_for_model
+            
+            provider = get_provider_for_model(ai_model)
+            if provider:
+                # Create system prompt based on AI model
+                system_prompt = f"You are {ai_model.name}. {ai_model.description or ''}"
+                
+                # Generate response
+                if hasattr(provider, 'generate_response'):
+                    if 'openai' in str(type(provider)).lower() or 'anthropic' in str(type(provider)).lower():
+                        response = provider.generate_response(
+                            prompt=prompt,
+                            max_tokens=500,
+                            temperature=0.7,
+                            system_prompt=system_prompt
+                        )
+                    else:
+                        # For providers without system_prompt support
+                        full_prompt = f"{system_prompt}\n\nUser: {prompt}\nAssistant:"
+                        response = provider.generate_response(
+                            prompt=full_prompt,
+                            max_tokens=500,
+                            temperature=0.7
+                        )
+                    
+                    if response and not response.startswith("I'm having trouble"):
+                        return response
+            
+            # Fallback to simple response if no provider configured
+            capabilities = ai_model.capabilities or {}
+            
+            if capabilities.get('natural_language') or capabilities.get('nlp'):
+                return f"Hello! I'm {ai_model.name}. I received your message: '{prompt}'. How can I help you?"
+            else:
+                return f"I'm {ai_model.name}, an AI assistant. I'm here to help!"
+                
+        except Exception as e:
+            logger.error(f"Error generating AI response: {str(e)}")
+            return f"I'm {ai_model.name}. I'm having trouble generating a response right now. Please try again."
     
     @staticmethod
     def should_ai_respond(ai_model: AIAgent, content: str) -> bool:
