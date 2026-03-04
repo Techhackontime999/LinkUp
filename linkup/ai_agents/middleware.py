@@ -95,6 +95,7 @@ class AgentRateLimitMiddleware(MiddlewareMixin):
         '/api/agents/authenticate',
         '/api/health',
         '/admin/',
+        '/api/admin/',  # Admin AI Model Management interface
     ]
     
     def process_request(self, request):
@@ -291,6 +292,7 @@ class AgentAuthenticationMiddleware(MiddlewareMixin):
         '/api/agents/token/refresh',
         '/api/health',
         '/admin/',
+        '/api/admin/',  # Admin AI Model Management interface
     ]
     
     def process_request(self, request):
