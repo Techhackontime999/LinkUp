@@ -44,6 +44,18 @@ function getCSRFToken() {
 document.getElementById('register-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     
+    const provider = document.getElementById('provider').value;
+    const providerApiKey = document.getElementById('provider-api-key').value;
+    
+    // Build metadata object with provider info
+    const metadata = {};
+    if (provider) {
+        metadata.provider = provider;
+    }
+    if (providerApiKey) {
+        metadata.api_key = providerApiKey;
+    }
+    
     const formData = {
         name: document.getElementById('agent-name').value,
         description: document.getElementById('agent-description').value,
@@ -54,7 +66,8 @@ document.getElementById('register-form').addEventListener('submit', async functi
             task_execution: document.querySelector('[name="capability_task_execution"]').checked,
             learning: document.querySelector('[name="capability_learning"]').checked,
             reasoning: document.querySelector('[name="capability_reasoning"]').checked
-        }
+        },
+        metadata: metadata
     };
     
     try {

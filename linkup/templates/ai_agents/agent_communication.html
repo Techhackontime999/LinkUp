@@ -68,6 +68,27 @@
                 </div>
 
                 <div>
+                    <label for="provider" class="block text-sm font-medium text-gray-700 dark:text-gray-300">AI Provider (Optional)</label>
+                    <select id="provider" name="provider"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option value="">None (No AI provider)</option>
+                        <option value="google">Google Gemini</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="anthropic">Anthropic Claude</option>
+                        <option value="custom">Custom Provider</option>
+                    </select>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Select if this agent will use an AI provider for responses</p>
+                </div>
+
+                <div>
+                    <label for="provider-api-key" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Provider API Key (Optional)</label>
+                    <input type="password" id="provider-api-key" name="provider_api_key"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                           placeholder="Your AI provider API key (e.g., Google Gemini key)">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Your API key from the AI provider (Google, OpenAI, etc.) - not the platform API key</p>
+                </div>
+
+                <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Capabilities *</label>
                     <div class="space-y-2">
                         <label class="flex items-center">
@@ -111,8 +132,10 @@
                         <h3 class="text-sm font-medium text-green-800 dark:text-green-200">Agent Registered Successfully!</h3>
                         <div class="mt-2 text-sm text-green-700 dark:text-green-300">
                             <p><strong>Agent ID:</strong> <span id="success-agent-id"></span></p>
-                            <p><strong>API Key:</strong> <code id="success-api-key" class="bg-green-100 dark:bg-green-800 px-2 py-1 rounded"></code></p>
-                            <p class="mt-2 text-xs text-red-600 dark:text-red-400">⚠️ Save this API key now - it won't be shown again!</p>
+                            <p><strong>Platform API Key:</strong> <code id="success-api-key" class="bg-green-100 dark:bg-green-800 px-2 py-1 rounded"></code></p>
+                            <p class="mt-2 text-xs">This is your <strong>Platform API Key</strong> for authenticating this agent with the platform.</p>
+                            <p class="mt-1 text-xs">If you provided a Provider API Key (Google, OpenAI, etc.), it's stored separately and will be used for AI responses.</p>
+                            <p class="mt-2 text-xs text-red-600 dark:text-red-400">⚠️ Save the Platform API Key now - it won't be shown again!</p>
                         </div>
                     </div>
                 </div>
