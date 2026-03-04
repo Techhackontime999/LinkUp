@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'ai_agents/communication.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">AI Agent Communication</h1>
+        <p class="mt-2 text-gray-600 dark:text-gray-400">Register AI agents and enable them to communicate with each other</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+            <button onclick="showTab('register')" id="tab-register" class="tab-button active border-purple-500 text-purple-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                Register Agent
+            </button>
+            <button onclick="showTab('agents')" id="tab-agents" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                My Agents
+            </button>
+            <button onclick="showTab('communicate')" id="tab-communicate" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                Send Message
+            </button>
+            <button onclick="showTab('conversations')" id="tab-conversations" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                Conversations
+            </button>
+        </nav>
+    </div>
+
+    <!-- Register Agent Tab -->
+    <div id="content-register" class="tab-content">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Register New AI Agent</h2>
+            <form id="register-form" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label for="agent-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Agent Name *</label>
+                    <input type="text" id="agent-name" name="name" required 
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                           placeholder="e.g., ResearchBot-Alpha">
+                </div>
+
+                <div>
+                    <label for="agent-description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                    <textarea id="agent-description" name="description" rows="3"
+                              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                              placeholder="Describe what this agent does"></textarea>
+                </div>
+
+                <div>
+                    <label for="agent-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Agent Type *</label>
+                    <select id="agent-type" name="agent_type" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option value="CONVERSATIONAL">Conversational</option>
+                        <option value="TASK_BASED">Task-Based</option>
+                        <option value="RESEARCH">Research</option>
+                        <option value="CUSTOM">Custom</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="owner-email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Owner Email *</label>
+                    <input type="email" id="owner-email" name="owner_email" required value="{{ user.email }}"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Capabilities *</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="capability_natural_language" checked class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Natural Language Processing</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="capability_task_execution" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Task Execution</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="capability_learning" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Learning</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="capability_reasoning" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Reasoning</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="document.getElementById('register-form').reset()" 
+                            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                        Reset
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-purple-600 text-white rounded-md text-sm font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                        Register Agent
+                    </button>
+                </div>
+            </form>
+
+            <!-- Success Message -->
+            <div id="register-success" class="hidden mt-4 p-4 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-md">
+                <div class="flex">
+                    <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-green-800 dark:text-green-200">Agent Registered Successfully!</h3>
+                        <div class="mt-2 text-sm text-green-700 dark:text-green-300">
+                            <p><strong>Agent ID:</strong> <span id="success-agent-id"></span></p>
+                            <p><strong>API Key:</strong> <code id="success-api-key" class="bg-green-100 dark:bg-green-800 px-2 py-1 rounded"></code></p>
+                            <p class="mt-2 text-xs text-red-600 dark:text-red-400">⚠️ Save this API key now - it won't be shown again!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Agents Tab -->
+    <div id="content-agents" class="tab-content hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">My Registered Agents</h2>
+            <div id="agents-list" class="space-y-4">
+                <p class="text-gray-500 dark:text-gray-400">Loading agents...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Send Message Tab -->
+    <div id="content-communicate" class="tab-content hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Send Message Between Agents</h2>
+            <form id="message-form" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label for="sender-agent" class="block text-sm font-medium text-gray-700 dark:text-gray-300">From Agent *</label>
+                    <select id="sender-agent" name="sender_agent" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option value="">Select sender agent...</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="recipient-agent" class="block text-sm font-medium text-gray-700 dark:text-gray-300">To Agent *</label>
+                    <select id="recipient-agent" name="recipient_agent" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option value="">Select recipient agent...</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="message-content" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Message *</label>
+                    <textarea id="message-content" name="content" rows="5" required
+                              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                              placeholder="Enter your message here..."></textarea>
+                </div>
+
+                <div>
+                    <label for="message-priority" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Priority</label>
+                    <select id="message-priority" name="priority"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option value="1">Highest (1)</option>
+                        <option value="2">High (2)</option>
+                        <option value="3" selected>Normal (3)</option>
+                        <option value="4">Low (4)</option>
+                        <option value="5">Lowest (5)</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="submit" 
+                            class="px-4 py-2 bg-purple-600 text-white rounded-md text-sm font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                        Send Message
+                    </button>
+                </div>
+            </form>
+
+            <div id="message-success" class="hidden mt-4 p-4 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-md">
+                <p class="text-sm text-green-800 dark:text-green-200">Message sent successfully!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conversations Tab -->
+    <div id="content-conversations" class="tab-content hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Conversation History</h2>
+            
+            <div class="mb-4">
+                <label for="conversation-agent" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Select Agent</label>
+                <select id="conversation-agent" onchange="loadConversations()"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <option value="">Select an agent...</option>
+                </select>
+            </div>
+
+            <div id="conversations-list" class="space-y-4">
+                <p class="text-gray-500 dark:text-gray-400">Select an agent to view conversations</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'ai_agents/communication.js' %}"></script>
+{% endblock %}

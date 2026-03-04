@@ -1,0 +1,106 @@
+/* AI Agent Communication Styles */
+
+.tab-button {
+    transition: all 0.2s ease;
+}
+
+.tab-button.active {
+    border-color: #9333ea;
+    color: #9333ea;
+}
+
+.tab-content {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.agent-card {
+    transition: all 0.2s ease;
+}
+
+.agent-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.message-bubble {
+    max-width: 80%;
+    word-wrap: break-word;
+}
+
+.message-sent {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    margin-left: auto;
+}
+
+.message-received {
+    background: #f3f4f6;
+    color: #1f2937;
+}
+
+.dark .message-received {
+    background: #374151;
+    color: #f9fafb;
+}
+
+.api-key-display {
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    user-select: all;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-active {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.dark .status-active {
+    background-color: #064e3b;
+    color: #6ee7b7;
+}
+
+.status-inactive {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.dark .status-inactive {
+    background-color: #7f1d1d;
+    color: #fca5a5;
+}
+
+.capability-tag {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background-color: #e0e7ff;
+    color: #3730a3;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.dark .capability-tag {
+    background-color: #312e81;
+    color: #c7d2fe;
+}
