@@ -23,22 +23,22 @@
     <div class="mb-4">
         <ul class="nav nav-tabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="tab-register" data-bs-toggle="tab" data-bs-target="#content-register" type="button" role="tab" aria-controls="content-register" aria-selected="true">
+                <button class="nav-link active" id="tab-register" onclick="showTab('register')" type="button" role="tab" aria-controls="content-register" aria-selected="true">
                     <i class="fas fa-plus me-2"></i>Register Agent
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="tab-agents" data-bs-toggle="tab" data-bs-target="#content-agents" type="button" role="tab" aria-controls="content-agents" aria-selected="false">
+                <button class="nav-link" id="tab-agents" onclick="showTab('agents')" type="button" role="tab" aria-controls="content-agents" aria-selected="false">
                     <i class="fas fa-robot me-2"></i>My Agents
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="tab-communicate" data-bs-toggle="tab" data-bs-target="#content-communicate" type="button" role="tab" aria-controls="content-communicate" aria-selected="false">
+                <button class="nav-link" id="tab-communicate" onclick="showTab('communicate')" type="button" role="tab" aria-controls="content-communicate" aria-selected="false">
                     <i class="fas fa-envelope me-2"></i>Send Message
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="tab-conversations" data-bs-toggle="tab" data-bs-target="#content-conversations" type="button" role="tab" aria-controls="content-conversations" aria-selected="false">
+                <button class="nav-link" id="tab-conversations" onclick="showTab('conversations')" type="button" role="tab" aria-controls="content-conversations" aria-selected="false">
                     <i class="fas fa-history me-2"></i>Conversations
                 </button>
             </li>
@@ -48,7 +48,7 @@
     <!-- Tab Content -->
     <div class="tab-content">
         <!-- Register Agent Tab -->
-        <div class="tab-pane fade show active" id="content-register" role="tabpanel" aria-labelledby="tab-register">
+        <div class="tab-pane" id="content-register" role="tabpanel" aria-labelledby="tab-register">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">Register New AI Agent</h5>
@@ -146,7 +146,7 @@
         </div>
 
         <!-- My Agents Tab -->
-        <div class="tab-pane fade" id="content-agents" role="tabpanel" aria-labelledby="tab-agents">
+        <div class="tab-pane hidden" id="content-agents" role="tabpanel" aria-labelledby="tab-agents">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">My Registered Agents</h5>
@@ -162,7 +162,7 @@
         </div>
 
         <!-- Send Message Tab -->
-        <div class="tab-pane fade" id="content-communicate" role="tabpanel" aria-labelledby="tab-communicate">
+        <div class="tab-pane hidden" id="content-communicate" role="tabpanel" aria-labelledby="tab-communicate">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">Send Message Between Agents</h5>
@@ -215,7 +215,7 @@
         </div>
 
         <!-- Conversations Tab -->
-        <div class="tab-pane fade" id="content-conversations" role="tabpanel" aria-labelledby="tab-conversations">
+        <div class="tab-pane hidden" id="content-conversations" role="tabpanel" aria-labelledby="tab-conversations">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">Conversation History</h5>
