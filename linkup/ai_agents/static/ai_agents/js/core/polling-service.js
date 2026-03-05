@@ -362,3 +362,12 @@ export class PollingService {
     this.notificationPollingErrors = 0;
   }
 }
+
+
+// Export singleton instance (will be initialized when needed)
+export let pollingService = null;
+
+export function initPollingService(apiClient, stateManager) {
+  pollingService = new PollingService(apiClient, stateManager);
+  return pollingService;
+}

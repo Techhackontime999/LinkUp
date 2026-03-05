@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polling Service Integration Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .test-result.pass {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .test-result.fail {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .test-result.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+        .status-badge.active {
+            background-color: #28a745;
+            color: white;
+        }
+        .status-badge.inactive {
+            background-color: #6c757d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Polling Service Integration Tests</h1>
+    <div id="test-results"></div>
+
+    <script type="module">
+        // Import the PollingService
+        import { PollingService } from './polling-service.js';
+
+        // Mock APIClient
+        class MockAPIClient {
+            constructor() {
+                this.callCount = 0;
+                this.lastParams = null;
+                this.shouldFail = false;
+                this.failCount = 0;
+            }
+
+            async get(endpoint, params) {
+                this.callCount++;
+                this.lastParams = params;
+
+                if (this.shouldFail && this.failCount < 2) {
+                    this.failCount++;
+                    throw new Error('API request failed');
+                }
+
+                // Return mock data based on endpoint
+                if (endpoint.includes('/social/agents/feed/')) {
+                    return {
+                        data: {
+                            results: [
+                                {
+                                    id: 'post-' + this.callCount,
+                                    content: 'Test post ' + this.callCount,
+                                    created_at: new Date().toISOString(),
+                                    reaction_counts: { like: 0, love: 0, insightful: 0, helpful: 0, celebrate: 0 },
+                                    comment_count: 0,
+                                }
+                            ]
+                        }
+                    };
+                }
+
+                if (endpoint.includes('/messages/')) {
+                    return {
+                        data: {
+                            results: [
+                                {
+                                    id: 'msg-' + this.callCount,
+                                    content: 'Test message ' + this.callCount,
+                                    created_at: new Date().toISOString(),
+                                }
+                            ]
+                        }
+                    };
+                }
+
+                if (endpoint.includes('/social/notifications/')) {
+                    return {
+                        data: {
+                            results: [
+                                {
+                                    id: 'notif-' + this.callCount,
+                                    message: 'Test notification ' + this.callCount,
+                                    created_at: new Date().toISOString(),
+                                    read: false,
+                                }
+                            ]
+                        }
+                    };
+                }
+
+                return { data: { results: [] } };
+            }
+        }
+
+        // Mock StateManager
+        class MockStateManager {
+            constructor() {
+                this.state = {
+                    'feed.posts': [],
+                    'notifications.items': [],
+                    'notifications.unreadCount': 0,
+                };
+            }
+
+            getState(key) {
+                return this.state[key];
+            }
+
+            setState(key, value) {
+                this.state[key] = value;
+            }
+
+            addPostToFeed(post) {
+                const posts = this.state['feed.posts'] || [];
+                this.state['feed.posts'] = [post, ...posts];
+            }
+        }
+
+        // Test utilities
+        const resultsContainer = document.getElementById('test-results');
+        let testCount = 0;
+        let passCount = 0;
+
+        function addResult(title, passed, message) {
+            testCount++;
+            if (passed) passCount++;
+
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            resultDiv.innerHTML = `
+                <strong>${testCount}. ${title}</strong>
+                ${message ? `<br/>${message}` : ''}
+            `;
+            resultsContainer.appendChild(resultDiv);
+        }
+
+        function addInfo(message) {
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'test-result info';
+            infoDiv.innerHTML = message;
+            resultsContainer.appendChild(infoDiv);
+        }
+
+        // Run tests
+        async function runTests() {
+            addInfo('<strong>Starting Polling Service Integration Tests...</strong>');
+
+            // Test 1: Initialization
+            const mockAPI = new MockAPIClient();
+            const mockState = new MockStateManager();
+            const pollingService = new PollingService(mockAPI, mockState);
+
+            addResult(
+                'PollingService initializes correctly',
+                pollingService !== null && pollingService.apiClient === mockAPI,
+                'PollingService instance created with APIClient and StateManager'
+            );
+
+            // Test 2: Feed polling starts
+            const feedCallback = jest.fn ? jest.fn() : () => {};
+            pollingService.startFeedPolling(feedCallback);
+
+            addResult(
+                'Feed polling starts',
+                pollingService.isPollingFeed === true,
+                `Feed polling active: ${pollingService.isPollingFeed}`
+            );
+
+            // Test 3: Feed polling makes API calls
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            addResult(
+                'Feed polling makes API calls',
+                mockAPI.callCount > 0,
+                `API calls made: ${mockAPI.callCount}`
+            );
+
+            // Test 4: Feed polling includes since parameter
+            addResult(
+                'Feed polling uses incremental updates',
+                mockAPI.lastParams && mockAPI.lastParams.since !== undefined,
+                `Since parameter: ${mockAPI.lastParams?.since}`
+            );
+
+            // Test 5: Feed polling updates state
+            const posts = mockState.getState('feed.posts');
+            addResult(
+                'Feed polling updates state manager',
+                posts && posts.length > 0,
+                `Posts in state: ${posts?.length || 0}`
+            );
+
+            // Test 6: Stop feed polling
+            pollingService.stopFeedPolling();
+            addResult(
+                'Feed polling stops',
+                pollingService.isPollingFeed === false,
+                `Feed polling active: ${pollingService.isPollingFeed}`
+            );
+
+            // Test 7: Message polling
+            const messageCallback = jest.fn ? jest.fn() : () => {};
+            pollingService.startMessagePolling(messageCallback);
+
+            addResult(
+                'Message polling starts',
+                pollingService.isPollingMessages === true,
+                `Message polling active: ${pollingService.isPollingMessages}`
+            );
+
+            // Test 8: Notification polling
+            const notificationCallback = jest.fn ? jest.fn() : () => {};
+            pollingService.startNotificationPolling(notificationCallback);
+
+            addResult(
+                'Notification polling starts',
+                pollingService.isPollingNotifications === true,
+                `Notification polling active: ${pollingService.isPollingNotifications}`
+            );
+
+            // Test 9: Multiple polling types
+            addResult(
+                'Multiple polling types can run simultaneously',
+                pollingService.isPollingFeed === false && 
+                pollingService.isPollingMessages === true && 
+                pollingService.isPollingNotifications === true,
+                'Feed stopped, Messages and Notifications active'
+            );
+
+            // Test 10: Stop all polling
+            pollingService.stopAllPolling();
+            addResult(
+                'Stop all polling works',
+                pollingService.isPollingFeed === false &&
+                pollingService.isPollingMessages === false &&
+                pollingService.isPollingNotifications === false,
+                'All polling stopped'
+            );
+
+            // Test 11: Get status
+            pollingService.startFeedPolling();
+            const status = pollingService.getStatus();
+            addResult(
+                'Get status returns correct information',
+                status.feedPolling === true && status.lastFeedUpdate !== null,
+                `Status: ${JSON.stringify(status)}`
+            );
+
+            // Test 12: Reset service
+            pollingService.reset();
+            addResult(
+                'Reset clears all polling state',
+                pollingService.isPollingFeed === false &&
+                pollingService.lastFeedUpdate === null &&
+                pollingService.feedPollingErrors === 0,
+                'Polling service reset'
+            );
+
+            // Test 13: Error handling
+            const mockAPI2 = new MockAPIClient();
+            mockAPI2.shouldFail = true;
+            const pollingService2 = new PollingService(mockAPI2, mockState);
+            pollingService2.maxPollingErrors = 2;
+            pollingService2.startFeedPolling();
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            addResult(
+                'Error handling tracks failures',
+                pollingService2.feedPollingErrors > 0,
+                `Feed polling errors: ${pollingService2.feedPollingErrors}`
+            );
+
+            // Test 14: Prevent duplicate polling
+            const mockAPI3 = new MockAPIClient();
+            const pollingService3 = new PollingService(mockAPI3, mockState);
+            pollingService3.startFeedPolling();
+            const firstTimer = pollingService3.feedPollingTimer;
+            pollingService3.startFeedPolling();
+            const secondTimer = pollingService3.feedPollingTimer;
+
+            addResult(
+                'Prevent duplicate polling',
+                firstTimer === secondTimer,
+                'Same timer used for duplicate start calls'
+            );
+
+            // Summary
+            addInfo(`<strong>Tests Complete: ${passCount}/${testCount} passed</strong>`);
+        }
+
+        // Run tests when page loads
+        runTests().catch(error => {
+            addResult('Test execution', false, `Error: ${error.message}`);
+        });
+    </script>
+</body>
+</html>
