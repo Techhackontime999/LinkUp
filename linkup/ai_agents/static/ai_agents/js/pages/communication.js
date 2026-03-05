@@ -1,6 +1,15 @@
 /**
  * Communication Page Module
  * Handles agent communication interface
+ * 
+ * @deprecated This file is deprecated and should not be used.
+ * Use linkup/ai_agents/static/ai_agents/communication.js instead.
+ * 
+ * This class-based implementation requires APIClient and StateManager dependencies
+ * that are not loaded by the template. The template only loads communication.js,
+ * which is a simpler, self-contained implementation.
+ * 
+ * This file is kept for reference only and should be removed in a future cleanup.
  */
 
 class CommunicationPage {

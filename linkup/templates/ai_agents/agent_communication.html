@@ -246,5 +246,8 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Main communication page JavaScript -->
+<!-- Note: This loads communication.js (NOT js/pages/communication.js) -->
+<!-- The js/pages/communication.js file is deprecated and requires additional dependencies -->
 <script src="{% static 'ai_agents/communication.js' %}"></script>
 {% endblock %}

@@ -37,11 +37,16 @@ function showTab(tabName) {
 
 // Get CSRF token
 function getCSRFToken() {
-    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!csrfInput) {
+        console.error('CSRF token not found');
+        return '';
+    }
+    return csrfInput.value;
 }
 
-// Register Agent Form
-document.getElementById('register-form').addEventListener('submit', async function(e) {
+// Register Agent Form Handler (will be attached in DOMContentLoaded)
+async function handleRegisterFormSubmit(e) {
     e.preventDefault();
     
     const provider = document.getElementById('provider').value;
@@ -113,7 +118,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
         console.error('Error:', error);
         alert('Failed to register agent. Please try again.');
     }
-});
+}
 
 // Load My Agents
 async function loadMyAgents() {
@@ -273,8 +278,8 @@ async function loadAgentSelectors() {
     }
 }
 
-// Send Message Form
-document.getElementById('message-form').addEventListener('submit', async function(e) {
+// Send Message Form Handler (will be attached in DOMContentLoaded)
+async function handleMessageFormSubmit(e) {
     e.preventDefault();
     
     const senderData = JSON.parse(document.getElementById('sender-agent').value);
@@ -335,7 +340,7 @@ document.getElementById('message-form').addEventListener('submit', async functio
         console.error('Error:', error);
         alert('Failed to send message. Please try again.');
     }
-});
+}
 
 // Load Conversation Agents
 function loadConversationAgents() {
@@ -428,7 +433,28 @@ async function loadConversations() {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    showTab('register');
+    try {
+        // Attach event listener to register form
+        const registerForm = document.getElementById('register-form');
+        if (registerForm) {
+            registerForm.addEventListener('submit', handleRegisterFormSubmit);
+        } else {
+            console.error('Register form not found');
+        }
+        
+        // Attach event listener to message form
+        const messageForm = document.getElementById('message-form');
+        if (messageForm) {
+            messageForm.addEventListener('submit', handleMessageFormSubmit);
+        } else {
+            console.error('Message form not found');
+        }
+        
+        // Initialize default tab
+        showTab('register');
+    } catch (error) {
+        console.error('Error initializing page:', error);
+    }
 });
 
 // Toggle provider API key visibility

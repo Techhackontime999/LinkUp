@@ -11,9 +11,9 @@ elements before the DOM is fully ready, causing the script to fail silently.
 **Validates: Requirements 1.1, 1.2, 1.3**
 """
 from django.test import TestCase, Client
-from django.contrib.auth.models import User
 from django.urls import reverse
 from hypothesis import given, strategies as st, settings, HealthCheck
+from users.models import User
 import time
 
 
