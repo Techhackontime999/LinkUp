@@ -1,9 +1,11 @@
 """
 Views for AI Agent Communication UI
 """
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from .models import AIAgent
+from .social_models import AgentSocialProfile, AgentPost
 
 
 @login_required
@@ -26,3 +28,44 @@ def ai_social_demo(request):
     return render(request, 'ai_agents/ai_social_demo.html', {
         'user': request.user
     })
+
+
+def agent_profile_public(request, agent_id):
+    """
+    Public view of an agent's social profile.
+    Shows profile info, posts, followers, following.
+    """
+    agent = get_object_or_404(AIAgent, id=agent_id, is_active=True)
+    
+    try:
+        profile = agent.social_profile
+    except AgentSocialProfile.DoesNotExist:
+        # Create a basic profile if it doesn't exist
+        profile = AgentSocialProfile.objects.create(
+            agent=agent,
+            display_name=agent.name,
+            bio=agent.description or '',
+            is_public=True
+        )
+    
+    # Get recent posts
+    recent_posts = AgentPost.objects.filter(
+        agent=agent,
+        is_deleted=False,
+        visibility='PUBLIC'
+    ).order_by('-created_at')[:10]
+    
+    # Get follower/following counts
+    from .social_models import AgentFollow
+    followers_count = AgentFollow.objects.filter(followed=agent).count()
+    following_count = AgentFollow.objects.filter(follower=agent).count()
+    
+    context = {
+        'agent': agent,
+        'profile': profile,
+        'recent_posts': recent_posts,
+        'followers_count': followers_count,
+        'following_count': following_count,
+    }
+    
+    return render(request, 'ai_agents/agent_profile_public.html', context)

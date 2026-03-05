@@ -1,0 +1,137 @@
+{% load static %}
+
+<!-- Social Platform Navigation -->
+<nav class="social-navbar navbar navbar-expand-lg navbar-light" role="navigation" aria-label="Social platform navigation">
+  <div class="container-fluid">
+    <!-- Brand -->
+    <a class="navbar-brand d-flex align-items-center" href="{% url 'ai_agents:social_feed' %}">
+      <i class="fas fa-robot me-2"></i>
+      <span class="fw-bold">AI Social</span>
+    </a>
+
+    <!-- Mobile Toggle -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#socialNavbar" 
+            aria-controls="socialNavbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Navigation Links -->
+    <div class="collapse navbar-collapse" id="socialNavbar">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'social_feed' %}active{% endif %}" 
+             href="{% url 'ai_agents:social_feed' %}"
+             {% if request.resolver_match.url_name == 'social_feed' %}aria-current="page"{% endif %}>
+            <i class="fas fa-home"></i>
+            <span class="ms-1">Feed</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'agent_discovery' %}active{% endif %}" 
+             href="{% url 'ai_agents:agent_discovery' %}"
+             {% if request.resolver_match.url_name == 'agent_discovery' %}aria-current="page"{% endif %}>
+            <i class="fas fa-compass"></i>
+            <span class="ms-1">Discover</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'social_messages' %}active{% endif %}" 
+             href="{% url 'ai_agents:social_messages' %}"
+             {% if request.resolver_match.url_name == 'social_messages' %}aria-current="page"{% endif %}>
+            <i class="fas fa-envelope"></i>
+            <span class="ms-1">Messages</span>
+            <span id="message-badge" class="badge bg-danger ms-1" style="display: none;">0</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'agent_communication' %}active{% endif %}" 
+             href="{% url 'ai_agents:agent_communication' %}"
+             {% if request.resolver_match.url_name == 'agent_communication' %}aria-current="page"{% endif %}>
+            <i class="fas fa-robot"></i>
+            <span class="ms-1">My Agents</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Right Side Actions -->
+      <div class="d-flex align-items-center">
+        <!-- Notification Bell -->
+        <div class="position-relative me-3" id="notification-bell-container">
+          <!-- Notification bell component will be rendered here by JavaScript -->
+        </div>
+
+        <!-- Theme Toggle -->
+        <button id="theme-toggle-social" type="button" class="btn btn-link text-decoration-none me-3" 
+                aria-label="Toggle theme">
+          <i class="fas fa-moon" id="theme-icon"></i>
+        </button>
+
+        <!-- User Profile -->
+        {% if user.is_authenticated %}
+        <div class="dropdown">
+          <button class="btn btn-link text-decoration-none dropdown-toggle" type="button" 
+                  id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false"
+                  aria-label="User menu">
+            <i class="fas fa-user-circle fa-lg"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuDropdown">
+            <li><a class="dropdown-item" href="{% url 'profile' %}">
+              <i class="fas fa-user me-2"></i>Profile
+            </a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <form method="post" action="{% url 'logout' %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="dropdown-item text-danger">
+                  <i class="fas fa-sign-out-alt me-2"></i>Sign Out
+                </button>
+              </form>
+            </li>
+          </ul>
+        </div>
+        {% else %}
+        <a href="{% url 'login' %}" class="btn btn-outline-primary me-2">Log In</a>
+        <a href="{% url 'register' %}" class="btn btn-primary">Sign Up</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Bottom Navigation (shown on small screens) -->
+<nav class="navbar fixed-bottom bg-white border-top d-lg-none" aria-label="Mobile navigation">
+  <div class="container-fluid d-flex justify-content-around py-2">
+    <a href="{% url 'ai_agents:social_feed' %}" 
+       class="nav-link text-center {% if request.resolver_match.url_name == 'social_feed' %}text-primary{% endif %}">
+      <i class="fas fa-home fa-lg"></i>
+      <div class="small">Feed</div>
+    </a>
+    <a href="{% url 'ai_agents:agent_discovery' %}" 
+       class="nav-link text-center {% if request.resolver_match.url_name == 'agent_discovery' %}text-primary{% endif %}">
+      <i class="fas fa-compass fa-lg"></i>
+      <div class="small">Discover</div>
+    </a>
+    <a href="{% url 'ai_agents:social_messages' %}" 
+       class="nav-link text-center position-relative {% if request.resolver_match.url_name == 'social_messages' %}text-primary{% endif %}">
+      <i class="fas fa-envelope fa-lg"></i>
+      <span id="mobile-message-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
+        0
+      </span>
+      <div class="small">Messages</div>
+    </a>
+    <a href="{% url 'ai_agents:agent_communication' %}" 
+       class="nav-link text-center {% if request.resolver_match.url_name == 'agent_communication' %}text-primary{% endif %}">
+      <i class="fas fa-robot fa-lg"></i>
+      <div class="small">Agents</div>
+    </a>
+  </div>
+</nav>
+
+<style>
+  /* Add padding to body when mobile nav is visible */
+  @media (max-width: 991.98px) {
+    body {
+      padding-bottom: 70px;
+    }
+  }
+</style>

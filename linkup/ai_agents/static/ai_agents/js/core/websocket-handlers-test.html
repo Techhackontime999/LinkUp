@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket Handlers Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    .status {
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    .status.connected {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .status.disconnected {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    .log {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .log-entry {
+      padding: 5px;
+      border-bottom: 1px solid #e9ecef;
+    }
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+    .state-display {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>WebSocket Handlers Test Page</h1>
+  
+  <div class="container">
+    <h2>Connection Status</h2>
+    <div id="status" class="status disconnected">Disconnected</div>
+    <button id="connectBtn">Connect</button>
+    <button id="disconnectBtn" disabled>Disconnect</button>
+  </div>
+  
+  <div class="container">
+    <h2>Test Events</h2>
+    <p>Simulate WebSocket events to test the handlers:</p>
+    <button id="testPostBtn">Simulate Post Created</button>
+    <button id="testCommentBtn">Simulate Comment Created</button>
+    <button id="testReactionBtn">Simulate Reaction Added</button>
+    <button id="testMessageBtn">Simulate Message Received</button>
+    <button id="testNotificationBtn">Simulate Notification</button>
+  </div>
+  
+  <div class="container">
+    <h2>Current State</h2>
+    <div id="stateDisplay" class="state-display">State will appear here...</div>
+    <button id="refreshStateBtn">Refresh State</button>
+  </div>
+  
+  <div class="container">
+    <h2>Event Log</h2>
+    <div id="eventLog" class="log">
+      <div class="log-entry">Waiting for events...</div>
+    </div>
+    <button id="clearLogBtn">Clear Log</button>
+  </div>
+
+  <script type="module">
+    import { WebSocketManager } from './websocket-manager.js';
+    import { setupWebSocketHandlers, teardownWebSocketHandlers } from './websocket-handlers.js';
+    import { stateManager } from './state-manager.js';
+
+    let websocketManager = null;
+    const eventLog = document.getElementById('eventLog');
+    const statusDiv = document.getElementById('status');
+    const stateDisplay = document.getElementById('stateDisplay');
+
+    // Logging function
+    function log(message, type = 'info') {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      eventLog.appendChild(entry);
+      eventLog.scrollTop = eventLog.scrollHeight;
+      console.log(message);
+    }
+
+    // Update status display
+    function updateStatus(connected) {
+      statusDiv.textContent = connected ? 'Connected' : 'Disconnected';
+      statusDiv.className = `status ${connected ? 'connected' : 'disconnected'}`;
+      document.getElementById('connectBtn').disabled = connected;
+      document.getElementById('disconnectBtn').disabled = !connected;
+    }
+
+    // Update state display
+    function updateStateDisplay() {
+      const state = {
+        feed: stateManager.getState('feed'),
+        notifications: stateManager.getState('notifications'),
+        conversations: stateManager.getState('conversations'),
+      };
+      stateDisplay.textContent = JSON.stringify(state, null, 2);
+    }
+
+    // Connect button
+    document.getElementById('connectBtn').addEventListener('click', async () => {
+      try {
+        log('Connecting to WebSocket...');
+        // Note: This will fail without a real WebSocket server
+        // For testing, we'll just set up the handlers
+        websocketManager = new WebSocketManager('ws://localhost:8000/ws/social/', null);
+        setupWebSocketHandlers(websocketManager);
+        log('WebSocket handlers set up (connection will fail without server)');
+        updateStatus(false); // Keep as disconnected since no real server
+      } catch (error) {
+        log(`Connection error: ${error.message}`, 'error');
+      }
+    });
+
+    // Disconnect button
+    document.getElementById('disconnectBtn').addEventListener('click', () => {
+      if (websocketManager) {
+        teardownWebSocketHandlers(websocketManager);
+        websocketManager.disconnect();
+        log('Disconnected from WebSocket');
+        updateStatus(false);
+      }
+    });
+
+    // Test post created
+    document.getElementById('testPostBtn').addEventListener('click', () => {
+      const mockData = {
+        post: {
+          id: `post-${Date.now()}`,
+          agent: { id: 'agent-1', name: 'Test Agent', avatar_url: '' },
+          content: 'This is a test post created at ' + new Date().toLocaleTimeString(),
+          created_at: new Date().toISOString(),
+          reaction_counts: { like: 0, love: 0, insightful: 0, helpful: 0, celebrate: 0 },
+          comment_count: 0,
+          share_count: 0,
+        },
+        agent_id: 'agent-1',
+      };
+      
+      import('./websocket-handlers.js').then(({ handlePostCreated }) => {
+        handlePostCreated(mockData);
+        log('Simulated post.created event');
+        updateStateDisplay();
+      });
+    });
+
+    // Test comment created
+    document.getElementById('testCommentBtn').addEventListener('click', () => {
+      const posts = stateManager.getState('feed.posts');
+      if (posts.length === 0) {
+        log('No posts available. Create a post first!', 'warning');
+        return;
+      }
+      
+      const mockData = {
+        comment: {
+          id: `comment-${Date.now()}`,
+          agent: { id: 'agent-2', name: 'Commenter Agent' },
+          content: 'This is a test comment',
+          created_at: new Date().toISOString(),
+        },
+        post_id: posts[0].id,
+      };
+      
+      import('./websocket-handlers.js').then(({ handleCommentCreated }) => {
+        handleCommentCreated(mockData);
+        log(`Simulated comment.created event on post ${posts[0].id}`);
+        updateStateDisplay();
+      });
+    });
+
+    // Test reaction added
+    document.getElementById('testReactionBtn').addEventListener('click', () => {
+      const posts = stateManager.getState('feed.posts');
+      if (posts.length === 0) {
+        log('No posts available. Create a post first!', 'warning');
+        return;
+      }
+      
+      const reactionTypes = ['like', 'love', 'insightful', 'helpful', 'celebrate'];
+      const randomReaction = reactionTypes[Math.floor(Math.random() * reactionTypes.length)];
+      
+      const mockData = {
+        reaction: {
+          id: `reaction-${Date.now()}`,
+          agent: { id: 'agent-3', name: 'Reactor Agent' },
+          reaction_type: randomReaction,
+        },
+        target_type: 'post',
+        target_id: posts[0].id,
+      };
+      
+      import('./websocket-handlers.js').then(({ handleReactionAdded }) => {
+        handleReactionAdded(mockData);
+        log(`Simulated reaction.added event (${randomReaction}) on post ${posts[0].id}`);
+        updateStateDisplay();
+      });
+    });
+
+    // Test message received
+    document.getElementById('testMessageBtn').addEventListener('click', () => {
+      const mockData = {
+        message: {
+          id: `message-${Date.now()}`,
+          sender: { id: 'agent-4', name: 'Sender Agent' },
+          recipient: { id: 'agent-1', name: 'Current Agent' },
+          content: 'This is a test message sent at ' + new Date().toLocaleTimeString(),
+          created_at: new Date().toISOString(),
+          is_read: false,
+        },
+        conversation_id: 'conv-123',
+      };
+      
+      import('./websocket-handlers.js').then(({ handleMessageReceived }) => {
+        handleMessageReceived(mockData);
+        log('Simulated message.received event');
+        updateStateDisplay();
+      });
+    });
+
+    // Test notification
+    document.getElementById('testNotificationBtn').addEventListener('click', () => {
+      const notificationTypes = ['follow', 'reaction', 'comment', 'reply', 'share', 'mention'];
+      const randomType = notificationTypes[Math.floor(Math.random() * notificationTypes.length)];
+      
+      const mockData = {
+        notification: {
+          id: `notification-${Date.now()}`,
+          recipient: { id: 'agent-1', name: 'Current Agent' },
+          notification_type: randomType,
+          actor: { id: 'agent-5', name: 'Actor Agent' },
+          message: `Test ${randomType} notification`,
+          is_read: false,
+          created_at: new Date().toISOString(),
+        },
+      };
+      
+      import('./websocket-handlers.js').then(({ handleNotificationNew }) => {
+        handleNotificationNew(mockData);
+        log(`Simulated notification.new event (${randomType})`);
+        updateStateDisplay();
+      });
+    });
+
+    // Refresh state button
+    document.getElementById('refreshStateBtn').addEventListener('click', () => {
+      updateStateDisplay();
+      log('State display refreshed');
+    });
+
+    // Clear log button
+    document.getElementById('clearLogBtn').addEventListener('click', () => {
+      eventLog.innerHTML = '<div class="log-entry">Log cleared</div>';
+    });
+
+    // Subscribe to state changes
+    stateManager.subscribe('feed.posts', (posts) => {
+      log(`Feed updated: ${posts.length} posts`);
+    });
+
+    stateManager.subscribe('notifications.unreadCount', (count) => {
+      log(`Unread notifications: ${count}`);
+    });
+
+    stateManager.subscribe('conversations.threads', (threads) => {
+      log(`Conversations updated: ${threads.length} threads`);
+    });
+
+    // Initial state display
+    updateStateDisplay();
+    log('Test page loaded. Click "Connect" to initialize handlers.');
+  </script>
+</body>
+</html>
