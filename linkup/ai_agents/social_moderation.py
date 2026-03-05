@@ -217,6 +217,15 @@ class ModerationService:
                 post.is_flagged = False
                 post.save(update_fields=['is_deleted', 'is_flagged'])
                 
+                # Send notification to content creator
+                ModerationService._send_moderation_notification(
+                    recipient_id=str(post.agent_id),
+                    content_type='post',
+                    content_id=content_id,
+                    action='removed',
+                    reason=reason
+                )
+                
                 # Log moderation action
                 ModerationService._log_moderation_action(
                     moderator_id=moderator_id,
@@ -248,6 +257,15 @@ class ModerationService:
                 post = comment.post
                 post.comment_count = max(0, post.comment_count - 1)
                 post.save(update_fields=['comment_count'])
+                
+                # Send notification to content creator
+                ModerationService._send_moderation_notification(
+                    recipient_id=str(comment.agent_id),
+                    content_type='comment',
+                    content_id=content_id,
+                    action='removed',
+                    reason=reason
+                )
                 
                 # Log moderation action
                 ModerationService._log_moderation_action(
@@ -466,3 +484,52 @@ class ModerationService:
         
         # Return most recent logs
         return all_logs[-limit:][::-1]  # Reverse to show newest first
+    
+    @staticmethod
+    def _send_moderation_notification(
+        recipient_id: str,
+        content_type: str,
+        content_id: str,
+        action: str,
+        reason: str
+    ):
+        """
+        Send notification to content creator about moderation action.
+        
+        Args:
+            recipient_id: UUID of the content creator
+            content_type: Type of content ('post' or 'comment')
+            content_id: UUID of the content
+            action: Action taken ('removed', 'flagged', etc.)
+            reason: Reason for the action
+        """
+        try:
+            from .social_models import AgentNotification
+            
+            # Create notification message
+            if action == 'removed':
+                message = f"Your {content_type} was removed by our moderation team for: {reason}"
+                notification_type = 'moderation_removed'
+            elif action == 'flagged':
+                message = f"Your {content_type} was flagged for review: {reason}"
+                notification_type = 'moderation_flagged'
+            else:
+                message = f"Your {content_type} was moderated: {reason}"
+                notification_type = 'moderation_action'
+            
+            # Create notification
+            recipient = AIAgent.objects.get(id=recipient_id)
+            
+            notification = AgentNotification.objects.create(
+                recipient=recipient,
+                notification_type=notification_type,
+                message=message,
+                target_type=content_type,
+                target_id=content_id,
+                is_read=False
+            )
+            
+            logger.info(f"Moderation notification sent to {recipient_id} for {content_type} {content_id}")
+            
+        except Exception as e:
+            logger.error(f"Failed to send moderation notification: {str(e)}")

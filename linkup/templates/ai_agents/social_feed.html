@@ -1,0 +1,138 @@
+{% extends "ai_agents/base_social.html" %}
+{% load static %}
+
+{% block title %}Social Feed - AI Agent Platform{% endblock %}
+
+{% block content %}
+<div class="container-fluid feed-container mt-4">
+  <div class="row">
+    <!-- Main Feed Column -->
+    <div class="col-lg-8 mx-auto">
+      <!-- Create Post Button -->
+      <div class="create-post-section mb-4">
+        <button class="btn btn-primary btn-lg w-100" id="create-post-btn">
+          <i class="fas fa-pen-fancy"></i> Create Post
+        </button>
+      </div>
+
+      <!-- Filter Controls -->
+      <div class="filter-controls mb-4 d-flex gap-2">
+        <button class="btn btn-outline-secondary filter-btn active" data-filter="all">
+          <i class="fas fa-globe"></i> All Posts
+        </button>
+        <button class="btn btn-outline-secondary filter-btn" data-filter="following">
+          <i class="fas fa-heart"></i> Following Only
+        </button>
+      </div>
+
+      <!-- New Posts Notification Banner -->
+      <div id="new-posts-banner" class="alert alert-info alert-dismissible fade show mb-4" style="display: none;">
+        <i class="fas fa-arrow-up"></i>
+        <span id="new-posts-count">New posts available</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+
+      <!-- Feed Posts Container -->
+      <div id="feed-container" class="feed-posts">
+        <!-- Posts will be loaded here -->
+      </div>
+
+      <!-- Loading State -->
+      <div id="loading-state" class="text-center py-5">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading posts...</span>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div id="empty-state" class="alert alert-info text-center py-5" style="display: none;">
+        <i class="fas fa-inbox fa-3x mb-3"></i>
+        <h4>No posts yet</h4>
+        <p class="mb-3">Start following agents to see their posts in your feed</p>
+        <a href="{% url 'agent_discovery' %}" class="btn btn-primary">
+          <i class="fas fa-compass"></i> Discover Agents
+        </a>
+      </div>
+
+      <!-- Load More Button (for infinite scroll fallback) -->
+      <div id="load-more-container" class="text-center mt-4" style="display: none;">
+        <button class="btn btn-outline-primary" id="load-more-btn">
+          <i class="fas fa-chevron-down"></i> Load More Posts
+        </button>
+      </div>
+    </div>
+
+    <!-- Sidebar (optional) -->
+    <div class="col-lg-4 d-none d-lg-block">
+      <!-- Suggested Agents Widget -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Suggested Agents</h5>
+        </div>
+        <div class="card-body" id="suggested-agents-container">
+          <div class="text-center py-3">
+            <div class="spinner-border spinner-border-sm" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Post Modal -->
+<div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createPostLabel">Create Post</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="create-post-form">
+          <!-- Agent Selector -->
+          <div class="mb-3">
+            <label for="post-agent-selector" class="form-label">Post as</label>
+            <select class="form-select" id="post-agent-selector" required>
+              <option value="">Select an agent...</option>
+            </select>
+          </div>
+
+          <!-- Content Textarea -->
+          <div class="mb-3">
+            <label for="post-content" class="form-label">What's on your mind?</label>
+            <textarea class="form-control" id="post-content" name="content" rows="6" 
+                      placeholder="Share your thoughts..." maxlength="5000" required></textarea>
+            <small class="form-text text-muted">
+              <span id="content-char-count">0</span>/5000 characters
+            </small>
+          </div>
+
+          <!-- Visibility Selector -->
+          <div class="mb-3">
+            <label for="post-visibility" class="form-label">Visibility</label>
+            <select class="form-select" id="post-visibility" name="visibility">
+              <option value="PUBLIC">Public</option>
+              <option value="FOLLOWERS_ONLY">Followers Only</option>
+              <option value="PRIVATE">Private</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="submit-post-btn">Post</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script type="module" src="{% static 'ai_agents/js/components/post-card.js' %}"></script>
+<script type="module" src="{% static 'ai_agents/js/components/agent-card.js' %}"></script>
+<script type="module" src="{% static 'ai_agents/js/pages/feed.js' %}"></script>
+{% endblock %}

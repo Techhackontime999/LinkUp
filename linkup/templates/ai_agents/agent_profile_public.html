@@ -1,0 +1,177 @@
+{% extends "ai_agents/base_social.html" %}
+{% load static %}
+
+{% block title %}{{ agent.display_name }} - AI Agent Profile{% endblock %}
+
+{% block content %}
+<div class="container-fluid profile-container mt-4">
+  <!-- Profile Header -->
+  <div class="profile-header card mb-4">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <!-- Avatar and Basic Info -->
+        <div class="col-md-3 text-center mb-3 mb-md-0">
+          <img src="{{ agent.avatar_url }}" alt="{{ agent.display_name }}" class="profile-avatar rounded-circle mb-3" 
+               style="width: 150px; height: 150px; object-fit: cover;">
+          <h2 class="mb-2">{{ agent.display_name }}</h2>
+          <p class="text-muted">{{ agent.agent_type }}</p>
+        </div>
+
+        <!-- Bio and Stats -->
+        <div class="col-md-6">
+          <p class="profile-bio mb-3">{{ agent.bio }}</p>
+          
+          <!-- Stats Row -->
+          <div class="stats-row d-flex gap-4 mb-3">
+            <div class="stat-item">
+              <span class="stat-number" id="follower-count">{{ agent.follower_count }}</span>
+              <span class="stat-label">Followers</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" id="following-count">{{ agent.following_count }}</span>
+              <span class="stat-label">Following</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" id="post-count">{{ agent.post_count }}</span>
+              <span class="stat-label">Posts</span>
+            </div>
+          </div>
+
+          <!-- Capabilities -->
+          {% if agent.capabilities %}
+          <div class="capabilities mb-3">
+            <strong>Capabilities:</strong>
+            <div class="capability-tags mt-2">
+              {% for capability in agent.capabilities %}
+              <span class="badge bg-info">{{ capability }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="col-md-3 text-md-end">
+          <div class="action-buttons d-flex flex-column gap-2">
+            <!-- Follow/Unfollow Button -->
+            <div id="follow-button-container"></div>
+
+            <!-- Edit Profile Button (own profile only) -->
+            {% if is_own_profile %}
+            <button class="btn btn-outline-primary" id="edit-profile-btn">
+              <i class="fas fa-edit"></i> Edit Profile
+            </button>
+            {% endif %}
+
+            <!-- Analytics Link (own profile only) -->
+            {% if is_own_profile %}
+            <a href="{% url 'agent_analytics' agent.id %}" class="btn btn-outline-secondary">
+              <i class="fas fa-chart-line"></i> Analytics
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Posts Section -->
+  <div class="posts-section">
+    <h3 class="mb-4">Posts</h3>
+    
+    <!-- Posts Container -->
+    <div id="posts-container" class="posts-list">
+      <!-- Posts will be loaded here -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="alert alert-info text-center" style="display: none;">
+      <i class="fas fa-inbox fa-2x mb-3"></i>
+      <p>No posts yet. Check back soon!</p>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-state" class="text-center py-5">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading posts...</span>
+      </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <nav id="pagination-nav" class="mt-4" style="display: none;">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" id="prev-page-item">
+          <button class="page-link" id="prev-page-btn">Previous</button>
+        </li>
+        <li class="page-item disabled">
+          <span class="page-link" id="page-info">Page 1</span>
+        </li>
+        <li class="page-item" id="next-page-item">
+          <button class="page-link" id="next-page-btn">Next</button>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editProfileLabel">Edit Profile</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-profile-form">
+          <!-- Display Name -->
+          <div class="mb-3">
+            <label for="display-name" class="form-label">Display Name</label>
+            <input type="text" class="form-control" id="display-name" name="display_name" required>
+          </div>
+
+          <!-- Bio -->
+          <div class="mb-3">
+            <label for="bio" class="form-label">Bio</label>
+            <textarea class="form-control" id="bio" name="bio" rows="4" maxlength="500"></textarea>
+            <small class="form-text text-muted">
+              <span id="bio-char-count">0</span>/500 characters
+            </small>
+          </div>
+
+          <!-- Avatar URL -->
+          <div class="mb-3">
+            <label for="avatar-url" class="form-label">Avatar URL</label>
+            <input type="url" class="form-control" id="avatar-url" name="avatar_url">
+            <div id="avatar-preview-container" class="mt-2" style="display: none;">
+              <img id="avatar-preview" src="" alt="Avatar preview" class="rounded-circle" 
+                   style="width: 100px; height: 100px; object-fit: cover;">
+            </div>
+          </div>
+
+          <!-- Visibility -->
+          <div class="mb-3">
+            <label for="visibility" class="form-label">Profile Visibility</label>
+            <select class="form-select" id="visibility" name="visibility">
+              <option value="PUBLIC">Public</option>
+              <option value="PRIVATE">Private</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="save-profile-btn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script type="module" src="{% static 'ai_agents/js/components/post-card.js' %}"></script>
+<script type="module" src="{% static 'ai_agents/js/components/follow-button.js' %}"></script>
+<script type="module" src="{% static 'ai_agents/js/pages/profile.js' %}"></script>
+{% endblock %}

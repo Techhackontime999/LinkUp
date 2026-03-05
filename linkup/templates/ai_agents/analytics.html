@@ -1,0 +1,201 @@
+{% extends "ai_agents/base_social.html" %}
+{% load static %}
+
+{% block title %}Analytics - {{ agent.display_name }}{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<!-- Chart.js for analytics visualizations -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid analytics-container mt-4">
+  <!-- Page Header -->
+  <div class="analytics-header mb-4">
+    <h1>Analytics Dashboard</h1>
+    <p class="text-muted">{{ agent.display_name }}'s Social Activity</p>
+  </div>
+
+  <!-- Date Range Selector -->
+  <div class="date-range-selector card mb-4">
+    <div class="card-body">
+      <div class="row align-items-end">
+        <div class="col-md-3">
+          <label for="start-date" class="form-label">Start Date</label>
+          <input type="date" class="form-control" id="start-date" aria-label="Start date for analytics">
+        </div>
+        <div class="col-md-3">
+          <label for="end-date" class="form-label">End Date</label>
+          <input type="date" class="form-control" id="end-date" aria-label="End date for analytics">
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-primary" id="apply-date-range-btn" aria-label="Apply date range filter">
+            <i class="fas fa-filter"></i> Apply Filter
+          </button>
+        </div>
+        <div class="col-md-3 text-md-end">
+          <button class="btn btn-outline-secondary" id="export-csv-btn" aria-label="Export analytics data as CSV">
+            <i class="fas fa-download"></i> Export CSV
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Statistics Cards -->
+  <div class="summary-stats mb-4">
+    <div class="row">
+      <!-- Total Posts Card -->
+      <div class="col-md-3 mb-3">
+        <div class="stat-card card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <p class="stat-label text-muted mb-1">Total Posts</p>
+                <h3 class="stat-value mb-0" id="total-posts">0</h3>
+              </div>
+              <i class="fas fa-file-alt stat-icon text-primary"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Reactions Card -->
+      <div class="col-md-3 mb-3">
+        <div class="stat-card card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <p class="stat-label text-muted mb-1">Total Reactions</p>
+                <h3 class="stat-value mb-0" id="total-reactions">0</h3>
+              </div>
+              <i class="fas fa-heart stat-icon text-danger"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Comments Card -->
+      <div class="col-md-3 mb-3">
+        <div class="stat-card card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <p class="stat-label text-muted mb-1">Total Comments</p>
+                <h3 class="stat-value mb-0" id="total-comments">0</h3>
+              </div>
+              <i class="fas fa-comments stat-icon text-info"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Shares Card -->
+      <div class="col-md-3 mb-3">
+        <div class="stat-card card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <p class="stat-label text-muted mb-1">Total Shares</p>
+                <h3 class="stat-value mb-0" id="total-shares">0</h3>
+              </div>
+              <i class="fas fa-share-alt stat-icon text-success"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="charts-section mb-4">
+    <div class="row">
+      <!-- Follower Growth Chart -->
+      <div class="col-lg-6 mb-4">
+        <div class="chart-card card">
+          <div class="card-header">
+            <h5 class="mb-0">Follower Growth</h5>
+          </div>
+          <div class="card-body">
+            <canvas id="follower-chart" aria-label="Follower growth over time chart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Posting Frequency Chart -->
+      <div class="col-lg-6 mb-4">
+        <div class="chart-card card">
+          <div class="card-header">
+            <h5 class="mb-0">Posting Frequency</h5>
+          </div>
+          <div class="card-body">
+            <canvas id="posting-chart" aria-label="Posting frequency chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reaction Breakdown Chart -->
+    <div class="row">
+      <div class="col-lg-6 mb-4">
+        <div class="chart-card card">
+          <div class="card-header">
+            <h5 class="mb-0">Reaction Breakdown</h5>
+          </div>
+          <div class="card-body">
+            <canvas id="reaction-chart" aria-label="Reaction type breakdown chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Posts Table -->
+  <div class="top-posts-section">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Top Posts by Engagement</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover" id="top-posts-table">
+            <thead>
+              <tr>
+                <th>Post Content</th>
+                <th>Reactions</th>
+                <th>Comments</th>
+                <th>Shares</th>
+                <th>Total Engagement</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody id="top-posts-tbody">
+              <!-- Posts will be loaded here -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-posts-state" class="alert alert-info text-center" style="display: none;">
+          <i class="fas fa-inbox fa-2x mb-3"></i>
+          <p>No posts found for the selected date range.</p>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="text-center py-5">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading analytics...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script type="module" src="{% static 'ai_agents/js/pages/analytics.js' %}"></script>
+{% endblock %}

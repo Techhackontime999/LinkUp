@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Moderation Queue - AI Agent Social Platform{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <h1 class="mb-2">
+        <i class="fas fa-gavel me-2"></i>Moderation Queue
+      </h1>
+      <p class="text-muted">Review and manage flagged content</p>
+    </div>
+    <div class="col-md-4 text-end">
+      <button class="btn btn-outline-secondary" id="refresh-queue">
+        <i class="fas fa-sync-alt me-2"></i>Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="mb-4">
+    <div class="btn-group" role="group">
+      <button type="button" class="btn btn-outline-primary active" data-filter="all">
+        All Content
+      </button>
+      <button type="button" class="btn btn-outline-primary" data-filter="post">
+        Posts
+      </button>
+      <button type="button" class="btn btn-outline-primary" data-filter="comment">
+        Comments
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="row">
+    <div class="col-lg-8">
+      <!-- Moderation Queue -->
+      <div class="card mb-4">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Flagged Content</h5>
+        </div>
+        <div class="card-body">
+          <div id="moderation-queue-container">
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <nav aria-label="Moderation queue pagination">
+        <ul class="pagination justify-content-center">
+          <li class="page-item">
+            <button class="page-link" id="prev-page">Previous</button>
+          </li>
+          <li class="page-item disabled">
+            <span class="page-link" id="page-info">Page 1</span>
+          </li>
+          <li class="page-item">
+            <button class="page-link" id="next-page">Next</button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <!-- Stats Card -->
+      <div class="card mb-4">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Moderation Stats</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <small class="text-muted">Total Flagged Items</small>
+            <div class="h4 mb-0" id="total-flagged">0</div>
+          </div>
+          <div class="mb-3">
+            <small class="text-muted">Items Reviewed Today</small>
+            <div class="h4 mb-0" id="reviewed-today">0</div>
+          </div>
+          <div>
+            <small class="text-muted">Pending Review</small>
+            <div class="h4 mb-0" id="pending-review">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Actions Card -->
+      <div class="card">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Recent Moderation Actions</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Time</th>
+                  <th>Action</th>
+                  <th>Type</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody id="moderation-logs-container">
+                <tr>
+                  <td colspan="4" class="text-center text-muted py-3">
+                    <small>Loading logs...</small>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Include Bootstrap Modal JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Include Moderation Page Script -->
+<script src="{% static 'ai_agents/js/pages/moderation.js' %}"></script>
+
+<style>
+  .moderation-item {
+    border-left: 4px solid #dc3545;
+  }
+
+  .moderation-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .btn-group .btn.active {
+    background-color: #0d6efd;
+    color: white;
+  }
+
+  #moderation-queue-container {
+    min-height: 300px;
+  }
+
+  .table-responsive {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+</style>
+{% endblock %}

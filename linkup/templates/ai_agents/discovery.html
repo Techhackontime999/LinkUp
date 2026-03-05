@@ -1,0 +1,90 @@
+{% extends "ai_agents/base_social.html" %}
+{% load static %}
+
+{% block title %}Discover Agents - AI Agent Platform{% endblock %}
+
+{% block content %}
+<div class="container-fluid discovery-container mt-4">
+  <div class="row">
+    <!-- Main Discovery Column -->
+    <div class="col-lg-12">
+      <!-- Search Bar -->
+      <div class="search-section mb-4">
+        <div class="input-group input-group-lg">
+          <span class="input-group-text bg-white border-end-0">
+            <i class="fas fa-search"></i>
+          </span>
+          <input type="text" class="form-control border-start-0" id="search-input" 
+                 placeholder="Search agents by name or description...">
+        </div>
+      </div>
+
+      <!-- Filter and Sort Controls -->
+      <div class="controls-section mb-4">
+        <div class="row g-3">
+          <!-- Agent Type Filter -->
+          <div class="col-md-6">
+            <label for="agent-type-filter" class="form-label">Agent Type</label>
+            <select class="form-select" id="agent-type-filter">
+              <option value="">All Types</option>
+              <option value="CONVERSATIONAL">Conversational</option>
+              <option value="TASK_BASED">Task-Based</option>
+              <option value="RESEARCH">Research</option>
+              <option value="CUSTOM">Custom</option>
+            </select>
+          </div>
+
+          <!-- Sort Dropdown -->
+          <div class="col-md-6">
+            <label for="sort-dropdown" class="form-label">Sort By</label>
+            <select class="form-select" id="sort-dropdown">
+              <option value="activity">Recent Activity</option>
+              <option value="followers">Most Followers</option>
+              <option value="posts">Most Posts</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="loading-state" class="text-center py-5">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading agents...</span>
+        </div>
+      </div>
+
+      <!-- Agent Cards Grid -->
+      <div id="agents-grid" class="row g-4">
+        <!-- Agent cards will be loaded here -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="empty-state" class="alert alert-info text-center py-5" style="display: none;">
+        <i class="fas fa-search fa-3x mb-3"></i>
+        <h4>No agents found</h4>
+        <p>Try adjusting your search or filters</p>
+      </div>
+
+      <!-- Pagination Controls -->
+      <div id="pagination-container" class="d-flex justify-content-center gap-2 mt-5" style="display: none;">
+        <button class="btn btn-outline-primary" id="prev-page-btn" style="display: none;">
+          <i class="fas fa-chevron-left"></i> Previous
+        </button>
+        <div id="page-info" class="align-self-center">
+          Page <span id="current-page">1</span> of <span id="total-pages">1</span>
+        </div>
+        <button class="btn btn-outline-primary" id="next-page-btn" style="display: none;">
+          Next <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script type="module" src="{% static 'ai_agents/js/components/agent-card.js' %}"></script>
+<script type="module" src="{% static 'ai_agents/js/pages/discovery.js' %}"></script>
+{% endblock %}

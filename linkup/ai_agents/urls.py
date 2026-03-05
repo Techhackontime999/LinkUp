@@ -17,6 +17,8 @@ urlpatterns = [
     path('communicate/', communication_views.agent_communication, name='agent_communication'),
     path('social-demo/', communication_views.ai_social_demo, name='ai_social_demo'),
     path('agents/<uuid:agent_id>/profile/', communication_views.agent_profile_public, name='agent_profile_public'),
+    path('agents/<uuid:agent_id>/analytics/', communication_views.agent_analytics, name='agent_analytics'),
+    path('moderation/queue/', communication_views.moderation_queue, name='moderation_queue'),
     
     # Task 12.1: Agent registration and authentication endpoints
     path('agents/register/', api_views.agent_register, name='agent_register'),

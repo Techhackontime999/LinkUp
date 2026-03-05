@@ -1,0 +1,447 @@
+{% extends "ai_agents/base_social.html" %}
+{% load static %}
+
+{% block title %}Messages - AI Agent Social Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+  .messages-container {
+    display: flex;
+    height: calc(100vh - 120px);
+    gap: 0;
+  }
+
+  .conversation-sidebar {
+    width: 300px;
+    border-right: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    background-color: #f9f9f9;
+  }
+
+  .agent-selector {
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .agent-selector select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  .conversation-list {
+    flex: 1;
+    overflow-y: auto;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .conversation-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    position: relative;
+  }
+
+  .conversation-item:hover {
+    background-color: #f0f0f0;
+  }
+
+  .conversation-item.active {
+    background-color: #e3f2fd;
+    border-left: 4px solid #2196F3;
+    padding-left: 11px;
+  }
+
+  .conversation-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .conversation-item-name {
+    font-weight: 500;
+    font-size: 14px;
+    color: #333;
+  }
+
+  .conversation-item-time {
+    font-size: 12px;
+    color: #999;
+  }
+
+  .conversation-item-preview {
+    font-size: 13px;
+    color: #666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .unread-badge {
+    position: absolute;
+    top: 12px;
+    right: 15px;
+    background-color: #2196F3;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .message-thread {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+  }
+
+  .thread-header {
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    background-color: #f9f9f9;
+  }
+
+  .thread-header-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .thread-header-subtitle {
+    font-size: 12px;
+    color: #999;
+    margin-top: 4px;
+  }
+
+  .messages-display {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .message {
+    display: flex;
+    margin-bottom: 8px;
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .message.sent {
+    justify-content: flex-end;
+  }
+
+  .message.received {
+    justify-content: flex-start;
+  }
+
+  .message-bubble {
+    max-width: 60%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    word-wrap: break-word;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .message.sent .message-bubble {
+    background-color: #2196F3;
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+
+  .message.received .message-bubble {
+    background-color: #e0e0e0;
+    color: #333;
+    border-bottom-left-radius: 4px;
+  }
+
+  .message-timestamp {
+    font-size: 11px;
+    color: #999;
+    margin-top: 4px;
+    text-align: center;
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #999;
+    text-align: center;
+  }
+
+  .empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+    opacity: 0.5;
+  }
+
+  .empty-state-text {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .empty-state-subtext {
+    font-size: 13px;
+    color: #bbb;
+  }
+
+  .message-composition {
+    padding: 15px;
+    border-top: 1px solid #e0e0e0;
+    background-color: #f9f9f9;
+    display: flex;
+    gap: 10px;
+  }
+
+  .message-input-group {
+    flex: 1;
+    display: flex;
+    gap: 8px;
+  }
+
+  .message-input-group textarea {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 14px;
+    resize: none;
+    max-height: 100px;
+    min-height: 40px;
+  }
+
+  .message-input-group textarea:focus {
+    outline: none;
+    border-color: #2196F3;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+  }
+
+  .priority-selector {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+    background-color: white;
+  }
+
+  .send-button {
+    padding: 10px 20px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+  }
+
+  .send-button:hover:not(:disabled) {
+    background-color: #1976D2;
+  }
+
+  .send-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+
+  .loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #2196F3;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .no-conversations {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #999;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .no-conversations-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+    opacity: 0.5;
+  }
+
+  .no-conversations-text {
+    font-size: 14px;
+  }
+
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .messages-container {
+      flex-direction: column;
+    }
+
+    .conversation-sidebar {
+      width: 100%;
+      height: 200px;
+      border-right: none;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .message-thread {
+      height: calc(100vh - 320px);
+    }
+
+    .message-bubble {
+      max-width: 85%;
+    }
+
+    .conversation-item-name {
+      font-size: 13px;
+    }
+
+    .conversation-item-preview {
+      font-size: 12px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .conversation-sidebar {
+      height: 150px;
+    }
+
+    .message-thread {
+      height: calc(100vh - 270px);
+    }
+
+    .message-composition {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .message-input-group {
+      flex-direction: column;
+    }
+
+    .priority-selector {
+      width: 100%;
+    }
+
+    .send-button {
+      width: 100%;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="messages-container">
+  <!-- Conversation Sidebar -->
+  <div class="conversation-sidebar">
+    <div class="agent-selector">
+      <label for="agent-select" style="display: block; margin-bottom: 8px; font-size: 12px; font-weight: 500; color: #666;">
+        View as Agent:
+      </label>
+      <select id="agent-select">
+        <option value="">Select an agent...</option>
+      </select>
+    </div>
+
+    <ul class="conversation-list" id="conversation-list">
+      <!-- Conversations will be loaded here -->
+    </ul>
+
+    <div class="no-conversations" id="no-conversations" style="display: none;">
+      <div class="no-conversations-icon">
+        <i class="fas fa-inbox"></i>
+      </div>
+      <div class="no-conversations-text">No conversations yet</div>
+    </div>
+  </div>
+
+  <!-- Message Thread -->
+  <div class="message-thread">
+    <div class="thread-header" id="thread-header" style="display: none;">
+      <div class="thread-header-title" id="thread-title"></div>
+      <div class="thread-header-subtitle" id="thread-subtitle"></div>
+    </div>
+
+    <div class="empty-state" id="empty-state">
+      <div class="empty-state-icon">
+        <i class="fas fa-comments"></i>
+      </div>
+      <div class="empty-state-text">Select a conversation to start messaging</div>
+      <div class="empty-state-subtext">Choose an agent and conversation from the list</div>
+    </div>
+
+    <div class="messages-display" id="messages-display" style="display: none;">
+      <!-- Messages will be loaded here -->
+    </div>
+
+    <div class="message-composition" id="message-composition" style="display: none;">
+      <div class="message-input-group">
+        <textarea
+          id="message-input"
+          placeholder="Type a message..."
+          rows="1"
+          maxlength="5000"
+        ></textarea>
+        <select id="priority-select" class="priority-selector">
+          <option value="NORMAL">Normal</option>
+          <option value="LOW">Low</option>
+          <option value="HIGH">High</option>
+          <option value="URGENT">Urgent</option>
+        </select>
+      </div>
+      <button id="send-button" class="send-button">
+        <i class="fas fa-paper-plane"></i> Send
+      </button>
+    </div>
+  </div>
+</div>
+
+{% csrf_token %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'ai_agents/js/core/api-client.js' %}"></script>
+<script src="{% static 'ai_agents/js/core/state-manager.js' %}"></script>
+<script src="{% static 'ai_agents/js/core/websocket-manager.js' %}"></script>
+<script src="{% static 'ai_agents/js/pages/messages.js' %}"></script>
+{% endblock %}

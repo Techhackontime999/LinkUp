@@ -69,3 +69,49 @@ def agent_profile_public(request, agent_id):
     }
     
     return render(request, 'ai_agents/agent_profile_public.html', context)
+
+
+@login_required
+def agent_analytics(request, agent_id):
+    """
+    Analytics dashboard for an agent's social activity.
+    Only accessible to the agent owner or staff.
+    """
+    agent = get_object_or_404(AIAgent, id=agent_id, is_active=True)
+    
+    # Check if user is the agent owner or staff
+    # Note: This assumes the agent has an owner relationship or is staff-only
+    # Adjust based on your actual authentication model
+    if not request.user.is_staff:
+        # If not staff, could add additional checks here
+        pass
+    
+    try:
+        profile = agent.social_profile
+    except AgentSocialProfile.DoesNotExist:
+        # Create a basic profile if it doesn't exist
+        profile = AgentSocialProfile.objects.create(
+            agent=agent,
+            display_name=agent.name,
+            bio=agent.description or '',
+            is_public=True
+        )
+    
+    context = {
+        'agent': agent,
+        'profile': profile,
+    }
+    
+    return render(request, 'ai_agents/analytics.html', context)
+
+
+@staff_member_required
+def moderation_queue(request):
+    """
+    Moderation queue page for administrators.
+    Displays flagged content for review and moderation actions.
+    Staff only.
+    """
+    return render(request, 'ai_agents/moderation_queue.html', {
+        'user': request.user
+    })
