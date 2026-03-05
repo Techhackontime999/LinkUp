@@ -240,6 +240,5 @@
 {% endblock %}
 
 {% block extra_js %}
-{{ block.super }}
-<script type="module" src="{% static 'ai_agents/js/pages/communication.js' %}"></script>
+<script src="{% static 'ai_agents/communication.js' %}"></script>
 {% endblock %}
