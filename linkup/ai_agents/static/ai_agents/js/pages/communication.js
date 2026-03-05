@@ -39,28 +39,6 @@ class CommunicationPage {
   switchTab(tabName) {
     this.currentTab = tabName;
 
-    document.querySelectorAll('.tab-content').forEach(el => {
-      el.classList.add('hidden');
-    });
-
-    document.querySelectorAll('.tab-button').forEach(btn => {
-      btn.classList.remove('active', 'border-purple-500', 'text-purple-600');
-      btn.classList.add('border-transparent', 'text-gray-500');
-    });
-
-    const contentId = `content-${tabName}`;
-    const contentEl = document.getElementById(contentId);
-    if (contentEl) {
-      contentEl.classList.remove('hidden');
-    }
-
-    const buttonId = `tab-${tabName}`;
-    const buttonEl = document.getElementById(buttonId);
-    if (buttonEl) {
-      buttonEl.classList.remove('border-transparent', 'text-gray-500');
-      buttonEl.classList.add('active', 'border-purple-500', 'text-purple-600');
-    }
-
     if (tabName === 'agents') {
       this.loadMyAgents();
     } else if (tabName === 'conversations') {
@@ -111,10 +89,10 @@ class CommunicationPage {
     if (successDiv) {
       document.getElementById('success-agent-id').textContent = agentData.id;
       document.getElementById('success-api-key').textContent = agentData.api_key;
-      successDiv.classList.remove('hidden');
+      successDiv.classList.remove('d-none');
 
       setTimeout(() => {
-        successDiv.classList.add('hidden');
+        successDiv.classList.add('d-none');
       }, 10000);
     }
 
@@ -144,11 +122,10 @@ class CommunicationPage {
 
       if (storedAgents.length === 0) {
         agentsList.innerHTML = `
-          <div class="text-center py-8">
-            <p class="text-gray-500 dark:text-gray-400 mb-4">No agents registered yet</p>
-            <button onclick="communicationPage.switchTab('register')" 
-                    class="px-4 py-2 bg-purple-600 text-white rounded-md text-sm font-medium hover:bg-purple-700">
-              Register Your First Agent
+          <div class="col-12 text-center py-5">
+            <p class="text-muted mb-3">No agents registered yet</p>
+            <button class="btn btn-primary" onclick="document.getElementById('tab-register').click()">
+              <i class="fas fa-plus me-2"></i>Register Your First Agent
             </button>
           </div>
         `;
@@ -172,61 +149,65 @@ class CommunicationPage {
       agentsList.innerHTML = html;
       this.myAgents = storedAgents;
     } catch (error) {
-      agentsList.innerHTML = `<p class="text-red-500">Error loading agents: ${error.message}</p>`;
+      agentsList.innerHTML = `<div class="col-12"><div class="alert alert-danger">Error loading agents: ${error.message}</div></div>`;
     }
   }
 
   renderAgentCard(agentData) {
     const capabilities = agentData.capabilities || [];
     const capabilitiesHtml = capabilities.length > 0 
-      ? capabilities.map(cap => `<span class="inline-block bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs px-2 py-1 rounded mr-2">${cap}</span>`).join('')
-      : '<span class="text-gray-500 dark:text-gray-400 text-sm">No capabilities listed</span>';
+      ? capabilities.map(cap => `<span class="badge bg-primary me-2">${cap}</span>`).join('')
+      : '<span class="text-muted small">No capabilities listed</span>';
+
+    const statusBadge = agentData.is_active 
+      ? '<span class="badge bg-success">Active</span>'
+      : '<span class="badge bg-secondary">Inactive</span>';
 
     return `
-      <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-        <div class="flex justify-between items-start mb-3">
-          <div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">${agentData.name}</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Type: ${agentData.agent_type || 'Unknown'}</p>
-          </div>
-          <span class="inline-block px-3 py-1 rounded-full text-xs font-medium ${agentData.is_active ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}">
-            ${agentData.is_active ? 'Active' : 'Inactive'}
-          </span>
-        </div>
-        
-        ${agentData.description ? `<p class="text-sm text-gray-700 dark:text-gray-300 mb-3">${agentData.description}</p>` : ''}
-        
-        <div class="mb-3">
-          <p class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Capabilities:</p>
-          <div>${capabilitiesHtml}</div>
-        </div>
+      <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h5 class="card-title">${agentData.name}</h5>
+                <p class="card-text small text-muted">Type: ${agentData.agent_type || 'Unknown'}</p>
+              </div>
+              ${statusBadge}
+            </div>
+            
+            ${agentData.description ? `<p class="card-text small">${agentData.description}</p>` : ''}
+            
+            <div class="mb-3">
+              <p class="small fw-bold text-muted mb-1">Capabilities:</p>
+              <div>${capabilitiesHtml}</div>
+            </div>
 
-        ${agentData.post_count !== undefined ? `
-          <div class="grid grid-cols-3 gap-2 mb-3 text-center">
-            <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
-              <p class="text-lg font-semibold text-gray-900 dark:text-white">${agentData.post_count || 0}</p>
-              <p class="text-xs text-gray-600 dark:text-gray-400">Posts</p>
-            </div>
-            <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
-              <p class="text-lg font-semibold text-gray-900 dark:text-white">${agentData.follower_count || 0}</p>
-              <p class="text-xs text-gray-600 dark:text-gray-400">Followers</p>
-            </div>
-            <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
-              <p class="text-lg font-semibold text-gray-900 dark:text-white">${agentData.following_count || 0}</p>
-              <p class="text-xs text-gray-600 dark:text-gray-400">Following</p>
+            ${agentData.post_count !== undefined ? `
+              <div class="row text-center mb-3">
+                <div class="col-4">
+                  <p class="h6 mb-0">${agentData.post_count || 0}</p>
+                  <p class="small text-muted">Posts</p>
+                </div>
+                <div class="col-4">
+                  <p class="h6 mb-0">${agentData.follower_count || 0}</p>
+                  <p class="small text-muted">Followers</p>
+                </div>
+                <div class="col-4">
+                  <p class="h6 mb-0">${agentData.following_count || 0}</p>
+                  <p class="small text-muted">Following</p>
+                </div>
+              </div>
+            ` : ''}
+
+            <div class="d-grid gap-2">
+              <a href="/agents/${agentData.id}/profile/" class="btn btn-primary btn-sm">
+                <i class="fas fa-user me-1"></i>View Profile
+              </a>
+              <a href="/admin/ai_agents/aiagent/${agentData.id}/change/" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-cog me-1"></i>Manage
+              </a>
             </div>
           </div>
-        ` : ''}
-
-        <div class="flex gap-2">
-          <a href="/agents/${agentData.id}/profile/" 
-             class="flex-1 px-3 py-2 bg-purple-600 text-white rounded-md text-sm font-medium hover:bg-purple-700 text-center">
-            View Profile
-          </a>
-          <a href="/admin/ai_agents/aiagent/${agentData.id}/change/" 
-             class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 text-center">
-            Manage
-          </a>
         </div>
       </div>
     `;
@@ -314,9 +295,9 @@ class CommunicationPage {
         
         const successDiv = document.getElementById('message-success');
         if (successDiv) {
-          successDiv.classList.remove('hidden');
+          successDiv.classList.remove('d-none');
           setTimeout(() => {
-            successDiv.classList.add('hidden');
+            successDiv.classList.add('d-none');
           }, 3000);
         }
       } else {
@@ -354,7 +335,7 @@ class CommunicationPage {
     const conversationsList = document.getElementById('conversations-list');
     
     if (!conversations || conversations.length === 0) {
-      conversationsList.innerHTML = '<p class="text-gray-500 dark:text-gray-400">No conversations yet</p>';
+      conversationsList.innerHTML = '<p class="text-muted">No conversations yet</p>';
       return;
     }
 
@@ -364,15 +345,17 @@ class CommunicationPage {
       const timestamp = new Date(lastMessage.created_at).toLocaleString();
       
       html += `
-        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
-          <div class="flex justify-between items-start mb-2">
-            <h3 class="font-semibold text-gray-900 dark:text-white">
-              ${lastMessage.sender?.name || 'Unknown'} → ${lastMessage.recipient?.name || 'Unknown'}
-            </h3>
-            <span class="text-xs text-gray-500 dark:text-gray-400">${timestamp}</span>
+        <div class="card mb-2 cursor-pointer">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h6 class="card-title mb-0">
+                ${lastMessage.sender?.name || 'Unknown'} → ${lastMessage.recipient?.name || 'Unknown'}
+              </h6>
+              <small class="text-muted">${timestamp}</small>
+            </div>
+            <p class="card-text small text-truncate">${lastMessage.content || 'No messages'}</p>
+            ${conv.unread_count ? `<span class="badge bg-primary">Unread: ${conv.unread_count}</span>` : ''}
           </div>
-          <p class="text-sm text-gray-700 dark:text-gray-300 truncate">${lastMessage.content || 'No messages'}</p>
-          ${conv.unread_count ? `<span class="inline-block mt-2 px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs rounded">Unread: ${conv.unread_count}</span>` : ''}
         </div>
       `;
     });
@@ -382,11 +365,38 @@ class CommunicationPage {
 
   showError(message) {
     console.error(message);
-    alert(message);
+    // Create Bootstrap alert
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+    alertDiv.setAttribute('role', 'alert');
+    alertDiv.innerHTML = `
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    const container = document.querySelector('.container-fluid');
+    if (container) {
+      container.insertBefore(alertDiv, container.firstChild);
+      setTimeout(() => alertDiv.remove(), 5000);
+    }
   }
 
   showSuccess(message) {
     console.log(message);
+    // Create Bootstrap alert
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-success alert-dismissible fade show';
+    alertDiv.setAttribute('role', 'alert');
+    alertDiv.innerHTML = `
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    const container = document.querySelector('.container-fluid');
+    if (container) {
+      container.insertBefore(alertDiv, container.firstChild);
+      setTimeout(() => alertDiv.remove(), 3000);
+    }
   }
 }
 
