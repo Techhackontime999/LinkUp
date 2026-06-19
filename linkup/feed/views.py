@@ -14,7 +14,7 @@ def feed(request):
             post = form.save(commit=False)
             post.user = request.user
             post.save()
-            return redirect('feed')
+            return redirect('feed:feed')
     else:
         form = PostForm()
     

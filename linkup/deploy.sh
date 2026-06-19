@@ -1,8 +1,10 @@
 #!/bin/bash
 
-# LinkUp v1.0.0 - Quick Deployment Script
+# LinkUp v1.0.0 - Cross-Platform Deployment Script (Linux/Mac)
 # Usage: ./deploy.sh [environment]
 # Example: ./deploy.sh production
+#
+# For Windows, use: deploy.bat
 
 set -e
 
@@ -33,14 +35,50 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Detect OS
+OS="$(uname -s)"
+case "$OS" in
+    Linux*)     PLATFORM="linux";;
+    Darwin*)    PLATFORM="mac";;
+    *)          PLATFORM="unknown";;
+esac
+print_status "Detected platform: $PLATFORM"
+
+# Install system dependencies for python-magic on Linux
+if [ "$PLATFORM" = "linux" ]; then
+    print_status "Checking system dependencies..."
+    if command -v apt-get &> /dev/null; then
+        sudo apt-get update -qq && sudo apt-get install -y -qq libmagic1 2>/dev/null || \
+        print_warning "Could not install libmagic1 automatically. Install it manually: sudo apt-get install libmagic1"
+    elif command -v yum &> /dev/null; then
+        sudo yum install -y file-devel 2>/dev/null || \
+        print_warning "Could not install file-devel automatically."
+    elif command -v apk &> /dev/null; then
+        sudo apk add file-dev 2>/dev/null || \
+        print_warning "Could not install file-dev automatically."
+    fi
+fi
+
+if [ "$PLATFORM" = "mac" ]; then
+    if command -v brew &> /dev/null; then
+        brew install libmagic 2>/dev/null || \
+        print_warning "Could not install libmagic automatically. Install it manually: brew install libmagic"
+    fi
+fi
+
 # Check if Python is installed
-if ! command -v python3 &> /dev/null; then
+PYTHON_CMD=""
+if command -v python3 &> /dev/null; then
+    PYTHON_CMD="python3"
+elif command -v python &> /dev/null; then
+    PYTHON_CMD="python"
+else
     print_error "Python 3 is not installed. Please install Python 3.10 or higher."
     exit 1
 fi
 
 # Check Python version
-PYTHON_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
+PYTHON_VERSION=$($PYTHON_CMD -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
 REQUIRED_VERSION="3.10"
 
 if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$PYTHON_VERSION" | sort -V | head -n1)" != "$REQUIRED_VERSION" ]; then
@@ -53,7 +91,7 @@ print_success "Python $PYTHON_VERSION detected"
 # Create virtual environment if it doesn't exist
 if [ ! -d "venv" ]; then
     print_status "Creating virtual environment..."
-    python3 -m venv venv
+    $PYTHON_CMD -m venv venv
     print_success "Virtual environment created"
 else
     print_status "Virtual environment already exists"

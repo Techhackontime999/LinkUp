@@ -25,7 +25,7 @@ def validate_routing_at_startup():
     """Validate WebSocket routing patterns at application startup"""
     try:
         validation_result = routing_validator.validate_routing_patterns([
-            (pattern.pattern.pattern, pattern.callback)
+            (str(pattern.pattern), pattern.callback)
             for pattern in websocket_urlpatterns
         ])
 

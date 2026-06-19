@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.html import format_html
 from django.utils.text import Truncator
@@ -188,7 +189,7 @@ class CustomUserAdmin(BaseUserAdmin, ExportCSVMixin):
         context = {
             'title': 'Deactivate selected users',
             'queryset': queryset,
-            'action_checkbox_name': admin.ACTION_CHECKBOX_NAME,
+            'action_checkbox_name': ACTION_CHECKBOX_NAME,
             'opts': self.model._meta,
         }
         return TemplateResponse(request, 'admin/users/user/deactivate_confirmation.html', context)

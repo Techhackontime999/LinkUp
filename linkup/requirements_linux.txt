@@ -1,39 +1,8 @@
-# Core Django
-asgiref==3.11.0
-Django==5.2.10
-sqlparse==0.5.5
-typing_extensions==4.15.0
+# DEPRECATED: Use requirements.txt instead (it now supports all platforms via PEP 508 markers).
+# This file is kept for backwards compatibility.
+# The unified requirements.txt includes platform-specific dependencies
+# (e.g., python-magic-bin on Windows) using sys_platform markers.
+#
+# See: https://www.python.org/dev/peps/pep-0508/#environment-markers
 
-# Development tools
-django-browser-reload==1.21.0
-django-tailwind==4.2.0
-packaging==26.0
-
-# Media and content
-pillow==12.1.0
-django-ckeditor==6.7.3
-bleach==6.0.0
-python-magic==0.4.27
-
-
-# Real-time features (WebSockets)
-channels==4.1.0
-channels-redis==4.2.1
-daphne==4.2.1
-
-# Production dependencies
-python-decouple==3.8
-psycopg2-binary==2.9.10
-dj-database-url==2.2.0
-gunicorn==23.0.0
-whitenoise==6.8.2
-django-redis==5.4.0
-
-# Testing dependencies
-hypothesis==6.112.5
-pytest==8.3.4
-pytest-django==4.9.0
-pytest-asyncio==0.25.0
-
-# Test data generation
-faker>=18.0.0
+-r requirements.txt

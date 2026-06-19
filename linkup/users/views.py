@@ -14,7 +14,7 @@ def register(request):
             user = form.save()
             login(request, user)
             messages.success(request, 'Account created successfully. Welcome!')
-            return redirect('feed')
+            return redirect('feed:feed')
         else:
             # Add ARIA attributes to fields that have errors for better screen reader support
             for field_name in form.errors:

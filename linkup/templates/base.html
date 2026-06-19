@@ -29,7 +29,7 @@
             <div class="flex items-center justify-between h-16 space-x-4">
                 <!-- Left: Branding -->
                 <div class="flex-shrink-0">
-                    <a href="{% url 'feed' %}" class="text-2xl font-extrabold text-gradient heading-display" aria-label="LinkUp - Go to home page">LinkUp</a>
+                    <a href="{% url 'feed:feed' %}" class="text-2xl font-extrabold text-gradient heading-display" aria-label="LinkUp - Go to home page">LinkUp</a>
                 </div>
 
                 <!-- Center: Search Bar -->
@@ -55,7 +55,7 @@
                 <div class="flex items-center space-x-1 lg:space-x-4">
                     <a href="#create-post" class="btn-premium hidden sm:inline mr-2" aria-label="Create new post">Create</a>
                     <div class="hidden sm:flex items-center space-x-1 lg:space-x-4" role="menubar" aria-label="Main navigation menu">
-                        <a href="{% url 'feed' %}"
+                        <a href="{% url 'feed:feed' %}"
                             class="nav-link-premium {% if request.resolver_match.url_name == 'feed' %}active{% endif %}"
                             role="menuitem"
                             {% if request.resolver_match.url_name == 'feed' %}aria-current="page"{% endif %}>
@@ -224,7 +224,7 @@
     <div class="fixed bottom-0 left-0 right-0 w-full z-50 h-16 bg-white border-t border-gray-200 md:hidden">
         <div class="flex h-full w-full">
             <!-- Home -->
-            <a href="{% url 'feed' %}" 
+            <a href="{% url 'feed:feed' %}" 
                class="flex-1 flex flex-col items-center justify-center py-2 hover:bg-gray-50 group {% if request.resolver_match.url_name == 'feed' %}text-purple-600{% else %}text-gray-600{% endif %}">
                 <svg class="w-6 h-6 group-hover:text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>

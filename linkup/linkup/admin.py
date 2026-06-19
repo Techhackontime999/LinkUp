@@ -68,12 +68,12 @@ class LinkUpAdminSite(AdminSite):
         
         return TemplateResponse(request, 'admin/index.html', context)
     
-    def get_app_list(self, request: HttpRequest) -> List[Dict]:
+    def get_app_list(self, request: HttpRequest, app_label: str = None) -> List[Dict]:
         """
         Return a sorted list of all the installed apps that have been
         registered in this site, organized in logical order.
         """
-        app_list = super().get_app_list(request)
+        app_list = super().get_app_list(request, app_label)
         
         # Define custom ordering for apps
         app_order = {

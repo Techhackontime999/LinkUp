@@ -206,7 +206,7 @@ class RoutingValidator:
                     
                     # Extract pattern string from re_path object if needed
                     if hasattr(pattern, 'pattern'):
-                        pattern_str = pattern.pattern.pattern if hasattr(pattern.pattern, 'pattern') else str(pattern.pattern)
+                        pattern_str = str(pattern.pattern)
                         pattern_name = f'pattern_{i}'
                     else:
                         pattern_str = str(pattern)
