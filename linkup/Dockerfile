@@ -21,7 +21,7 @@ RUN chmod +x entrypoint.sh
 
 EXPOSE 8000
 
-RUN DJANGO_ENVIRONMENT=development python manage.py collectstatic --noinput
+RUN SECRET_KEY=build DATABASE_URL=sqlite:///build.db DJANGO_ENVIRONMENT=production python manage.py collectstatic --noinput
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8000/health/ || exit 1

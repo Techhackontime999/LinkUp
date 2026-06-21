@@ -76,6 +76,10 @@ SECURE_HSTS_SECONDS = 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = False
 SECURE_HSTS_PRELOAD = False
 
+# django-browser-reload for development
+INSTALLED_APPS += ['django_browser_reload']
+MIDDLEWARE += ['django_browser_reload.middleware.BrowserReloadMiddleware']
+
 # Internal IPs for debug toolbar and browser reload
 INTERNAL_IPS = [
     "127.0.0.1",

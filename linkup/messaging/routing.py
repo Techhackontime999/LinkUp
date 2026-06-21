@@ -13,11 +13,11 @@ routing_validator = RoutingValidator()
 websocket_urlpatterns = [
     # Chat WebSocket - connects users for private messaging
     # Pattern: ws/chat/<username>/
-    re_path(r'ws/chat/(?P<username>[^/]+)/$', consumers.ChatConsumer.as_asgi()),
-    
+    re_path(r'^ws/chat/(?P<username>[^/]+)/$', consumers.ChatConsumer.as_asgi()),
+
     # Notifications WebSocket - handles real-time notifications
     # Pattern: ws/notifications/
-    re_path(r'ws/notifications/$', consumers.NotificationsConsumer.as_asgi()),
+    re_path(r'^ws/notifications/$', consumers.NotificationsConsumer.as_asgi()),
 ]
 
 # Validate routing patterns at startup

@@ -84,6 +84,7 @@ yarn.lock
 # Build
 build/
 dist/
+!theme/static/css/dist/
 *.egg-info/
 
 # OS

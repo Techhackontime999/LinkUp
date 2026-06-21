@@ -23,7 +23,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Third party
     'tailwind',
-    'django_browser_reload',
     'ckeditor',
     'ckeditor_uploader',
     # Channels for real-time features
@@ -63,7 +62,6 @@ MIDDLEWARE = [
     'core.middleware.FileUploadSecurityMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django_browser_reload.middleware.BrowserReloadMiddleware',
 ]
 
 ROOT_URLCONF = 'professional_network.urls'
@@ -127,7 +125,7 @@ LOGIN_URL = 'login'
 
 # Tailwind
 TAILWIND_APP_NAME = 'theme'
-NPM_BIN_PATH = "npm"
+NPM_BIN_PATH = os.environ.get('NPM_BIN_PATH', 'npm')
 
 # Performance Settings
 DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024  # 50MB

@@ -30,7 +30,6 @@ urlpatterns = [
     path('', include('core.urls')),  # Include core URLs at root level
     path('messages/', include('messaging.urls', namespace='messaging')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
-    path("__reload__/", include("django_browser_reload.urls")),
     
     # Health check endpoints
     path('health/', health_views.health_check, name='health_check'),
@@ -39,6 +38,10 @@ urlpatterns = [
     path('readiness/', health_views.readiness_check, name='readiness_check'),
 ]
 
-# Serve media files during development
+# Development-only URLs
 if settings.DEBUG:
+    from django.urls import include
+    urlpatterns += [
+        path("__reload__/", include("django_browser_reload.urls")),
+    ]
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
