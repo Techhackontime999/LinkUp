@@ -28,13 +28,18 @@
       border-bottom: 1px solid var(--border-subtle);
     }
     #loader-overlay {
-      position: fixed; inset: 0; z-index: 9999;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999;
       background: #fafafa;
       transition: opacity 1.2s ease, visibility 1.2s ease;
     }
     [data-theme="dark"] #loader-overlay { background: #05050a; }
     #loader-overlay.hide { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
+    .loader-inner {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center;
+    }
     #main { animation: lcontent-in 0.7s ease 2.6s both; }
     @keyframes lcontent-in { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
     .loader-spinner {
@@ -82,9 +87,11 @@
 <body class="bg-[var(--bg-primary)] text-[var(--text-primary)] antialiased">
 
   <div id="loader-overlay">
-    <div class="loader-spinner"></div>
-    <h1 class="loader-title">LinkUp</h1>
-    <p class="loader-tagline">Your Professional Network</p>
+    <div class="loader-inner">
+      <div class="loader-spinner"></div>
+      <h1 class="loader-title">LinkUp</h1>
+      <p class="loader-tagline">Your Professional Network</p>
+    </div>
     <div class="loader-bar"></div>
   </div>
   <script>(function(){var s=Date.now();function h(){var e=Date.now()-s,d=Math.max(0,1800-e);setTimeout(function(){var l=document.getElementById('loader-overlay');if(l)l.classList.add('hide')},d)}if(document.readyState==='complete')h();else window.addEventListener('load',h)})()</script>
