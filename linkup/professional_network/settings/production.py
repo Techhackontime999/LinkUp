@@ -15,6 +15,7 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
 # Database - PostgreSQL for production
 # Expects DATABASE_URL environment variable
+# Supabase: postgresql://postgres:pass@db.xxxx.supabase.co:5432/postgres?sslmode=require
 import dj_database_url
 
 DATABASES = {
@@ -22,6 +23,7 @@ DATABASES = {
         default=config('DATABASE_URL'),
         conn_max_age=600,
         conn_health_checks=True,
+        ssl_require=config('DATABASE_SSL_REQUIRE', default=False, cast=bool),
     )
 }
 
