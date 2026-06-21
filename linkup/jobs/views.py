@@ -4,8 +4,8 @@ from django.contrib import messages
 from django.db import IntegrityError
 from django.db.models import Q
 from django.core.paginator import Paginator
-from .models import Job, Application, SavedJob
-from .forms import JobForm, ApplicationForm, JobSearchForm
+from .models import Job, Application, SavedJob, JobAlert
+from .forms import JobForm, ApplicationForm, JobSearchForm, JobAlertForm
 
 @login_required
 def job_list(request):
@@ -189,5 +189,39 @@ def save_job(request, pk):
 
 @login_required
 def job_alerts(request):
-    """View for job alerts (placeholder for future implementation)"""
-    return render(request, 'jobs/job_alerts.html')
+    alerts = JobAlert.objects.filter(user=request.user)
+
+    if request.method == 'POST':
+        form = JobAlertForm(request.POST)
+        if form.is_valid():
+            alert = form.save(commit=False)
+            alert.user = request.user
+            alert.save()
+            messages.success(request, 'Job alert created successfully!')
+            return redirect('jobs:job_alerts')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = JobAlertForm()
+
+    return render(request, 'jobs/job_alerts.html', {
+        'alerts': alerts,
+        'form': form,
+    })
+
+@login_required
+def delete_job_alert(request, pk):
+    alert = get_object_or_404(JobAlert, pk=pk, user=request.user)
+    if request.method == 'POST':
+        alert.delete()
+        messages.success(request, 'Job alert deleted successfully.')
+    return redirect('jobs:job_alerts')
+
+@login_required
+def toggle_job_alert(request, pk):
+    alert = get_object_or_404(JobAlert, pk=pk, user=request.user)
+    alert.is_active = not alert.is_active
+    alert.save()
+    status = 'activated' if alert.is_active else 'deactivated'
+    messages.success(request, f'Job alert {status} successfully.')
+    return redirect('jobs:job_alerts')

@@ -327,6 +327,9 @@
             case 'error':
                 handleError(data);
                 break;
+            case 'message_deleted':
+                handleMessageDeleted(data);
+                break;
             default:
                 console.warn('Unknown message type:', type, data);
         }
@@ -558,6 +561,23 @@
     }
 
     // Enhanced error handling with user-friendly messages and retry options
+    function handleMessageDeleted(data) {
+        var messageId = data.message_id;
+        var mode = data.mode || 'everyone';
+        var el = document.querySelector('[data-message-id="' + messageId + '"]');
+        if (!el) return;
+
+        if (mode === 'everyone') {
+            var contentEl = el.querySelector('.break-words');
+            if (contentEl) contentEl.innerHTML = '<em class="text-[var(--text-muted)] text-xs italic">This message has been deleted</em>';
+            var attachmentEl = el.querySelector('.chat-attachment-image-wrapper, .chat-attachment-video, .chat-attachment-audio-wrapper, .chat-attachment');
+            if (attachmentEl) attachmentEl.remove();
+            el.classList.add('message-deleted');
+        } else {
+            el.remove();
+        }
+    }
+
     function handleError(data) {
         console.error('WebSocket error:', data.error);
         
@@ -646,15 +666,80 @@
         performanceMetrics.averageReceiveTime = (currentAvg * count + receiveTime) / (count + 1);
     }
 
+    function formatFileSize(bytes) {
+        if (!bytes) return '';
+        bytes = parseInt(bytes);
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function renderAttachmentHtml(m, isCurrentUser) {
+        if (!m.attachment_url) return '';
+        var url = m.attachment_url;
+        var name = m.attachment_name || 'File';
+        var ext = name.split('.').pop().toLowerCase();
+        var isImage = url.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) || name.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+        var isVideo = url.match(/\.(mp4|webm|mov)(\?|$)/i) || name.match(/\.(mp4|webm|mov)$/i);
+        var isAudio = url.match(/\.(mp3|wav|ogg|flac|aac|wma)(\?|$)/i) || name.match(/\.(mp3|wav|ogg|flac|aac|wma)$/i);
+        if (isImage) {
+            return '<div class="chat-attachment-image-wrapper cursor-pointer" data-preview-url="' + url + '" data-preview-name="' + name.replace(/"/g, '&quot;') + '" data-preview-type="image">' +
+                '<img src="' + url + '" alt="' + escapeHtml(name) + '" class="chat-attachment-img" loading="lazy">' +
+                '<button class="chat-attachment-download-btn" onclick="event.stopPropagation();window.open(\'' + url + '\',\'_blank\')" title="Open in new tab">' +
+                '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+                '</button></div>';
+        }
+        if (isVideo) {
+            return '<video controls class="chat-attachment-video cursor-pointer rounded-xl" preload="metadata" data-preview-url="' + url + '" data-preview-name="' + name.replace(/"/g, '&quot;') + '" data-preview-type="video"><source src="' + url + '"></video>';
+        }
+        if (isAudio) {
+            return '<div class="chat-attachment-audio-wrapper cursor-pointer" data-preview-url="' + url + '" data-preview-name="' + name.replace(/"/g, '&quot;') + '" data-preview-type="audio">' +
+                '<div class="chat-attachment-audio-icon">' +
+                '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>' +
+                '</div>' +
+                '<div class="chat-attachment-audio-info">' +
+                '<div class="chat-attachment-audio-name">' + escapeHtml(name) + '</div>' +
+                '<audio controls class="chat-attachment-audio" preload="metadata"><source src="' + url + '"></audio>' +
+                '</div></div>';
+        }
+        var iconColor = '#ef4444';
+        if (['pdf'].includes(ext)) iconColor = '#ef4444';
+        else if (['doc','docx'].includes(ext)) iconColor = '#3b82f6';
+        else if (['ppt','pptx'].includes(ext)) iconColor = '#f97316';
+        else if (['xls','xlsx','csv'].includes(ext)) iconColor = '#22c55e';
+        else if (['txt'].includes(ext)) iconColor = '#6b7280';
+        else if (['zip','rar','7z'].includes(ext)) iconColor = '#8b5cf6';
+        return '<a href="' + url + '" target="_blank" class="chat-attachment ' + (isCurrentUser ? 'chat-attachment-self' : 'chat-attachment-other') + '">' +
+            '<div class="chat-attachment-icon" style="background:' + iconColor + '18;color:' + iconColor + '">' + ext.toUpperCase() + '</div>' +
+            '<div class="chat-attachment-info">' +
+            '<div class="chat-attachment-name">' + escapeHtml(name) + '</div>' +
+            '<div class="chat-attachment-size">' + (m.attachment_size ? formatFileSize(m.attachment_size) : 'Click to download') + '</div>' +
+            '</div>' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="' + iconColor + '" stroke-width="2" class="flex-shrink-0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+            '</a>';
+    }
+
     // Enhanced message display with optimistic UI and improved performance
     function appendMessage(m, prepend = false) {
         m = normalizeMessagePayload(m);
+
+        // Deduplication: skip if element with this ID already exists
+        if (m && m.id && document.querySelector(`[data-message-id="${m.id}"]`)) {
+            return;
+        }
+        // Also check for duplicate via client ID
+        if (m && m.client_id && document.querySelector(`[data-client-id="${m.client_id}"]`)) {
+            return;
+        }
 
         // Remove loading indicator if present
         const loadingEl = document.getElementById('loading-messages');
         if (loadingEl) {
             loadingEl.remove();
         }
+
+        // Remove empty state if present
+        removeEmptyState();
         
         const el = document.createElement('div');
         const senderUsername = m && m.sender ? m.sender : '';
@@ -678,7 +763,8 @@
             statusIcon = getStatusIcon(status);
         }
         
-        // Enhanced message bubble with better styling and animations
+        var attachmentHtml = m.attachment_url ? renderAttachmentHtml(m, isCurrentUser) : '';
+
         el.innerHTML = `
             <div class="max-w-xs lg:max-w-md transform transition-all duration-200 hover:scale-[1.02]">
                 ${!isCurrentUser ? `<div class="text-xs text-gray-500 mb-1 ml-1 font-medium">${escapeHtml(senderUsername)}</div>` : ''}
@@ -688,7 +774,9 @@
                             ? 'bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-br-sm hover:shadow-lg' 
                             : 'bg-white text-gray-800 rounded-bl-sm border border-gray-200 hover:shadow-md hover:border-gray-300'
                     }">
-                        <div class="break-words leading-relaxed">${escapeHtml(m.content)}</div>
+                        ${m.content ? `<div class="break-words leading-relaxed">${escapeHtml(m.content)}</div>` : ''}
+                        ${attachmentHtml}
+                        ${m.uploading ? '<div class="upload-progress-bar mt-2"><div class="upload-progress-track"><div class="upload-progress-fill" style="width:0%"></div></div><span class="upload-progress-pct text-xs ' + (isCurrentUser ? 'text-purple-200' : 'text-gray-400') + '">0%</span></div><div class="chat-uploading-tag text-xs ' + (isCurrentUser ? 'text-purple-200' : 'text-gray-400') + ' mt-1 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>Uploading...</div>' : ''}
                         <div class="flex items-center justify-end mt-1.5 space-x-1 text-xs ${
                             isCurrentUser ? 'text-purple-200' : 'text-gray-400'
                         }">
@@ -722,6 +810,13 @@
                 </div>
             </div>
         `;
+        
+        // Add selection checkbox
+        var checkbox = document.createElement('div');
+        checkbox.className = 'selection-checkbox';
+        el.style.position = 'relative';
+        checkbox.style.left = '8px';
+        el.appendChild(checkbox);
         
         // Enhanced insertion with smooth animations
         if (prepend) {
@@ -963,6 +1058,7 @@
 
     // Create message element (helper function for batch operations)
     function createMessageElement(m, prepend = false) {
+        m = normalizeMessagePayload(m);
         const el = document.createElement('div');
         const isCurrentUser = m.sender === currentUser;
         
@@ -977,6 +1073,8 @@
             statusIcon = getStatusIcon(status);
         }
         
+        var attachmentHtml = m.attachment_url ? renderAttachmentHtml(m, isCurrentUser) : '';
+
         el.innerHTML = `
             <div class="max-w-xs lg:max-w-md transform transition-all duration-200 hover:scale-[1.02]">
                 ${!isCurrentUser ? `<div class="text-xs text-gray-500 mb-1 ml-1 font-medium">${escapeHtml(m.sender)}</div>` : ''}
@@ -986,7 +1084,8 @@
                             ? 'bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-br-sm hover:shadow-lg' 
                             : 'bg-white text-gray-800 rounded-bl-sm border border-gray-200 hover:shadow-md hover:border-gray-300'
                     }">
-                        <div class="break-words leading-relaxed">${escapeHtml(m.content)}</div>
+                        ${m.content ? `<div class="break-words leading-relaxed">${escapeHtml(m.content)}</div>` : ''}
+                        ${attachmentHtml}
                         <div class="flex items-center justify-end mt-1.5 space-x-1 text-xs ${
                             isCurrentUser ? 'text-purple-200' : 'text-gray-400'
                         }">
@@ -1022,10 +1121,16 @@
         }, SCROLL_DEBOUNCE_DELAY);
     }
 
+    let isSending = false;
+
     // Enhanced message sending with optimistic UI and 50ms display target
     function sendMessage() {
         const text = chatInput.value.trim();
-        if (!text) return;
+        const hasFile = typeof selectedFile !== 'undefined' && selectedFile !== null;
+        if (!text && !hasFile) return;
+        if (isSending) return;
+        isSending = true;
+        setTimeout(() => { isSending = false; }, 500);
 
         // Stop typing indicator
         if (isTyping) {
@@ -1034,9 +1139,14 @@
             clearTimeout(typingTimeout);
         }
 
-        // Generate client ID for deduplication and optimistic UI
         const clientId = `client_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         const sendTime = Date.now();
+
+        if (hasFile) {
+            // Upload file via AJAX
+            sendFileMessage(text, clientId, sendTime);
+            return;
+        }
 
         // Create optimistic message for immediate display (50ms target)
         const optimisticMessage = {
@@ -1086,6 +1196,137 @@
             // Enhanced offline handling with multiple fallback strategies
             handleOfflineMessage(messageData, optimisticMessage, sendTime);
         }
+    }
+
+    function sendFileMessage(text, clientId, sendTime) {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        if (text) formData.append('message', text);
+        formData.append('client_id', clientId);
+        formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+
+        var isLarge = selectedFile.size > 5 * 1024 * 1024;
+        var isVideo = selectedFile.type.startsWith('video/');
+
+        var optimisticMessage = {
+            id: 'temp_' + clientId,
+            sender: currentUser,
+            recipient: targetUser,
+            content: text || '',
+            attachment_url: URL.createObjectURL(selectedFile),
+            attachment_name: selectedFile.name,
+            attachment_size: selectedFile.size,
+            status: 'pending',
+            client_id: clientId,
+            created_at: new Date().toISOString(),
+            is_read: false,
+            optimistic: true,
+            uploading: true
+        };
+
+        setTimeout(function() {
+            appendMessage(optimisticMessage);
+        }, 50);
+
+        // Clear input and file
+        chatInput.value = '';
+        clearSelectedFile();
+
+        /* store element ref for reliable updates even after data-client-id is cleared */
+        var msgEl = document.querySelector('[data-client-id="' + clientId + '"]');
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', CHAT_CONFIG.uploadUrl, true);
+        xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+
+        xhr.upload.onprogress = function(e) {
+            if (e.lengthComputable) {
+                var pct = Math.round((e.loaded / e.total) * 100);
+                if (msgEl) {
+                    var bar = msgEl.querySelector('.upload-progress-fill');
+                    var pctLabel = msgEl.querySelector('.upload-progress-pct');
+                    if (bar) bar.style.width = pct + '%';
+                    if (pctLabel) pctLabel.textContent = pct + '%';
+                }
+            }
+        };
+
+        function findMsgEl() {
+            if (msgEl && document.contains(msgEl)) return msgEl;
+            msgEl = document.querySelector('[data-client-id="' + clientId + '"]');
+            if (!msgEl) msgEl = document.querySelector('[data-message-id="' + (xhr._dataId || '') + '"]');
+            return msgEl;
+        }
+
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                try {
+                    var data = JSON.parse(xhr.responseText);
+                    xhr._dataId = data.id;
+                    var el = findMsgEl();
+                    if (el) {
+                        el.setAttribute('data-message-id', data.id);
+                        el.removeAttribute('data-client-id');
+                        el.classList.remove('optimistic-message');
+                        if (data.attachment_url) {
+                            var img = el.querySelector('.chat-attachment-img');
+                            if (img) { img.src = data.attachment_url; }
+                            var vid = el.querySelector('.chat-attachment-video source');
+                            if (vid) { vid.src = data.attachment_url; el.querySelector('.chat-attachment-video')?.load(); }
+                            var aud = el.querySelector('.chat-attachment-audio source');
+                            if (aud) { aud.src = data.attachment_url; el.querySelector('.chat-attachment-audio')?.load(); }
+                            var docLink = el.querySelector('.chat-attachment');
+                            if (docLink && !docLink.classList.contains('chat-attachment-img')) { docLink.href = data.attachment_url; }
+                        }
+                        var bar = el.querySelector('.upload-progress-bar');
+                        if (bar) bar.remove();
+                        var uploadingTag = el.querySelector('.chat-uploading-tag');
+                        if (uploadingTag) uploadingTag.remove();
+                    }
+                } catch(e) {}
+            } else {
+                var el = findMsgEl();
+                if (el) {
+                    var statusEl = el.querySelector('.chat-uploading-tag');
+                    if (statusEl) { statusEl.innerHTML = '<span class="text-red-400">Upload failed</span>'; }
+                    el.querySelector('.upload-progress-bar')?.remove();
+                }
+                showToast('Failed to send file. Please try again.', 'error');
+            }
+        };
+        xhr.onerror = function() {
+            var el = findMsgEl();
+            if (el) {
+                var statusEl = el.querySelector('.chat-uploading-tag');
+                if (statusEl) statusEl.innerHTML = '<span class="text-red-400">Upload failed</span>';
+                el.querySelector('.upload-progress-bar')?.remove();
+            }
+            showToast('Network error while uploading file.', 'error');
+        };
+        xhr.ontimeout = function() {
+            var el = findMsgEl();
+            if (el) {
+                var statusEl = el.querySelector('.chat-uploading-tag');
+                if (statusEl) statusEl.innerHTML = '<span class="text-red-400">Upload timed out</span>';
+                el.querySelector('.upload-progress-bar')?.remove();
+            }
+            showToast('Upload timed out. Please try again.', 'error');
+        };
+        xhr.send(formData);
+    }
+
+    function clearSelectedFile() {
+        selectedFile = null;
+        var fi = document.getElementById('chat-file-input');
+        if (fi) { fi.value = ''; }
+        var fp = document.getElementById('chat-file-preview');
+        if (fp) { fp.classList.add('hidden'); }
+        var fn = document.getElementById('chat-file-name');
+        if (fn) { fn.textContent = ''; }
+        var fs = document.getElementById('chat-file-size');
+        if (fs) { fs.textContent = ''; }
+        var ft = document.getElementById('chat-file-preview-thumb');
+        if (ft) { ft.innerHTML = ''; }
     }
 
     // Enhanced offline message handling
@@ -1181,6 +1422,7 @@
     // Enhanced typing indicator with debouncing and performance optimization
     let typingDebounceTimeout = null;
     function sendTypingIndicator(typing) {
+        if (window.CHAT_CONFIG.isSelfChat) return;
         if (ws && ws.readyState === WebSocket.OPEN) {
             // Debounce typing indicators to reduce network traffic
             clearTimeout(typingDebounceTimeout);
@@ -1348,7 +1590,7 @@
 
     // Enhanced event listeners with better performance
     chatSend.addEventListener('click', sendMessage);
-    
+
     chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -1483,6 +1725,296 @@
             chatInput.focus();
         }
     }, 500);
+
+    // === Selection mode & message deletion ===
+    var selectionMode = false;
+    var selectedMessages = {};
+
+    function enterSelectionMode() {
+        selectionMode = true;
+        document.querySelector('.glass-card').classList.add('selection-active');
+    }
+
+    function exitSelectionMode() {
+        selectionMode = false;
+        selectedMessages = {};
+        document.querySelector('.glass-card')?.classList.remove('selection-active');
+        document.querySelectorAll('.message-bubble.selected').forEach(function(el) {
+            el.classList.remove('selected');
+        });
+        var bar = document.getElementById('selection-bar');
+        bar?.classList.remove('show');
+        bar?.classList.add('hidden');
+        var countLabel = document.getElementById('selected-count');
+        if (countLabel) countLabel.textContent = '0 selected';
+    }
+
+    function toggleMessageSelection(el) {
+        var id = el.getAttribute('data-message-id');
+        if (!id) return;
+        if (selectedMessages[id]) {
+            delete selectedMessages[id];
+            el.classList.remove('selected');
+        } else {
+            selectedMessages[id] = true;
+            el.classList.add('selected');
+        }
+        updateSelectionBar();
+    }
+
+    function updateSelectionBar() {
+        var count = Object.keys(selectedMessages).length;
+        var bar = document.getElementById('selection-bar');
+        var label = document.getElementById('selected-count');
+        if (label) label.textContent = count + ' selected';
+        if (count > 0) {
+            bar?.classList.remove('hidden');
+            requestAnimationFrame(function() { bar?.classList.add('show'); });
+        } else {
+            bar?.classList.remove('show');
+            setTimeout(function() { bar?.classList.add('hidden'); }, 300);
+        }
+    }
+
+    function showDeleteModal() {
+        document.getElementById('delete-modal')?.classList.remove('hidden');
+    }
+
+    function hideDeleteModal() {
+        document.getElementById('delete-modal')?.classList.add('hidden');
+    }
+
+    function deleteSelectedMessages(mode) {
+        var ids = Object.keys(selectedMessages);
+        if (ids.length === 0) return;
+        hideDeleteModal();
+
+        fetch(CHAT_CONFIG.deleteMessagesUrl, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+            body: JSON.stringify({message_ids: ids, mode: mode})
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                ids.forEach(function(id) {
+                    var el = document.querySelector('[data-message-id="' + id + '"]');
+                    if (el) {
+                        if (mode === 'everyone') {
+                            var contentEl = el.querySelector('.break-words');
+                            if (contentEl) contentEl.innerHTML = '<em class="text-[var(--text-muted)] text-xs italic">This message has been deleted</em>';
+                            var attachmentEl = el.querySelector('.chat-attachment-image-wrapper, .chat-attachment-video, .chat-attachment-audio-wrapper, .chat-attachment');
+                            if (attachmentEl) attachmentEl.remove();
+                            el.classList.add('message-deleted');
+                        } else {
+                            el.remove();
+                        }
+                    }
+                });
+                exitSelectionMode();
+                showToast('Messages deleted', 'success');
+            } else {
+                showToast(data.error || 'Failed to delete messages', 'error');
+            }
+        })
+        .catch(function() {
+            showToast('Failed to delete messages', 'error');
+        });
+    }
+
+    function clearChat() {
+        hideClearChatModal();
+        fetch(CHAT_CONFIG.clearChatUrl, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')}
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                document.querySelectorAll('.message-bubble').forEach(function(el) { el.remove(); });
+                if (selectionMode) exitSelectionMode();
+                showEmptyState();
+                showToast('Chat cleared', 'success');
+            } else {
+                showToast(data.error || 'Failed to clear chat', 'error');
+            }
+        })
+        .catch(function() {
+            showToast('Failed to clear chat', 'error');
+        });
+    }
+
+    function showEmptyState() {
+        var existing = document.getElementById('empty-chat-state');
+        if (existing) return;
+        var el = document.createElement('div');
+        el.id = 'empty-chat-state';
+        el.className = 'flex flex-col items-center justify-center py-12 text-gray-400';
+        el.innerHTML = '<svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>' +
+            '<p class="text-lg font-medium mb-2">Start a conversation</p>' +
+            '<p class="text-sm">Send a message to begin chatting with ' + targetUser + '</p>';
+        var chatWin = document.getElementById('chat-window');
+        if (chatWin) chatWin.appendChild(el);
+    }
+
+    function removeEmptyState() {
+        var el = document.getElementById('empty-chat-state');
+        if (el) el.remove();
+    }
+
+    function showClearChatModal() {
+        document.getElementById('clear-chat-modal')?.classList.remove('hidden');
+    }
+
+    function hideClearChatModal() {
+        document.getElementById('clear-chat-modal')?.classList.add('hidden');
+    }
+
+    // Long press handler (mouse + touch)
+    var longPressTimer = null;
+    var longPressTarget = null;
+
+    function startLongPress(el) {
+        if (selectionMode) return;
+        longPressTimer = setTimeout(function() {
+            enterSelectionMode();
+            toggleMessageSelection(el);
+        }, 500);
+    }
+
+    function cancelLongPress() {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+        longPressTarget = null;
+    }
+
+    document.addEventListener('mousedown', function(e) {
+        var msgBubble = e.target.closest('.message-bubble');
+        if (msgBubble && !selectionMode) {
+            longPressTarget = msgBubble;
+            startLongPress(msgBubble);
+        }
+    });
+    document.addEventListener('mouseup', cancelLongPress);
+    document.addEventListener('mouseleave', cancelLongPress);
+
+    document.addEventListener('touchstart', function(e) {
+        var msgBubble = e.target.closest('.message-bubble');
+        if (msgBubble && !selectionMode) {
+            longPressTarget = msgBubble;
+            startLongPress(msgBubble);
+        }
+    }, {passive: true});
+    document.addEventListener('touchend', cancelLongPress);
+    document.addEventListener('touchmove', cancelLongPress);
+
+    // === Media preview modal ===
+    function openMediaPreview(url, name, type) {
+        var modal = document.getElementById('media-preview-modal');
+        var content = document.getElementById('media-preview-content');
+        var footer = document.getElementById('media-preview-footer');
+        var filename = document.getElementById('media-preview-filename');
+        var download = document.getElementById('media-preview-download');
+
+        if (!modal || !content) return;
+
+        content.innerHTML = '';
+
+        if (type === 'image') {
+            content.innerHTML = '<img src="' + url + '" alt="' + escapeHtml(name) + '">';
+            footer.classList.remove('hidden');
+        } else if (type === 'video') {
+            content.innerHTML = '<video controls autoplay class="rounded-xl"><source src="' + url + '"></video>';
+            footer.classList.remove('hidden');
+        } else if (type === 'audio') {
+            content.innerHTML = '<div class="media-audio-container">' +
+                '<div class="text-5xl opacity-60">🎵</div>' +
+                '<div class="text-white text-base font-medium truncate max-w-xs">' + escapeHtml(name) + '</div>' +
+                '<audio controls autoplay><source src="' + url + '"></audio>' +
+                '</div>';
+            footer.classList.remove('hidden');
+        } else {
+            footer.classList.add('hidden');
+            return;
+        }
+
+        if (filename) filename.textContent = name;
+        if (download) download.href = url;
+
+        modal.classList.remove('hidden');
+        modal.classList.add('show');
+    }
+
+    function closeMediaPreview() {
+        var modal = document.getElementById('media-preview-modal');
+        if (!modal) return;
+        modal.classList.add('hidden');
+        modal.classList.remove('show');
+        var content = document.getElementById('media-preview-content');
+        if (content) content.innerHTML = '';
+    }
+
+    // Delegated click: open media preview on attachment click
+    document.getElementById('chat-window')?.addEventListener('click', function(e) {
+        if (selectionMode) return;
+        var trigger = e.target.closest('[data-preview-url]');
+        if (!trigger) return;
+        var url = trigger.getAttribute('data-preview-url');
+        var name = trigger.getAttribute('data-preview-name') || 'File';
+        var type = trigger.getAttribute('data-preview-type') || 'image';
+        e.stopPropagation();
+        openMediaPreview(url, name, type);
+    });
+
+    // Media preview modal close handlers
+    document.getElementById('media-preview-close')?.addEventListener('click', closeMediaPreview);
+    document.getElementById('media-preview-modal')?.addEventListener('click', function(e) {
+        if (e.target === this) closeMediaPreview();
+    });
+
+    // Event delegation for selection clicks
+    document.getElementById('chat-window')?.addEventListener('click', function(e) {
+        if (!selectionMode) return;
+        var msgBubble = e.target.closest('.message-bubble');
+        if (msgBubble) {
+            toggleMessageSelection(msgBubble);
+        } else {
+            exitSelectionMode();
+        }
+    });
+
+    // Wire up UI buttons
+    document.getElementById('cancel-selection-btn')?.addEventListener('click', exitSelectionMode);
+    document.getElementById('delete-selected-btn')?.addEventListener('click', showDeleteModal);
+    document.getElementById('delete-for-me-btn')?.addEventListener('click', function() { deleteSelectedMessages('me'); });
+    document.getElementById('delete-for-everyone-btn')?.addEventListener('click', function() { deleteSelectedMessages('everyone'); });
+    document.getElementById('delete-modal-cancel')?.addEventListener('click', hideDeleteModal);
+    document.getElementById('clear-chat-btn')?.addEventListener('click', showClearChatModal);
+    document.getElementById('clear-chat-confirm-btn')?.addEventListener('click', clearChat);
+    document.getElementById('clear-chat-cancel-btn')?.addEventListener('click', hideClearChatModal);
+
+    // Close modals on backdrop click
+    document.getElementById('delete-modal')?.addEventListener('click', function(e) {
+        if (e.target === this) hideDeleteModal();
+    });
+    document.getElementById('clear-chat-modal')?.addEventListener('click', function(e) {
+        if (e.target === this) hideClearChatModal();
+    });
+
+    // Escape key — unified handler
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            var mediaModal = document.getElementById('media-preview-modal');
+            if (mediaModal && !mediaModal.classList.contains('hidden')) {
+                closeMediaPreview();
+                e.preventDefault();
+                return;
+            }
+            if (selectionMode) exitSelectionMode();
+            hideDeleteModal();
+            hideClearChatModal();
+        }
+    });
 
     // Add CSS animations for optimistic UI
     const style = document.createElement('style');

@@ -1,63 +1,45 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="min-h-screen flex items-center justify-center py-12 site-container"
-    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-    <div class="max-w-md w-full">
-        <div class="premium-card p-8 glass">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gradient heading-display mb-2">LinkUp</h1>
-                <h2 class="text-2xl font-bold text-gray-800 mb-2">Welcome Back</h2>
-                <p class="text-gray-600">Sign in to continue to your account</p>
-            </div>
-
-            {% if form.errors %}
-            <div class="alert-premium alert-error mb-6" role="alert" aria-live="assertive">
-                <div class="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>Invalid username or password.</span>
-                </div>
-            </div>
-            {% endif %}
-
-            <form method="post" class="space-y-6">
-                {% csrf_token %}
-                <div class="input-group-premium">
-                    <label for="id_username" class="block text-sm font-semibold text-gray-700 mb-2">Username</label>
-                    <input type="text" name="username" id="id_username" class="input-premium"
-                        placeholder="Enter your username" required>
-                </div>
-
-                <div class="input-group-premium">
-                    <label for="id_password" class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-                    <input type="password" name="password" id="id_password" class="input-premium"
-                        placeholder="Enter your password" required>
-                </div>
-
-                <div class="flex items-center justify-between text-sm">
-                    <label class="flex items-center cursor-pointer">
-                        <input type="checkbox" class="mr-2" />
-                        <span class="text-gray-600">Remember me</span>
-                    </label>
-                    <a href="#" class="text-purple-600 hover:text-purple-700 font-semibold">Forgot password?</a>
-                </div>
-
-                <button type="submit" class="btn-premium w-full py-3">
-                    Sign In
-                </button>
-            </form>
-
-            <div class="mt-6 text-center">
-                <p class="text-gray-600">New to LinkUp?
-                    <a href="{% url 'register' %}" class="text-purple-600 hover:text-purple-700 font-semibold">Join
-                        now</a>
-                </p>
-            </div>
-        </div>
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="text-center mb-8">
+      <div class="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg" style="background: linear-gradient(135deg, var(--aurora-purple), var(--aurora-teal)); box-shadow: 0 4px 20px var(--accent-glow);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </div>
+      <h1>Welcome back</h1>
+      <p>Sign in to continue to your account</p>
     </div>
+
+    {% if form.errors %}
+    <div class="alert alert-error mb-6">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      <span>Invalid username or password.</span>
+    </div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="id_username">Username</label>
+        <input type="text" name="username" id="id_username" class="input-premium" placeholder="Enter your username" required autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label for="id_password">Password</label>
+        <input type="password" name="password" id="id_password" class="input-premium" placeholder="Enter your password" required autocomplete="current-password">
+      </div>
+      <div class="flex items-center justify-between text-sm mb-6">
+        <label class="flex items-center gap-2 cursor-pointer text-[var(--text-secondary)]">
+          <input type="checkbox" class="w-4 h-4 rounded border-[var(--border-subtle)] text-[var(--accent)] focus:ring-[var(--accent)]">
+          Remember me
+        </label>
+        <a href="#" class="text-[var(--accent)] hover:text-[var(--accent-dark)] font-medium">Forgot password?</a>
+      </div>
+      <button type="submit" class="btn-primary w-full py-2.5">Sign in</button>
+    </form>
+
+    <div class="divider">New to LinkUp?</div>
+
+    <a href="{% url 'register' %}" class="btn-secondary w-full justify-center py-2.5">Create an account</a>
+  </div>
 </div>
 {% endblock %}

@@ -186,37 +186,37 @@ class NotificationSystem {
     
     createNotificationElement(notification) {
         const element = document.createElement('div');
-        element.className = `notification-item p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${!notification.is_read ? 'bg-blue-50' : ''}`;
+        element.className = `notification-item p-3 border-b border-[var(--border-subtle)] hover:bg-[var(--bg-secondary)] cursor-pointer transition-colors ${!notification.is_read ? 'bg-[var(--accent)]/5' : ''}`;
         element.dataset.notificationId = notification.id;
         
         const timeAgo = this.formatTimeAgo(new Date(notification.created_at));
         const priorityClass = this.getPriorityClass(notification.priority);
         
         element.innerHTML = `
-            <div class="flex items-start space-x-3">
+            <div class="flex items-start gap-3">
                 ${notification.sender_avatar ? 
-                    `<img src="${notification.sender_avatar}" alt="${notification.sender}" class="w-8 h-8 rounded-full">` :
-                    `<div class="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white text-sm font-medium">
+                    `<img src="${notification.sender_avatar}" alt="${notification.sender}" class="w-8 h-8 rounded-full flex-shrink-0">` :
+                    `<div class="w-8 h-8 rounded-full" style="background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal));flex-shrink:0;display:flex;align-items:center;justify-content:center;color:white;font-size:0.875rem;font-weight:600;">
                         ${notification.sender ? notification.sender.charAt(0).toUpperCase() : 'S'}
                     </div>`
                 }
                 <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                        <p class="text-sm font-medium text-gray-900 truncate">
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="text-sm font-medium text-[var(--text-primary)] truncate">
                             ${notification.title}
                             ${notification.is_grouped && notification.group_count > 1 ? 
-                                `<span class="ml-2 px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded-full">${notification.group_count}</span>` : 
+                                `<span class="ml-2 px-2 py-0.5 text-xs rounded-full" style="background:var(--bg-secondary);color:var(--text-muted)">${notification.group_count}</span>` : 
                                 ''
                             }
                         </p>
-                        <div class="flex items-center space-x-2">
+                        <div class="flex items-center gap-2 flex-shrink-0">
                             ${priorityClass ? `<span class="w-2 h-2 rounded-full ${priorityClass}"></span>` : ''}
-                            <span class="text-xs text-gray-500">${timeAgo}</span>
+                            <span class="text-xs text-[var(--text-muted)] whitespace-nowrap">${timeAgo}</span>
                         </div>
                     </div>
-                    <p class="text-sm text-gray-600 mt-1">${notification.message}</p>
+                    <p class="text-sm text-[var(--text-secondary)] mt-1">${notification.message}</p>
                     ${!notification.is_read ? 
-                        `<button class="mark-read-btn text-xs text-purple-600 hover:text-purple-800 mt-2" data-notification-id="${notification.id}">
+                        `<button class="mark-read-btn text-xs font-medium mt-2" style="color:var(--accent)" data-notification-id="${notification.id}">
                             Mark as read
                         </button>` : 
                         ''
@@ -338,13 +338,13 @@ class NotificationSystem {
         const element = document.querySelector(`[data-notification-id="${notificationId}"]`);
         if (element) {
             if (isRead) {
-                element.classList.remove('bg-blue-50');
+                element.classList.remove('bg-[var(--accent)]/5');
                 const markReadBtn = element.querySelector('.mark-read-btn');
                 if (markReadBtn) {
                     markReadBtn.remove();
                 }
             } else {
-                element.classList.add('bg-blue-50');
+                element.classList.add('bg-[var(--accent)]/5');
             }
         }
     }
@@ -357,7 +357,7 @@ class NotificationSystem {
         
         // Update all UI elements
         document.querySelectorAll('.notification-item').forEach(element => {
-            element.classList.remove('bg-blue-50');
+            element.classList.remove('bg-[var(--accent)]/5');
             const markReadBtn = element.querySelector('.mark-read-btn');
             if (markReadBtn) {
                 markReadBtn.remove();

@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Job, Application
+from .models import Job, Application, JobAlert
 
 class JobForm(forms.ModelForm):
     class Meta:
@@ -94,15 +94,15 @@ class ApplicationForm(forms.ModelForm):
         fields = ['resume', 'cover_letter']
         widgets = {
             'resume': forms.FileInput(attrs={
-                'class': 'form-file-input form-field-enhanced',
+                'class': 'absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10',
                 'accept': '.pdf,.doc,.docx',
-                'data-validation': '{"required": true}'
+                'required': True
             }),
             'cover_letter': forms.Textarea(attrs={
-                'class': 'form-textarea form-field-enhanced',
-                'rows': 8,
-                'placeholder': 'Write a compelling cover letter explaining why you\'re the perfect fit for this role...',
-                'data-validation': '{"minLength": 100, "required": true}'
+                'class': 'input-premium w-full',
+                'rows': 6,
+                'style': 'min-height:120px;resize:vertical',
+                'placeholder': 'Tell us why you\'re a great fit for this role...',
             }),
         }
     
@@ -166,3 +166,36 @@ class JobSearchForm(forms.Form):
             'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white'
         })
     )
+
+
+class JobAlertForm(forms.ModelForm):
+    class Meta:
+        model = JobAlert
+        fields = ['keywords', 'location', 'workplace_type', 'job_type', 'frequency']
+        widgets = {
+            'keywords': forms.TextInput(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500',
+                'placeholder': 'e.g., software engineer, data analyst'
+            }),
+            'location': forms.TextInput(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500',
+                'placeholder': 'City, country or remote'
+            }),
+            'workplace_type': forms.Select(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white'
+            }),
+            'job_type': forms.Select(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white'
+            }),
+            'frequency': forms.Select(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white'
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['workplace_type'].required = False
+        self.fields['workplace_type'].choices = [('', 'Any Workplace Type')] + list(Job.WORKPLACE_TYPE_CHOICES)
+        self.fields['job_type'].required = False
+        self.fields['job_type'].choices = [('', 'Any Job Type')] + list(Job.JOB_TYPE_CHOICES)
+        self.fields['keywords'].required = False

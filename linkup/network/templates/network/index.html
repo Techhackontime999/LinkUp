@@ -1,230 +1,182 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 pt-6">
-    <!-- Left Sidebar -->
-    <div class="md:col-span-1">
-        <div class="premium-card p-5 animate-fade-in">
-            <h2 class="text-lg font-bold text-gray-800 mb-4">Manage network</h2>
-            <div class="space-y-2">
-                <div
-                    class="flex justify-between items-center p-3 rounded-lg hover:bg-purple-50 transition-colors cursor-pointer">
-                    <span class="text-gray-700 font-medium">Connections</span>
-                    <span class="badge-premium">{{ total_connections }}</span>
-                </div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+  <aside class="hidden lg:block lg:col-span-3">
+    <div class="double-bezel tilt-card scroll-reveal">
+      <div class="bezel-outer">
+        <div class="bezel-inner p-5">
+          <h3 class="text-xs font-semibold tracking-wide text-[var(--text-muted)] uppercase mb-4">Network</h3>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-secondary)]">
+              <span class="text-sm font-medium text-[var(--text-primary)]">Connections</span>
+              <span class="stat-counter inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-lg bg-[var(--accent)]/10 text-[var(--accent)] text-xs font-bold" data-target="{{ total_connections }}">0</span>
             </div>
+            <div class="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-secondary)]">
+              <span class="text-sm font-medium text-[var(--text-primary)]">Invitations</span>
+              <span class="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-lg bg-[var(--aurora-pink)]/10 text-[var(--aurora-pink)] text-xs font-bold">{{ received_requests|length }}</span>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="md:col-span-3">
-        <!-- Invitations -->
-        {% if received_requests %}
-        <div class="premium-card p-6 mb-6 animate-fade-in">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Invitations</h2>
-            <div class="space-y-4">
-                {% for req in received_requests %}
-                <div class="connection-card flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <div class="post-avatar w-16 h-16 text-xl">
-                            {{ req.user.username|slice:":2"|upper }}
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-gray-800">{{ req.user.username }}</h3>
-                            <p class="text-sm text-gray-600">{{ req.user.profile.headline|default:"Professional" }}</p>
-                            <p class="text-xs text-gray-500 mt-1">Wants to connect</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <a href="{% url 'reject_request' req.id %}"
-                            class="px-5 py-2.5 border-2 border-gray-300 rounded-lg text-gray-700 font-semibold hover:border-gray-400 hover:bg-gray-50 transition-all">
-                            Ignore
-                        </a>
-                        <a href="{% url 'accept_request' req.id %}" class="btn-premium px-5 py-2.5 text-sm">
-                            Accept
-                        </a>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+    <div class="double-bezel tilt-card scroll-reveal mt-6">
+      <div class="bezel-outer">
+        <div class="bezel-inner p-5">
+          <h3 class="text-xs font-semibold tracking-wide text-[var(--text-muted)] uppercase mb-3">Quick tips</h3>
+          <div class="space-y-3 text-xs text-[var(--text-secondary)] leading-relaxed">
+            <p>Growing your network helps you discover new opportunities and stay connected with industry peers.</p>
+            <p class="text-[var(--text-muted)]">People you know are more likely to accept your connection requests.</p>
+          </div>
         </div>
-        {% endif %}
+      </div>
+    </div>
+  </aside>
 
-        <!-- My Connections -->
-        {% if connections_page_obj %}
-        <div class="premium-card p-6 mb-6 animate-fade-in">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">My Connections</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {% for conn in connections_page_obj %}
-                {% if conn.user == request.user %}
-                {% with connection_user=conn.friend %}
-                <div class="connection-card">
-                    <div class="flex items-center space-x-4">
-                        <a href="{% url 'public_profile' connection_user.username %}"
-                            class="flex items-center space-x-4 flex-1 no-underline text-current"
-                            aria-label="View {% if connection_user.first_name %}{{ connection_user.first_name }} {{ connection_user.last_name }}{% else %}{{ connection_user.username }}{% endif %}'s profile">
-                            <div class="post-avatar w-14 h-14 text-lg rounded-full overflow-hidden">
-                                {% if connection_user.profile.avatar %}
-                                <img src="{{ connection_user.profile.avatar.url }}"
-                                    alt="{% if connection_user.first_name %}{{ connection_user.first_name }} {{ connection_user.last_name }}{% else %}{{ connection_user.username }}{% endif %}'s avatar"
-                                    class="avatar-img object-cover" />
-                                {% else %}
-                                {{ connection_user.username|slice:":2"|upper }}
-                                {% endif %}
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-gray-800">{% if connection_user.first_name %}{{ connection_user.first_name }} {{ connection_user.last_name }}{% else %}{{ connection_user.username }}{% endif %}</h3>
-                                <p class="text-sm text-gray-600">@{{ connection_user.username }}</p>
-                                <p class="text-xs text-gray-500 mt-1">Connected {{ conn.created_at|date:"M Y" }}</p>
-                            </div>
-                        </a>
-                        <button class="text-gray-400 hover:text-gray-600 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                            </svg>
-                        </button>
-                    </div>
+  <div class="lg:col-span-9 space-y-6">
+    {% if received_requests %}
+    <div class="double-bezel tilt-card scroll-reveal">
+      <div class="bezel-outer">
+        <div class="bezel-inner p-6">
+          <div class="flex items-center justify-between mb-5">
+            <h2 class="text-sm font-semibold tracking-wide text-[var(--text-muted)] uppercase">Invitations</h2>
+            <span class="inline-flex items-center justify-center h-6 px-2.5 rounded-lg bg-[var(--aurora-pink)]/10 text-[var(--aurora-pink)] text-xs font-bold">{{ received_requests|length }}</span>
+          </div>
+          <div class="space-y-3">
+            {% for req in received_requests %}
+            <div class="flex items-center justify-between gap-4 p-4 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-secondary)]/80 transition-colors">
+              <div class="flex items-center gap-4 min-w-0">
+                <div class="flex-shrink-0" style="width:44px;height:44px;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal));color:white;font-weight:700;font-size:0.875rem;display:flex;align-items:center;justify-content:center;">{{ req.user.username|slice:":2"|upper }}</div>
+                <div class="min-w-0">
+                  <h3 class="text-sm font-semibold text-[var(--text-primary)] truncate">{{ req.user.get_full_name|default:req.user.username }}</h3>
+                  <p class="text-xs text-[var(--text-secondary)] truncate">{{ req.user.profile.headline|default:"Professional" }}</p>
                 </div>
-                {% endwith %}
-                {% else %}
-                {% with connection_user=conn.user %}
-                <div class="connection-card">
-                    <div class="flex items-center space-x-4">
-                        <a href="{% url 'public_profile' connection_user.username %}"
-                            class="flex items-center space-x-4 flex-1 no-underline text-current"
-                            aria-label="View {% if connection_user.first_name %}{{ connection_user.first_name }} {{ connection_user.last_name }}{% else %}{{ connection_user.username }}{% endif %}'s profile">
-                            <div class="post-avatar w-14 h-14 text-lg rounded-full overflow-hidden">
-                                {% if connection_user.profile.avatar %}
-                                <img src="{{ connection_user.profile.avatar.url }}"
-                                    alt="{% if connection_user.first_name %}{{ connection_user.first_name }} {{ connection_user.last_name }}{% else %}{{ connection_user.username }}{% endif %}'s avatar"
-                                    class="avatar-img object-cover" />
-                                {% else %}
-                                {{ connection_user.username|slice:":2"|upper }}
-                                {% endif %}
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-gray-800">{% if connection_user.first_name %}{{ connection_user.first_name }} {{ connection_user.last_name }}{% else %}{{ connection_user.username }}{% endif %}</h3>
-                                <p class="text-sm text-gray-600">@{{ connection_user.username }}</p>
-                                <p class="text-xs text-gray-500 mt-1">Connected {{ conn.created_at|date:"M Y" }}</p>
-                            </div>
-                        </a>
-                        <button class="text-gray-400 hover:text-gray-600 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                {% endwith %}
-                {% endif %}
-                {% endfor %}
+              </div>
+              <div class="flex items-center gap-2 flex-shrink-0">
+                <a href="{% url 'reject_request' req.id %}" class="btn-ghost text-sm px-3 py-1.5">Ignore</a>
+                <a href="{% url 'accept_request' req.id %}" class="btn-primary text-sm px-4 py-1.5">Accept</a>
+              </div>
             </div>
+            {% endfor %}
+          </div>
         </div>
-        {% endif %}
+      </div>
+    </div>
+    {% endif %}
 
-        <!-- Suggestions -->
-        <div class="premium-card p-6 mb-6 animate-fade-in">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">People you may know</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {% for user in suggestions %}
-                <div class="connection-card text-center animate-fade-in group">
-                    <a href="{% url 'public_profile' user.username %}" class="no-underline text-current"
-                        aria-label="View {% if user.first_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username }}{% endif %}'s profile">
-                        <div class="mb-4 relative">
-                            <div
-                                class="post-avatar w-24 h-24 text-3xl mx-auto shadow-lg group-hover:shadow-glow transition-all rounded-full overflow-hidden">
-                                {% if user.profile.avatar %}
-                                <img src="{{ user.profile.avatar.url }}"
-                                    alt="{% if user.first_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username }}{% endif %}'s avatar"
-                                    class="avatar-img object-cover mx-auto" />
-                                {% else %}
-                                {{ user.username|slice:":2"|upper }}
-                                {% endif %}
-                            </div>
-                        </div>
-                        <h3 class="font-bold text-gray-800 text-lg mb-1">{% if user.first_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username }}{% endif %}</h3>
-                        <p class="text-sm text-gray-600 mb-6 h-10 overflow-hidden">
-                            {% if user.profile %}
-                                {{ user.profile.headline|default:"Professional on LinkUp" }}
-                            {% else %}
-                                Professional on LinkUp
-                            {% endif %}
-                        </p>
+    {% if connections_page_obj %}
+    <div class="double-bezel tilt-card scroll-reveal">
+      <div class="bezel-outer">
+        <div class="bezel-inner p-6">
+          <h2 class="text-sm font-semibold tracking-wide text-[var(--text-muted)] uppercase mb-5">My Connections</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {% for conn in connections_page_obj %}
+            {% with connection_user=conn.friend %}
+            <a href="{% url 'public_profile' connection_user.username %}" class="no-underline group">
+              <div class="flex items-center gap-4 p-4 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-secondary)]/70 transition-all duration-300 group-hover:translate-x-0.5">
+                <div class="flex-shrink-0" style="width:44px;height:44px;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal));color:white;font-weight:700;font-size:0.875rem;display:flex;align-items:center;justify-content:center;outline:2px solid var(--bg-card);outline-offset:-1px;">
+                  {% if connection_user.profile.avatar %}<img src="{{ connection_user.profile.avatar.url }}" alt="" class="w-full h-full object-cover">{% else %}{{ connection_user.username|slice:":2"|upper }}{% endif %}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <h3 class="text-sm font-semibold text-[var(--text-primary)] truncate group-hover:text-[var(--accent)] transition-colors">{{ connection_user.get_full_name|default:connection_user.username }}</h3>
+                  <p class="text-xs text-[var(--text-secondary)] truncate">@{{ connection_user.username }}</p>
+                  <p class="text-[10px] text-[var(--text-muted)] mt-0.5">Connected {{ conn.created_at|date:"M Y" }}</p>
+                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors flex-shrink-0"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </a>
+            {% endwith %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="double-bezel tilt-card scroll-reveal">
+      <div class="bezel-outer">
+        <div class="bezel-inner p-6">
+          <h2 class="text-sm font-semibold tracking-wide text-[var(--text-muted)] uppercase mb-5">People you may know</h2>
+          {% if suggestions %}
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for user in suggestions %}
+            <div class="relative group float-anim" style="animation-duration:{% cycle '3.2' '3.8' '4.2' '3.5' %}s;animation-delay:{% cycle '0' '0.15' '0.3' '0.45' %}s">
+              <div class="tilt-card p-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] hover:border-[var(--accent)]/20 transition-all duration-300 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.04)] card-particles">
+                <div class="flex items-start gap-4">
+                  <a href="{% url 'public_profile' user.username %}" class="flex-shrink-0 no-underline">
+                    <div style="width:52px;height:52px;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal));color:white;font-weight:700;font-size:1rem;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px var(--accent-glow);">{{ user.username|slice:":2"|upper }}</div>
+                  </a>
+                  <div class="flex-1 min-w-0">
+                    <a href="{% url 'public_profile' user.username %}" class="no-underline">
+                      <h3 class="text-sm font-semibold text-[var(--text-primary)] truncate hover:text-[var(--accent)] transition-colors">{{ user.get_full_name|default:user.username }}</h3>
                     </a>
-
-                    <div class="space-y-3">
-                        <button class="btn-connect-ajax btn-premium w-full text-sm py-2" data-user-id="{{ user.id }}">
-                            <span class="connect-text">Connect</span>
-                        </button>
-                        <button class="btn-follow-ajax btn-premium-outline w-full text-sm py-2"
-                            data-user-id="{{ user.id }}">
-                            <span class="follow-text">Follow</span>
-                        </button>
+                    <div class="flex items-center gap-1.5 mt-0.5">
+                      <span class="live-dot sm" style="width:5px;height:5px"></span>
+                      <p class="text-xs text-[var(--text-muted)] truncate">{{ user.profile.headline|default:"Professional on LinkUp" }}</p>
                     </div>
+                    <div class="flex items-center gap-2 mt-3">
+                      <button class="btn-connect-ajax px-4 py-1.5 text-xs font-semibold rounded-xl border border-[var(--accent)] bg-[var(--accent)] text-white hover:bg-[var(--accent-dark)] transition-all duration-200 active:scale-[0.97] btn-ripple" data-user-id="{{ user.id }}">
+                        <span class="connect-text">Connect</span>
+                      </button>
+                      <button class="btn-follow-ajax px-4 py-1.5 text-xs font-semibold rounded-xl border border-[var(--border-subtle)] bg-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] transition-all duration-200 active:scale-[0.97]" data-user-id="{{ user.id }}">
+                        <span class="follow-text">Follow</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                {% endfor %}
-                {% if not suggestions %}
-                <div class="col-span-3 text-center py-12">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300 mb-4" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    <h3 class="text-lg font-semibold text-gray-700 mb-2">No new suggestions</h3>
-                    <p class="text-gray-500">Check back later for more people to connect with</p>
-                </div>
-                {% endif %}
+              </div>
             </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="text-center py-10">
+            <div class="w-14 h-14 rounded-2xl bg-[var(--bg-secondary)] flex items-center justify-center mx-auto mb-4">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-[var(--text-muted)]"><path d="M17 20h5v-2a3 3 0 0 0-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 0 1 5.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 0 1 9.288 0M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+            </div>
+            <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-1">No suggestions</h3>
+            <p class="text-xs text-[var(--text-muted)]">Check back later for more people to connect with</p>
+          </div>
+          {% endif %}
         </div>
+      </div>
     </div>
+  </div>
 </div>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Connect Button AJAX
-        const connectBtns = document.querySelectorAll('.btn-connect-ajax');
-        connectBtns.forEach(btn => {
-            btn.addEventListener('click', function () {
-                const userId = this.dataset.user_id || this.dataset.userId;
-                const textSpan = this.querySelector('.connect-text');
-
-                fetch(`/network/connect-toggle/${userId}/`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === 'pending') {
-                            textSpan.textContent = 'Pending';
-                            this.classList.replace('btn-premium', 'bg-gray-200');
-                        } else {
-                            textSpan.textContent = 'Connect';
-                            this.classList.replace('bg-gray-200', 'btn-premium');
-                        }
-                    });
-            });
-        });
-
-        // Follow Button AJAX
-        const followBtns = document.querySelectorAll('.btn-follow-ajax');
-        followBtns.forEach(btn => {
-            btn.addEventListener('click', function () {
-                const userId = this.dataset.user_id || this.dataset.userId;
-                const textSpan = this.querySelector('.follow-text');
-
-                fetch(`/network/follow/${userId}/?ajax=1`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.is_following) {
-                            textSpan.textContent = 'Following';
-                            this.classList.add('bg-purple-50');
-                        } else {
-                            textSpan.textContent = 'Follow';
-                            this.classList.remove('bg-purple-50');
-                        }
-                    });
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.btn-connect-ajax').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const userId = this.dataset.user_id || this.dataset.userId;
+      if (!userId) return;
+      const textSpan = this.querySelector('.connect-text');
+      const isPending = textSpan.textContent === 'Pending';
+      if (isPending) return;
+      fetch(`/network/connect-toggle/${userId}/`).then(r => r.json()).then(data => {
+        if (data.status === 'pending') {
+          textSpan.textContent = 'Pending';
+          this.classList.remove('bg-[var(--accent)]', 'text-white', 'hover:bg-[var(--accent-dark)]', 'border-[var(--accent)]');
+          this.classList.add('bg-[var(--bg-secondary)]', 'text-[var(--text-secondary)]', 'border-[var(--border-subtle)]');
+        } else {
+          textSpan.textContent = 'Connect';
+          this.classList.remove('bg-[var(--bg-secondary)]', 'text-[var(--text-secondary)]', 'border-[var(--border-subtle)]');
+          this.classList.add('bg-[var(--accent)]', 'text-white', 'hover:bg-[var(--accent-dark)]', 'border-[var(--accent)]');
+        }
+      });
     });
+  });
+  document.querySelectorAll('.btn-follow-ajax').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const userId = this.dataset.user_id || this.dataset.userId;
+      if (!userId) return;
+      const textSpan = this.querySelector('.follow-text');
+      const isFollowing = textSpan.textContent === 'Following';
+      fetch(`/network/follow/${userId}/?ajax=1`).then(r => r.json()).then(data => {
+        textSpan.textContent = data.is_following ? 'Following' : 'Follow';
+      });
+    });
+  });
+});
 </script>
 {% endblock %}

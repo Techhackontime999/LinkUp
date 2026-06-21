@@ -36,8 +36,30 @@ ALLOWED_DOCUMENT_TYPES = {
     'application/pdf': ['.pdf'],
     'application/msword': ['.doc'],
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+    'application/vnd.ms-powerpoint': ['.ppt'],
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
     'text/plain': ['.txt'],
     'text/csv': ['.csv'],
+}
+
+ALLOWED_AUDIO_TYPES = {
+    'audio/mpeg': ['.mp3', '.mp2'],
+    'audio/wav': ['.wav'],
+    'audio/ogg': ['.ogg'],
+    'audio/flac': ['.flac'],
+    'audio/aac': ['.aac'],
+    'audio/x-ms-wma': ['.wma'],
+    'audio/webm': ['.webm'],
+}
+
+ALLOWED_VIDEO_TYPES = {
+    'video/mp4': ['.mp4'],
+    'video/x-msvideo': ['.avi'],
+    'video/quicktime': ['.mov'],
+    'video/x-matroska': ['.mkv'],
+    'video/webm': ['.webm'],
+    'video/x-ms-wmv': ['.wmv'],
+    'video/x-flv': ['.flv'],
 }
 
 ALLOWED_ARCHIVE_TYPES = {
@@ -46,10 +68,12 @@ ALLOWED_ARCHIVE_TYPES = {
     'application/x-7z-compressed': ['.7z'],
 }
 
-# Maximum file sizes (in bytes)
-MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5MB
-MAX_DOCUMENT_SIZE = 10 * 1024 * 1024  # 10MB
-MAX_ARCHIVE_SIZE = 50 * 1024 * 1024  # 50MB
+# Maximum file sizes (in bytes) — LinkedIn-inspired limits
+MAX_IMAGE_SIZE = 10 * 1024 * 1024       # 10MB  (LinkedIn: 5-8MB posts, 8-10MB profile)
+MAX_VIDEO_SIZE = 200 * 1024 * 1024      # 200MB (LinkedIn: 5GB enterprise — capped for practicality)
+MAX_DOCUMENT_SIZE = 100 * 1024 * 1024   # 100MB (LinkedIn: 100MB)
+MAX_AUDIO_SIZE = 50 * 1024 * 1024       # 50MB
+MAX_ARCHIVE_SIZE = 50 * 1024 * 1024     # 50MB
 
 # Dangerous file extensions that should never be allowed
 DANGEROUS_EXTENSIONS = {
@@ -223,6 +247,10 @@ class FileUploadValidator:
                 self._validate_image_content(file)
             elif detected_mime == 'application/pdf':
                 self._validate_pdf_content(file)
+            elif detected_mime and detected_mime.startswith('video/'):
+                self._validate_video_content(file)
+            elif detected_mime and detected_mime.startswith('audio/'):
+                self._validate_audio_content(file)
             
         except Exception as e:
             logger.error(f"Content validation error for file {file.name}: {str(e)}")
@@ -269,7 +297,50 @@ class FileUploadValidator:
         # Check PDF header
         if not header.startswith(b'%PDF-'):
             raise ValidationError("Invalid PDF file format.")
-    
+
+    def _validate_video_content(self, file):
+        """Basic video container header validation."""
+        file.seek(0)
+        header = file.read(16)
+        file.seek(0)
+
+        # Common video container signatures
+        valid = (
+            header[4:8] == b'ftyp'                      # MP4/M4V (ISO Base Media)
+            or header.startswith(b'\x1a\x45\xdf\xa3')   # WebM/MKV (Matroska)
+            or (header.startswith(b'RIFF') and header[8:12] == b'AVI ')  # AVI
+            or header.startswith(b'\x00\x00\x01\xba')    # MPEG-1/2
+            or header[0:3] in (b'\x00\x00\x01', b'\x00\x00\x00')        # MPEG video
+        )
+        if not valid:
+            ext = os.path.splitext(file.name)[1].lower()
+            if ext in ('.mp4', '.mov', '.avi', '.mkv', '.webm', '.wmv', '.flv'):
+                return  # Known extension — skip deep check
+            raise ValidationError("Invalid or unsupported video file format.")
+
+    def _validate_audio_content(self, file):
+        """Basic audio container header validation."""
+        file.seek(0)
+        header = file.read(12)
+        file.seek(0)
+
+        # Common audio container signatures
+        valid = (
+            header.startswith(b'ID3')                    # MP3 (ID3 tag)
+            or header[:4] == b'RIFF' and header[8:12] == b'WAVE'  # WAV
+            or header.startswith(b'OggS')                 # OGG/FLAC
+            or header.startswith(b'\xff\xfb')             # MP3 (no ID3)
+            or header.startswith(b'\xff\xf3')
+            or header.startswith(b'\xff\xf2')
+            or header[:4] == b'ftyp'                      # AAC/MP4 audio
+            or header.startswith(b'fLaC')                  # FLAC native
+        )
+        if not valid:
+            ext = os.path.splitext(file.name)[1].lower()
+            if ext in ('.mp3', '.wav', '.ogg', '.flac', '.aac', '.wma'):
+                return  # Known extension — skip deep check
+            raise ValidationError("Invalid or unsupported audio file format.")
+
     def _security_scan(self, file):
         """Perform security scanning on uploaded file."""
         file.seek(0)
@@ -319,11 +390,40 @@ class DocumentUploadValidator(FileUploadValidator):
 
 
 @deconstructible
+class VideoUploadValidator(FileUploadValidator):
+    """Specialized validator for video uploads."""
+
+    def __init__(self, max_size=MAX_VIDEO_SIZE):
+        super().__init__(
+            allowed_types=ALLOWED_VIDEO_TYPES,
+            max_size=max_size,
+            check_content=True
+        )
+
+
+@deconstructible
+class AudioUploadValidator(FileUploadValidator):
+    """Specialized validator for audio uploads."""
+
+    def __init__(self, max_size=MAX_AUDIO_SIZE):
+        super().__init__(
+            allowed_types=ALLOWED_AUDIO_TYPES,
+            max_size=max_size,
+            check_content=True
+        )
+
+
+@deconstructible
 class AttachmentUploadValidator(FileUploadValidator):
-    """Specialized validator for message attachments (images + documents)."""
+    """Specialized validator for message/feed attachments (images + documents + videos + audio)."""
     
-    def __init__(self, max_size=MAX_DOCUMENT_SIZE):
-        allowed_types = {**ALLOWED_IMAGE_TYPES, **ALLOWED_DOCUMENT_TYPES}
+    def __init__(self, max_size=MAX_VIDEO_SIZE):
+        allowed_types = {
+            **ALLOWED_IMAGE_TYPES,
+            **ALLOWED_DOCUMENT_TYPES,
+            **ALLOWED_VIDEO_TYPES,
+            **ALLOWED_AUDIO_TYPES,
+        }
         super().__init__(
             allowed_types=allowed_types,
             max_size=max_size,

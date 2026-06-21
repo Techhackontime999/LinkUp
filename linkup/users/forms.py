@@ -2,7 +2,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
-from .models import User, Profile, Experience, Education
+from .models import User, Profile, Experience, Education, SocialLink
 
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True, help_text="Required. Enter a valid email address.")
@@ -51,8 +51,9 @@ class UserUpdateForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs.update({
-                'class': 'form-input form-field-enhanced',
-                'data-validation': '{}' if field.required else '{"required": false}'
+                'class': 'input-premium',
+                'data-validation': '{}' if field.required else '{"required": false}',
+                'data-required': 'true' if field.required else 'false'
             })
     
     def clean_email(self):
@@ -64,20 +65,34 @@ class UserUpdateForm(forms.ModelForm):
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['headline', 'bio', 'location', 'avatar']
+        fields = ['headline', 'bio', 'location', 'avatar', 'website', 'linkedin', 'github', 'youtube', 'instagram', 'twitter']
         widgets = {
             'bio': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Tell us about yourself...'}),
             'headline': forms.TextInput(attrs={'placeholder': 'Your professional headline'}),
             'location': forms.TextInput(attrs={'placeholder': 'City, Country'}),
+            'website': forms.URLInput(attrs={'placeholder': 'https://yoursite.com'}),
+            'linkedin': forms.URLInput(attrs={'placeholder': 'https://linkedin.com/in/username'}),
+            'github': forms.URLInput(attrs={'placeholder': 'https://github.com/username'}),
+            'youtube': forms.URLInput(attrs={'placeholder': 'https://youtube.com/@channel'}),
+            'instagram': forms.URLInput(attrs={'placeholder': 'https://instagram.com/username'}),
+            'twitter': forms.URLInput(attrs={'placeholder': 'https://x.com/username'}),
         }
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
-            if field.widget.__class__.__name__ != 'ClearableFileInput':
+            if field.widget.__class__.__name__ == 'ClearableFileInput':
                 field.widget.attrs.update({
-                    'class': 'form-input form-field-enhanced',
-                    'data-validation': '{}' if field.required else '{"required": false}'
+                    'class': 'file-input-premium',
+                    'accept': 'image/*'
+                })
+            else:
+                widget_cls = field.widget.__class__.__name__
+                css_class = 'textarea-premium' if widget_cls == 'Textarea' else 'input-premium'
+                field.widget.attrs.update({
+                    'class': css_class,
+                    'data-validation': '{}' if field.required else '{"required": false}',
+                    'data-required': 'true' if field.required else 'false'
                 })
     
     def clean_headline(self):
@@ -102,13 +117,24 @@ class ExperienceForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
-            if field.widget.input_type != 'checkbox':
+            is_checkbox = getattr(field.widget, 'input_type', None) == 'checkbox'
+            is_textarea = isinstance(field.widget, forms.Textarea)
+            if is_checkbox:
                 field.widget.attrs.update({
-                    'class': 'form-input form-field-enhanced',
-                    'data-validation': '{}' if field.required else '{"required": false}'
+                    'class': 'toggle-checkbox',
+                    'role': 'switch'
                 })
-            if field.widget.input_type == 'textarea':
-                field.widget.attrs.update({'class': 'form-textarea form-field-enhanced'})
+            elif is_textarea:
+                field.widget.attrs.update({
+                    'class': 'textarea-premium',
+                    'data-autogrow': 'true'
+                })
+            else:
+                field.widget.attrs.update({
+                    'class': 'input-premium',
+                    'data-validation': '{}' if field.required else '{"required": false}',
+                    'data-required': 'true' if field.required else 'false'
+                })
     
     def clean(self):
         cleaned_data = super().clean()
@@ -140,13 +166,24 @@ class EducationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
-            if field.widget.input_type != 'checkbox':
+            is_checkbox = getattr(field.widget, 'input_type', None) == 'checkbox'
+            is_textarea = isinstance(field.widget, forms.Textarea)
+            if is_checkbox:
                 field.widget.attrs.update({
-                    'class': 'form-input form-field-enhanced',
-                    'data-validation': '{}' if field.required else '{"required": false}'
+                    'class': 'toggle-checkbox',
+                    'role': 'switch'
                 })
-            if field.widget.input_type == 'textarea':
-                field.widget.attrs.update({'class': 'form-textarea form-field-enhanced'})
+            elif is_textarea:
+                field.widget.attrs.update({
+                    'class': 'textarea-premium',
+                    'data-autogrow': 'true'
+                })
+            else:
+                field.widget.attrs.update({
+                    'class': 'input-premium',
+                    'data-validation': '{}' if field.required else '{"required": false}',
+                    'data-required': 'true' if field.required else 'false'
+                })
     
     def clean(self):
         cleaned_data = super().clean()
@@ -157,3 +194,22 @@ class EducationForm(forms.ModelForm):
             raise ValidationError("Start date cannot be after end date.")
         
         return cleaned_data
+
+class SocialLinkForm(forms.ModelForm):
+    class Meta:
+        model = SocialLink
+        fields = ['label', 'url', 'sort_order']
+        widgets = {
+            'label': forms.TextInput(attrs={'placeholder': 'e.g. LinkedIn, Portfolio, Blog'}),
+            'url': forms.URLInput(attrs={'placeholder': 'https://...'}),
+            'sort_order': forms.HiddenInput(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if not isinstance(field.widget, forms.HiddenInput):
+                field.widget.attrs.update({
+                    'class': 'input-premium',
+                    'data-required': 'true' if field.required else 'false'
+                })

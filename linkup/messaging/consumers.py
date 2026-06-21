@@ -1,4 +1,5 @@
 import json
+import os
 import time
 from datetime import datetime
 from channels.db import database_sync_to_async
@@ -125,20 +126,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
             # Check for missed messages and synchronize
             await self.synchronize_missed_messages()
             
-            # Send other user's status to this user (integrated approach)
-            other_presence = await self.get_user_presence(self.other_user)
-            status_message = {
-                'type': 'user_status',
-                'user_id': self.other_user.id,
-                'username': self.other_user.username,
-                'is_online': other_presence['is_online'],
-                'last_seen': other_presence['last_seen'],
-                'last_seen_display': other_presence['last_seen_display']
-            }
-            
-            # Use JSON serializer for safe transmission (our fixes)
-            serialized_status = self.json_serializer.safe_serialize(status_message)
-            await self.send(text_data=self.json_serializer.to_json_string(serialized_status))
+            if self.user.id != self.other_user.id:
+                # Send other user's status to this user (integrated approach)
+                other_presence = await self.get_user_presence(self.other_user)
+                status_message = {
+                    'type': 'user_status',
+                    'user_id': self.other_user.id,
+                    'username': self.other_user.username,
+                    'is_online': other_presence['is_online'],
+                    'last_seen': other_presence['last_seen'],
+                    'last_seen_display': other_presence['last_seen_display']
+                }
+                
+                # Use JSON serializer for safe transmission (our fixes)
+                serialized_status = self.json_serializer.safe_serialize(status_message)
+                await self.send(text_data=self.json_serializer.to_json_string(serialized_status))
             
         except Exception as e:
             # Catch any unexpected errors in connect
@@ -392,8 +394,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     await message_persistence_manager.update_message_status_atomic(
                         msg.id, 'sent', self.user.id
                     )
-                    # Create notification for the recipient
-                    await self.create_message_notification(msg)
+                    if self.user.id == self.other_user.id:
+                        # Self-chat: immediately mark as read
+                        await message_persistence_manager.update_message_status_atomic(
+                            msg.id, 'read', self.user.id
+                        )
+                    else:
+                        # Create notification for the recipient
+                        await self.create_message_notification(msg)
                 else:
                     # Broadcasting failed, initiate retry mechanism
                     logger.warning(f"Message {msg.id} broadcast failed, initiating retry")
@@ -517,9 +525,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """Send message to WebSocket with enhanced status tracking, automatic read receipts, and error handling"""
         try:
             message = event['message']
+            is_self_chat = self.user.id == self.other_user.id
 
-            # Mark as delivered if recipient is receiving it
-            if message['recipient'] == self.user.username and message.get('status') != 'delivered':
+            # Mark as delivered if recipient is receiving it (skip for self-chat)
+            if not is_self_chat and message['recipient'] == self.user.username and message.get('status') != 'delivered':
                 delivery_success = await message_persistence_manager.update_message_status_atomic(
                     message['id'], 'delivered', self.user.id
                 )
@@ -536,8 +545,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await retry_manager.retry_failed_message(message['id'], 'client_send_failed')
                 return
 
-            # Auto-generate read receipt if this is for the recipient and chat is active
-            if (message['recipient'] == self.user.username and
+            # Auto-generate read receipt if this is for the recipient and chat is active (skip for self-chat)
+            if not is_self_chat and (message['recipient'] == self.user.username and
                 message.get('type') == 'message' and
                 hasattr(self, 'auto_read_receipts') and
                 self.auto_read_receipts):
@@ -558,6 +567,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 error_type="message_processing_error",
                 error_details=str(e) if logger.isEnabledFor(logging.DEBUG) else None
             )
+
+    async def chat_message_deleted(self, event):
+        """Handle message deletion broadcast — tells clients to remove/update a message"""
+        try:
+            await self.send(text_data=json.dumps({
+                'type': 'message_deleted',
+                'message_id': event['message_id'],
+                'mode': event.get('mode', 'everyone'),
+                'deleted_at': event.get('deleted_at')
+            }))
+        except Exception as e:
+            logger.error(f"Error in chat_message_deleted handler: {e}")
 
     async def message_status_update(self, event):
         """Send message status update to WebSocket"""
@@ -656,21 +677,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def create_message_payload(self, msg, retry_id=None):
         """Create optimized message payload for real-time delivery"""
+        is_self_chat = msg.sender_id == msg.recipient_id
         return {
             'type': 'message',
             'id': msg.id,
             'sender': msg.sender.username,
             'recipient': msg.recipient.username,
             'content': msg.content,
-            'status': msg.status,
+            'attachment_url': msg.attachment.url if msg.attachment else None,
+            'attachment_name': os.path.basename(msg.attachment.name) if msg.attachment else None,
+            'status': 'read' if is_self_chat else msg.status,
             'client_id': msg.client_id,
             'created_at': msg.created_at.isoformat(),
             'sent_at': msg.sent_at.isoformat() if msg.sent_at else None,
-            'delivered_at': msg.delivered_at.isoformat() if msg.delivered_at else None,
-            'read_at': msg.read_at.isoformat() if msg.read_at else None,
-            'is_read': msg.is_read,
+            'delivered_at': timezone.now().isoformat() if is_self_chat else (msg.delivered_at.isoformat() if msg.delivered_at else None),
+            'read_at': timezone.now().isoformat() if is_self_chat else (msg.read_at.isoformat() if msg.read_at else None),
+            'is_read': True if is_self_chat else msg.is_read,
             'retry_id': retry_id,
-            'status_icon': msg.get_status_icon()
+            'status_icon': 'read' if is_self_chat else msg.get_status_icon()
         }
 
     @database_sync_to_async

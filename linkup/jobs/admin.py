@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.text import Truncator
 from django.db.models import Q
-from .models import Job, Application
+from .models import Job, Application, JobAlert
 import sys
 import os
 
@@ -200,3 +200,17 @@ class ApplicationAdmin(admin.ModelAdmin, ExportCSVMixin):
 # Register all models with custom admin site
 admin_site.register(Job, JobAdmin)
 admin_site.register(Application, ApplicationAdmin)
+
+
+class JobAlertAdmin(admin.ModelAdmin):
+    list_display = ('user', 'keywords', 'location', 'job_type', 'frequency', 'is_active', 'created_at')
+    list_filter = ('is_active', 'frequency', 'job_type', 'workplace_type')
+    search_fields = ('user__username', 'user__email', 'keywords', 'location')
+    date_hierarchy = 'created_at'
+    list_per_page = 100
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related('user')
+
+admin_site.register(JobAlert, JobAlertAdmin)

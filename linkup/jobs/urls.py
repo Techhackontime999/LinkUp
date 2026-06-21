@@ -15,4 +15,6 @@ urlpatterns = [
     path('my-applications/', views.my_applications, name='my_applications'),
     path('saved-jobs/', views.saved_jobs, name='saved_jobs'),
     path('alerts/', views.job_alerts, name='job_alerts'),
+    path('alerts/<int:pk>/delete/', views.delete_job_alert, name='delete_job_alert'),
+    path('alerts/<int:pk>/toggle/', views.toggle_job_alert, name='toggle_job_alert'),
 ]

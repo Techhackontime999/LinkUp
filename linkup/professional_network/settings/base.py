@@ -51,7 +51,6 @@ CKEDITOR_CONFIGS = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add this line
     'core.middleware.SecurityHeadersMiddleware',
     'core.performance.PerformanceMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

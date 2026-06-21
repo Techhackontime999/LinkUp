@@ -2,39 +2,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Access Denied - LinkUp</title>
-    {% tailwind_css %}
-    <link rel="stylesheet" href="{% static 'css/custom_styles.css' %}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Denied - LinkUp</title>
+  {% tailwind_css %}
+  <link rel="stylesheet" href="{% static 'css/custom_styles.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: light dark; }
+    body { background: var(--bg-primary); color: var(--text-primary); font-family: Inter, system-ui, -apple-system, sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; padding: 1rem; }
+  </style>
 </head>
-<body class="bg-gray-100 font-sans">
-    <div class="min-h-screen flex items-center justify-center px-4">
-        <div class="max-w-md w-full text-center">
-            <!-- Error Icon -->
-            <div class="mb-8">
-                <svg class="mx-auto h-24 w-24 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-            </div>
-            
-            <!-- Error Message -->
-            <h1 class="text-6xl font-bold text-gray-800 mb-4">403</h1>
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Access Denied</h2>
-            <p class="text-gray-600 mb-8">
-                You don't have permission to access this page. If you believe this is an error, please contact support.
-            </p>
-            
-            <!-- Action Buttons -->
-            <div class="space-y-3">
-                <a href="/" class="inline-block w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-md">
-                    Go to Homepage
-                </a>
-                <button onclick="history.back()" class="inline-block w-full px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-all duration-200">
-                    Go Back
-                </button>
-            </div>
-        </div>
+<body>
+  <div class="auth-card" style="max-width:440px;text-align:center">
+    <div class="w-16 h-16 rounded-xl bg-amber-500/10 flex items-center justify-center mx-auto mb-5">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.5"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
     </div>
+    <h1 style="font-size:4rem;font-weight:800;color:var(--text-primary);margin:0 0 0.25rem">403</h1>
+    <h2 style="font-size:1.25rem;font-weight:600;color:var(--text-primary);margin:0 0 0.5rem">Access Denied</h2>
+    <p style="color:var(--text-secondary);margin-bottom:2rem;font-size:0.9rem;line-height:1.6">You don't have permission to access this page. If you believe this is an error, please contact support.</p>
+    <div style="display:flex;flex-direction:column;gap:0.75rem">
+      <a href="/" class="btn-primary" style="text-align:center;text-decoration:none">Go to Homepage</a>
+      <button onclick="history.back()" class="btn-secondary" style="text-align:center">Go Back</button>
+    </div>
+  </div>
 </body>
 </html>

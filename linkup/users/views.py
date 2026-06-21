@@ -3,8 +3,9 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
-from .forms import CustomUserCreationForm, UserUpdateForm, ProfileUpdateForm
-from .models import User
+from django.forms import inlineformset_factory
+from .forms import CustomUserCreationForm, UserUpdateForm, ProfileUpdateForm, ExperienceForm, EducationForm, SocialLinkForm
+from .models import User, Experience, Education, SocialLink
 
 
 def register(request):
@@ -31,18 +32,55 @@ def register(request):
 
 @login_required
 def profile(request):
+    ExperienceFormSet = inlineformset_factory(
+        User, Experience,
+        form=ExperienceForm,
+        extra=1, can_delete=True,
+        fields=['title', 'company', 'location', 'start_date', 'end_date', 'is_current', 'description']
+    )
+    EducationFormSet = inlineformset_factory(
+        User, Education,
+        form=EducationForm,
+        extra=1, can_delete=True,
+        fields=['school', 'degree', 'field_of_study', 'start_date', 'end_date', 'description']
+    )
+    SocialLinkFormSet = inlineformset_factory(
+        User, SocialLink,
+        form=SocialLinkForm,
+        extra=1, can_delete=True,
+        fields=['label', 'url', 'sort_order']
+    )
+
     if request.method == 'POST':
         u_form = UserUpdateForm(request.POST, instance=request.user)
         p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
-        if u_form.is_valid() and p_form.is_valid():
+        exp_formset = ExperienceFormSet(request.POST, request.FILES, instance=request.user, prefix='exp')
+        edu_formset = EducationFormSet(request.POST, request.FILES, instance=request.user, prefix='edu')
+        social_formset = SocialLinkFormSet(request.POST, request.FILES, instance=request.user, prefix='social')
+        if u_form.is_valid() and p_form.is_valid() and exp_formset.is_valid() and edu_formset.is_valid() and social_formset.is_valid():
             u_form.save()
             p_form.save()
+            exp_formset.save()
+            edu_formset.save()
+            social_formset.save()
+            messages.success(request, 'Profile saved successfully!')
             return redirect('profile')
+        else:
+            messages.error(request, 'Please fix the errors below.')
     else:
         u_form = UserUpdateForm(instance=request.user)
         p_form = ProfileUpdateForm(instance=request.user.profile)
+        exp_formset = ExperienceFormSet(instance=request.user, prefix='exp')
+        edu_formset = EducationFormSet(instance=request.user, prefix='edu')
+        social_formset = SocialLinkFormSet(instance=request.user, prefix='social')
 
-    return render(request, 'users/profile.html', {'u_form': u_form, 'p_form': p_form})
+    return render(request, 'users/profile.html', {
+        'u_form': u_form,
+        'p_form': p_form,
+        'exp_formset': exp_formset,
+        'edu_formset': edu_formset,
+        'social_formset': social_formset,
+    })
 
 @login_required
 def public_profile(request, username):
@@ -85,12 +123,33 @@ def public_profile(request, username):
     connected_users_ids = [c.friend.id for c in Connection.objects.filter(user=request.user)] + [c.user.id for c in Connection.objects.filter(friend=request.user)] + [request.user.id]
     suggestions = UserModel.objects.exclude(id__in=connected_users_ids)[:5]
 
+    # Connection status between viewer and profile_user
+    connection_status = 'none'
+    if request.user.is_authenticated and request.user != profile_user:
+        conn = Connection.objects.filter(
+            (Q(user=request.user) & Q(friend=profile_user)) |
+            (Q(user=profile_user) & Q(friend=request.user))
+        ).first()
+        if conn:
+            connection_status = conn.status
+
+    # Profile strength percentage
+    fields_filled = sum([
+        bool(profile_user.profile.bio),
+        bool(profile_user.profile.headline),
+        profile_user.experiences.count() > 0,
+        profile_user.educations.count() > 0,
+    ])
+    profile_strength = fields_filled * 25
+
     return render(request, 'users/public_profile.html', {
         'profile_user': profile_user,
         'mutual_connections': mutual_connections,
         'follower_users': follower_users,
         'profile_connections': profile_connections,
         'suggestions': suggestions,
+        'profile_strength': profile_strength,
+        'connection_status': connection_status,
     })
 
 

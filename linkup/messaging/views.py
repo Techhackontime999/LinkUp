@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseServerError
@@ -7,6 +8,7 @@ from django.contrib.auth import get_user_model
 from django.views.decorators.http import require_GET, require_POST
 from django.core.exceptions import ValidationError
 from django.db import transaction, IntegrityError
+from django.db.models import Q, F, Case, When
 from django.utils import timezone
 from django.conf import settings
 from .models import Message, UserStatus, Notification, QueuedMessage
@@ -95,31 +97,33 @@ def chat_view(request, username):
     try:
         target = get_object_or_404(User, username=username)
         
-        if request.user == target:
-            logger.warning(f"User {request.user.id} attempted to chat with themselves")
-            return redirect('profile')
+        is_self = request.user == target
         
         # Get user status with error handling
         is_online = False
         last_seen = None
         
-        try:
-            status = UserStatus.objects.get(user=target)
-            is_online = status.is_online
-            last_seen = status.last_seen
-        except UserStatus.DoesNotExist:
-            logger.info(f"UserStatus not found for user {target.id}, creating default")
+        if not is_self:
             try:
-                UserStatus.objects.create(user=target, is_online=False)
-            except IntegrityError:
-                pass  # Status was created by another request
-        except Exception as e:
-            logger.error(f"Error fetching user status for {target.id}: {e}")
+                status = UserStatus.objects.get(user=target)
+                is_online = status.is_online
+                last_seen = status.last_seen
+            except UserStatus.DoesNotExist:
+                logger.info(f"UserStatus not found for user {target.id}, creating default")
+                try:
+                    UserStatus.objects.create(user=target, is_online=False)
+                except IntegrityError:
+                    pass
+            except Exception as e:
+                logger.error(f"Error fetching user status for {target.id}: {e}")
+        else:
+            is_online = True
         
         return render(request, 'messaging/chat.html', {
             'target': target,
             'is_online': is_online,
-            'last_seen': last_seen
+            'last_seen': last_seen,
+            'is_self_chat': is_self
         })
     
     except User.DoesNotExist:
@@ -139,11 +143,6 @@ def fetch_history(request, username):
     try:
         target = get_object_or_404(User, username=username)
         
-        if request.user == target:
-            return JsonResponse({
-                'error': "Cannot fetch conversation with yourself"
-            }, status=400)
-
         # Get pagination parameters with enhanced defaults
         page = int(request.GET.get('page', 1))
         page_size = int(request.GET.get('page_size', 50))  # Default 50 messages for initial load
@@ -163,7 +162,8 @@ def fetch_history(request, username):
                 user2_id=target.id,
                 limit=page_size,
                 before_id=int(before_id) if before_id else None,
-                include_metadata=include_metadata
+                include_metadata=include_metadata,
+                current_user_id=request.user.id
             )
             
             messages = conversation_data.get('messages', [])
@@ -181,6 +181,13 @@ def fetch_history(request, username):
                 (Q(sender=target) & Q(recipient=request.user))
             )
             base_query = QueryOptimizer.optimize_message_queries(base_query)
+            
+            # Exclude messages deleted for the current user
+            base_query = base_query.exclude(
+                Q(sender=request.user) & Q(sender_deleted=True)
+            ).exclude(
+                Q(recipient=request.user) & Q(recipient_deleted=True)
+            )
             
             # If before_id is provided, get messages older than that message
             if before_id:
@@ -215,11 +222,15 @@ def fetch_history(request, username):
             messages = []
             for m in msgs:
                 try:
+                    deleted_everyone = m.is_deleted
                     message_data = {
                         'id': m.id,
                         'sender': m.sender.username,
                         'recipient': m.recipient.username,
-                        'content': m.content,
+                        'content': '[This message has been deleted]' if deleted_everyone else m.content,
+                        'attachment_url': None if deleted_everyone else (m.attachment.url if m.attachment else None),
+                        'attachment_name': None if deleted_everyone else (os.path.basename(m.attachment.name) if m.attachment else None),
+                        'is_deleted': deleted_everyone,
                         'status': m.status,
                         'client_id': m.client_id,
                         'created_at': m.created_at.isoformat(),
@@ -241,7 +252,7 @@ def fetch_history(request, username):
         try:
             unread_message_ids = [
                 msg['id'] for msg in messages 
-                if msg['recipient'] == request.user.username and not msg['is_read']
+                if (msg.get('recipient') or msg.get('recipient_username')) == request.user.username and not msg['is_read']
             ]
             
             if unread_message_ids:
@@ -301,11 +312,6 @@ def send_message_fallback(request, username):
     try:
         target = get_object_or_404(User, username=username)
         
-        if request.user == target:
-            return JsonResponse({
-                'error': "Cannot message yourself"
-            }, status=400)
-
         # Parse message content
         try:
             if request.content_type == 'application/json':
@@ -343,6 +349,8 @@ def send_message_fallback(request, username):
                         'sender': existing_message.sender.username,
                         'recipient': existing_message.recipient.username,
                         'content': existing_message.content,
+                        'attachment_url': existing_message.attachment.url if existing_message.attachment else None,
+                        'attachment_name': os.path.basename(existing_message.attachment.name) if existing_message.attachment else None,
                         'status': existing_message.status,
                         'client_id': existing_message.client_id,
                         'created_at': existing_message.created_at.isoformat(),
@@ -381,6 +389,8 @@ def send_message_fallback(request, username):
                             'sender': m.sender.username,
                             'recipient': m.recipient.username,
                             'content': m.content,
+                            'attachment_url': m.attachment.url if m.attachment else None,
+                            'attachment_name': os.path.basename(m.attachment.name) if m.attachment else None,
                             'status': m.status,
                             'client_id': m.client_id,
                             'created_at': m.created_at.isoformat(),
@@ -407,6 +417,8 @@ def send_message_fallback(request, username):
                     'sender': m.sender.username,
                     'recipient': m.recipient.username,
                     'content': m.content,
+                    'attachment_url': m.attachment.url if m.attachment else None,
+                    'attachment_name': os.path.basename(m.attachment.name) if m.attachment else None,
                     'status': m.status,
                     'client_id': m.client_id,
                     'created_at': m.created_at.isoformat(),
@@ -539,11 +551,6 @@ def load_older_messages(request, username):
     """Enhanced load older messages using persistence manager for improved performance"""
     try:
         target = get_object_or_404(User, username=username)
-        
-        if request.user == target:
-            return JsonResponse({
-                'error': "Cannot fetch conversation with yourself"
-            }, status=400)
         
         # Get parameters with enhanced validation
         before_id = request.GET.get('before_id')
@@ -691,11 +698,6 @@ def synchronize_conversation(request, username):
     try:
         target = get_object_or_404(User, username=username)
         
-        if request.user == target:
-            return JsonResponse({
-                'error': "Cannot synchronize conversation with yourself"
-            }, status=400)
-        
         # Get last sync time parameter
         last_sync_param = request.GET.get('last_sync_time')
         last_sync_time = None
@@ -775,11 +777,6 @@ def queue_message(request, username):
     try:
         target = get_object_or_404(User, username=username)
         
-        if request.user == target:
-            return JsonResponse({
-                'error': "Cannot message yourself"
-            }, status=400)
-
         # Parse message content
         try:
             if request.content_type == 'application/json':
@@ -814,13 +811,14 @@ def queue_message(request, username):
                 ).first()
                 
                 if existing_message:
-                    # Return existing message instead of creating duplicate
                     logger.info(f"Returning existing message with client_id {client_id}")
                     return JsonResponse({
                         'id': existing_message.id,
                         'sender': request.user.username,
                         'recipient': target.username,
                         'content': existing_message.content,
+                        'attachment_url': existing_message.attachment.url if existing_message.attachment else None,
+                        'attachment_name': os.path.basename(existing_message.attachment.name) if existing_message.attachment else None,
                         'status': existing_message.status,
                         'client_id': existing_message.client_id,
                         'created_at': existing_message.created_at.isoformat(),
@@ -849,15 +847,17 @@ def queue_message(request, username):
                 )
                 
                 response_data = {
-                    'id': message.id,  # Use real message ID
+                    'id': message.id,
                     'sender': request.user.username,
                     'recipient': target.username,
                     'content': text,
+                    'attachment_url': message.attachment.url if message.attachment else None,
+                    'attachment_name': os.path.basename(message.attachment.name) if message.attachment else None,
                     'status': message.status,
                     'client_id': message.client_id,
                     'created_at': message.created_at.isoformat(),
                     'sent_at': message.sent_at.isoformat() if message.sent_at else None,
-                    'queued': False,  # Not queued anymore, it's a real message
+                    'queued': False,
                     'queue_id': queued_msg.id
                 }
                 
@@ -876,6 +876,256 @@ def queue_message(request, username):
     except Exception as e:
         logger.error(f"Unexpected error in queue_message: {e}")
         return JsonResponse({'error': 'Unable to queue message'}, status=500)
+
+
+@login_required
+@require_POST
+def upload_attachment(request, username):
+    """Upload a file attachment and create a message with it"""
+    try:
+        target = get_object_or_404(User, username=username)
+
+        file = request.FILES.get('file')
+        if not file:
+            return JsonResponse({'error': 'No file provided'}, status=400)
+
+        from core.validators import AttachmentUploadValidator
+        try:
+            AttachmentUploadValidator()(file)
+        except ValidationError as e:
+            return JsonResponse({'error': '; '.join(e.messages)}, status=400)
+
+        text = request.POST.get('message', '').strip()
+        client_id = request.POST.get('client_id', '')
+
+        try:
+            import uuid
+            with transaction.atomic():
+                if not client_id:
+                    client_id = f"file_{int(timezone.now().timestamp() * 1000)}_{uuid.uuid4().hex[:8]}"
+
+                message = Message.objects.create(
+                    sender=request.user,
+                    recipient=target,
+                    content=text or '',
+                    attachment=file,
+                    status='sent',
+                    client_id=client_id,
+                    sent_at=timezone.now()
+                )
+
+                try:
+                    from channels.layers import get_channel_layer
+                    from asgiref.sync import async_to_sync
+
+                    channel_layer = get_channel_layer()
+                    if channel_layer:
+                        a, b = sorted([request.user.id, target.id])
+                        room_group_name = f'chat_{a}_{b}'
+
+                        payload = {
+                            'type': 'message',
+                            'id': message.id,
+                            'sender': message.sender.username,
+                            'recipient': message.recipient.username,
+                            'content': message.content,
+                            'attachment_url': message.attachment.url if message.attachment else None,
+                            'attachment_name': os.path.basename(message.attachment.name) if message.attachment else None,
+                            'status': message.status,
+                            'client_id': message.client_id,
+                            'created_at': message.created_at.isoformat(),
+                            'sent_at': message.sent_at.isoformat() if message.sent_at else None,
+                        }
+
+                        async_to_sync(channel_layer.group_send)(room_group_name, {
+                            'type': 'chat_message',
+                            'message': payload
+                        })
+
+                except Exception as ws_error:
+                    logger.warning(f"Failed to broadcast attachment message via WebSocket: {ws_error}")
+
+                return JsonResponse({
+                    'id': message.id,
+                    'sender': request.user.username,
+                    'recipient': target.username,
+                    'content': message.content,
+                    'attachment_url': message.attachment.url if message.attachment else None,
+                    'attachment_name': os.path.basename(message.attachment.name) if message.attachment else None,
+                    'status': message.status,
+                    'client_id': message.client_id,
+                    'created_at': message.created_at.isoformat(),
+                    'sent_at': message.sent_at.isoformat() if message.sent_at else None,
+                })
+
+        except ValidationError as e:
+            return JsonResponse({'error': str(e)}, status=400)
+        except IntegrityError as e:
+            return JsonResponse({'error': 'Unable to save attachment'}, status=500)
+
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'Recipient not found'}, status=404)
+    except Exception as e:
+        logger.error(f"Unexpected error in upload_attachment: {e}")
+        return JsonResponse({'error': 'Unable to upload attachment'}, status=500)
+
+
+@login_required
+@require_POST
+def delete_message(request, message_id):
+    """Delete a single message: 'me' mode or 'everyone' mode (WhatsApp-like)"""
+    try:
+        message = get_object_or_404(Message, id=message_id)
+        body = json.loads(request.body)
+        mode = body.get('mode', 'me')  # 'me' or 'everyone'
+
+        if request.user != message.sender and request.user != message.recipient:
+            return JsonResponse({'error': 'Not authorized to delete this message'}, status=403)
+
+        with transaction.atomic():
+            if mode == 'everyone':
+                now = timezone.now()
+                message.is_deleted = True
+                message.content = ''
+                if message.attachment:
+                    message.attachment.delete(save=False)
+                message.deleted_at = now
+                message.save()
+
+                try:
+                    from channels.layers import get_channel_layer
+                    from asgiref.sync import async_to_sync
+                    channel_layer = get_channel_layer()
+                    room = f"chat_{min(message.sender_id, message.recipient_id)}_{max(message.sender_id, message.recipient_id)}"
+                    async_to_sync(channel_layer.group_send)(
+                        room,
+                        {
+                            'type': 'chat.message_deleted',
+                            'message_id': message.id,
+                            'mode': 'everyone',
+                            'deleted_at': now.isoformat(),
+                        }
+                    )
+                except Exception as e:
+                    logger.error(f"Error broadcasting delete event: {e}")
+
+            else:  # 'me' mode
+                if request.user == message.sender:
+                    message.sender_deleted = True
+                else:
+                    message.recipient_deleted = True
+                message.save()
+
+        return JsonResponse({'success': True, 'mode': mode, 'message_id': message.id})
+
+    except Message.DoesNotExist:
+        return JsonResponse({'error': 'Message not found'}, status=404)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        logger.error(f"Error deleting message {message_id}: {e}")
+        return JsonResponse({'error': 'Unable to delete message'}, status=500)
+
+
+@login_required
+@require_POST
+def delete_messages_bulk(request):
+    """Delete multiple messages at once"""
+    try:
+        body = json.loads(request.body)
+        message_ids = body.get('message_ids', [])
+        mode = body.get('mode', 'me')
+
+        if not message_ids:
+            return JsonResponse({'error': 'No message IDs provided'}, status=400)
+
+        messages = Message.objects.filter(id__in=message_ids)
+        now = timezone.now()
+        deleted_ids = []
+
+        with transaction.atomic():
+            for message in messages:
+                if request.user != message.sender and request.user != message.recipient:
+                    continue
+
+                if mode == 'everyone':
+                    message.is_deleted = True
+                    message.content = ''
+                    if message.attachment:
+                        message.attachment.delete(save=False)
+                    message.deleted_at = now
+                    message.save()
+                else:
+                    if request.user == message.sender:
+                        message.sender_deleted = True
+                    else:
+                        message.recipient_deleted = True
+                    message.save()
+
+                deleted_ids.append(message.id)
+
+        if deleted_ids and mode == 'everyone':
+            try:
+                from channels.layers import get_channel_layer
+                from asgiref.sync import async_to_sync
+                channel_layer = get_channel_layer()
+                for message in messages.filter(id__in=deleted_ids):
+                    room = f"chat_{min(message.sender_id, message.recipient_id)}_{max(message.sender_id, message.recipient_id)}"
+                    async_to_sync(channel_layer.group_send)(
+                        room,
+                        {
+                            'type': 'chat.message_deleted',
+                            'message_id': message.id,
+                            'mode': 'everyone',
+                            'deleted_at': now.isoformat(),
+                        }
+                    )
+            except Exception as e:
+                logger.error(f"Error broadcasting bulk delete: {e}")
+
+        return JsonResponse({'success': True, 'deleted_ids': deleted_ids, 'count': len(deleted_ids)})
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        logger.error(f"Error in bulk delete: {e}")
+        return JsonResponse({'error': 'Unable to delete messages'}, status=500)
+
+
+@login_required
+@require_POST
+def clear_chat(request, username):
+    """Clear entire conversation (delete for me)"""
+    try:
+        target = get_object_or_404(User, username=username)
+
+        now = timezone.now()
+
+        with transaction.atomic():
+            # Mark all messages in the conversation as deleted for the current user
+            updated = Message.objects.filter(
+                (Q(sender=request.user) & Q(recipient=target)) |
+                (Q(sender=target) & Q(recipient=request.user))
+            ).filter(
+                Q(sender_deleted=False) | Q(recipient_deleted=False)
+            ).update(
+                sender_deleted=Case(
+                    When(sender=request.user, then=True),
+                    default=F('sender_deleted')
+                ),
+                recipient_deleted=Case(
+                    When(recipient=request.user, then=True),
+                    default=F('recipient_deleted')
+                ),
+            )
+
+        return JsonResponse({'success': True, 'cleared_count': updated})
+
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    except Exception as e:
+        logger.error(f"Error clearing chat with {username}: {e}")
+        return JsonResponse({'error': 'Unable to clear chat'}, status=500)
 
 
 @login_required
@@ -922,27 +1172,43 @@ def notifications_list(request):
         notification_type = request.GET.get('type')
         unread_only = request.GET.get('unread_only', '').lower() == 'true'
         
-        notifications = notification_service.get_notifications(
-            user=request.user,
-            limit=limit,
-            offset=offset,
-            notification_type=notification_type,
-            unread_only=unread_only
-        )
-        
         total_unread = notification_service.get_unread_count(request.user)
         
-        return JsonResponse({
-            'notifications': notifications,
+        # If AJAX request (has limit param), return JSON with serialized dicts
+        if 'limit' in request.GET or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            notifications = notification_service.get_notifications(
+                user=request.user, limit=limit, offset=offset,
+                notification_type=notification_type, unread_only=unread_only,
+            )
+            return JsonResponse({
+                'notifications': notifications,
+                'total_unread': total_unread,
+                'limit': limit,
+                'offset': offset,
+                'has_more': len(notifications) == limit,
+            })
+        
+        # For regular page visits, render with model instances (for template filters like timesince)
+        notif_query = Notification.objects.filter(recipient=request.user)
+        if notification_type:
+            notif_query = notif_query.filter(notification_type=notification_type)
+        if unread_only:
+            notif_query = notif_query.filter(is_read=False)
+        notif_instances = notif_query.select_related('sender').order_by('-created_at')[:limit]
+        return render(request, 'messaging/notifications_list.html', {
+            'notifications': notif_instances,
             'total_unread': total_unread,
-            'limit': limit,
-            'offset': offset,
-            'has_more': len(notifications) == limit  # Indicates if there might be more
         })
     
     except Exception as e:
         logger.error(f"Error getting notifications list: {e}")
-        return JsonResponse({'error': 'Unable to fetch notifications'}, status=500)
+        if 'limit' in request.GET or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'Unable to fetch notifications'}, status=500)
+        return render(request, 'messaging/notifications_list.html', {
+            'notifications': [],
+            'total_unread': 0,
+            'error': str(e),
+        }, status=500)
 
 
 @login_required

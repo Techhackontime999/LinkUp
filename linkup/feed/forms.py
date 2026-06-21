@@ -7,13 +7,13 @@ class PostForm(forms.ModelForm):
         fields = ['content', 'image']
         widgets = {
             'content': forms.Textarea(attrs={
-                'class': 'form-textarea form-field-enhanced',
+                'class': 'textarea-premium',
                 'rows': 4,
-                'placeholder': 'What\'s on your mind? Share your thoughts with your professional network...',
-                'data-validation': '{"minLength": 10, "maxLength": 1000}'
+                'placeholder': 'Share your thoughts with your professional network...',
+                'data-autogrow': 'true'
             }),
             'image': forms.FileInput(attrs={
-                'class': 'file-input file-input-bordered w-full max-w-xs form-field-enhanced',
+                'class': 'file-input-premium',
                 'accept': 'image/*'
             }),
         }
@@ -30,10 +30,11 @@ class CommentForm(forms.ModelForm):
         fields = ['content']
         widgets = {
             'content': forms.Textarea(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none',
+                'class': 'input-premium',
                 'rows': 2,
                 'placeholder': 'Write a comment...',
-                'maxlength': '500'
+                'maxlength': '500',
+                'style': 'min-height:40px;resize:none'
             }),
         }
     

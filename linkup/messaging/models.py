@@ -42,6 +42,12 @@ class Message(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    # Deletion fields (WhatsApp-like)
+    is_deleted = models.BooleanField(default=False, help_text="Deleted for everyone — content/attachment cleared")
+    sender_deleted = models.BooleanField(default=False, help_text="Sender deleted this message for themselves")
+    recipient_deleted = models.BooleanField(default=False, help_text="Recipient deleted this message for themselves")
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
     # New timestamp fields
     sent_at = models.DateTimeField(null=True, blank=True)
     failed_at = models.DateTimeField(null=True, blank=True)

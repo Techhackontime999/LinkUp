@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6 pb-24 lg:pb-8">
+  <div class="flex items-center justify-between scroll-reveal">
+    <div>
+      <h1 class="text-2xl font-extrabold tracking-tight text-[var(--text-primary)]">Notifications</h1>
+      <p class="text-sm text-[var(--text-secondary)] mt-0.5">
+        {% if total_unread > 0 %}
+        <span class="inline-flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-[var(--accent)]"></span>
+          {{ total_unread }} unread
+        </span>
+        {% else %}
+        All caught up
+        {% endif %}
+      </p>
+    </div>
+    <button id="page-mark-all-read" class="btn-ghost text-sm px-3 py-1.5" {% if not notifications %}disabled{% endif %}>
+      Mark all read
+    </button>
+  </div>
+
+  {% if error %}
+  <div class="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-sm text-red-600 dark:text-red-400">
+    {{ error }}
+  </div>
+  {% endif %}
+
+  <div class="double-bezel scroll-reveal">
+    <div class="bezel-outer">
+      <div class="bezel-inner p-0 divide-y divide-[var(--border-subtle)]">
+        {% if notifications %}
+          {% for notif in notifications %}
+          <div class="notification-item flex items-start gap-3 p-4 hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer {% if not notif.is_read %}bg-[var(--accent)]/5{% endif %}" data-notification-id="{{ notif.id }}">
+            <div class="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center text-white text-sm font-bold" style="background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal))">
+              {% if notif.sender %}{{ notif.sender.username|first|upper }}{% else %}S{% endif %}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-2">
+                <p class="text-sm font-medium text-[var(--text-primary)] truncate">{{ notif.title }}</p>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                  {% if notif.priority == 'urgent' %}<span class="w-2 h-2 rounded-full" style="background:#ef4444"></span>{% endif %}
+                  <span class="text-xs text-[var(--text-muted)] whitespace-nowrap">{{ notif.created_at|timesince }} ago</span>
+                </div>
+              </div>
+              <p class="text-sm text-[var(--text-secondary)] mt-0.5 line-clamp-2">{{ notif.message }}</p>
+              {% if not notif.is_read %}
+              <button class="mark-read-btn text-xs font-medium mt-1.5" style="color:var(--accent)">Mark as read</button>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="py-16 text-center">
+            <div class="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center" style="background:var(--bg-secondary);color:var(--text-muted);margin-bottom:1rem">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            </div>
+            <p class="text-[var(--text-muted)] font-medium">No notifications yet</p>
+            <p class="text-sm text-[var(--text-muted)] mt-1">We'll notify you when something arrives.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const csrf = '{{ csrf_token }}';
+
+  document.querySelectorAll('.mark-read-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const item = this.closest('.notification-item');
+      const id = item.dataset.notificationId;
+      fetch(`/messages/notifications/${id}/read/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrf, 'Content-Type': 'application/json'}
+      }).then(r => r.json()).then(data => {
+        if (data.success) {
+          item.classList.remove('bg-[var(--accent)]/5');
+          this.remove();
+        }
+      });
+    });
+  });
+
+  document.getElementById('page-mark-all-read')?.addEventListener('click', function() {
+    fetch('/messages/notifications/mark-all-read/', {
+      method: 'POST',
+      headers: {'X-CSRFToken': csrf, 'Content-Type': 'application/json'}
+    }).then(r => r.json()).then(data => {
+      if (data.success) {
+        document.querySelectorAll('.notification-item').forEach(item => {
+          item.classList.remove('bg-[var(--accent)]/5');
+          const markBtn = item.querySelector('.mark-read-btn');
+          if (markBtn) markBtn.remove();
+        });
+        this.disabled = true;
+      }
+    });
+  });
+});
+</script>
+{% endblock %}

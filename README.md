@@ -7,7 +7,7 @@
 [![Django](https://img.shields.io/badge/Django-5.2.10-green.svg)](https://djangoproject.com)
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.2.0-success.svg)](https://github.com/Techhackontime999/LinkUp/releases)
+[![Version](https://img.shields.io/badge/Version-2.0.0-success.svg)](https://github.com/Techhackontime999/LinkUp/releases)
 [![Status](https://img.shields.io/badge/Status-Released-brightgreen.svg)](https://github.com/Techhackontime999/LinkUp/releases)
 [![GitHub stars](https://img.shields.io/github/stars/Techhackontime999/LinkUp?style=social)](https://github.com/Techhackontime999/LinkUp/stargazers)
 
@@ -52,11 +52,11 @@
 - Public profile pages
 
 ### 💼 Jobs
-- Browse and search job listings
+- Browse and search job listings with type, workplace & location filters
 - Post job openings (recruiters/companies)
 - Apply to jobs directly through the platform
 - Track and manage applications
-- Saved jobs and job alerts
+- Saved jobs and custom job alerts (instant/daily/weekly)
 
 ### 💬 Real-time Messaging
 - Instant WebSocket-powered chat
@@ -80,7 +80,9 @@
 ### 🎨 UI/UX
 - Fully responsive, mobile-first design
 - Modern glassmorphism-inspired interface (Tailwind CSS)
-- Smooth animations and skeleton loading states
+- Interactive 3D neural-aurora background (Three.js)
+- Smooth animations, page loader, and skeleton loading states
+- Dark/light theme with system preference detection
 - WCAG 2.1 AA accessibility compliant
 
 ### 🔒 Security
@@ -313,18 +315,30 @@ coverage html
 
 ## 📋 Changelog
 
-### v1.2.0 — February 8, 2026 *(Latest)*
+### v2.0.0 — June 21, 2026 *(Latest)*
 
-**Major features added:**
-- Complete Job Management System — post, edit, delete jobs; applications, tracking, saved jobs, and alerts
-- Enhanced Search — fixed template syntax errors, improved UI and form rendering
-- Admin Test Data Management — seed/clear commands and data migration tools
+**Cross-platform UI/UX Revolution:**
+- Complete visual redesign — glassmorphism-inspired UI with CSS custom properties
+- Interactive 3D neural-aurora background powered by Three.js
+- Elegant page loader with animated spinner, gradient text, and smooth content reveal
+- Dark/light theme with automatic system preference detection and manual toggle
+- Scroll-reveal animations, stagger containers, magnetic buttons, and parallax tilt cards
+- Responsive mobile navigation and refined component system
 
-**Technical fixes:**
-- Template rendering issues resolved
-- Form validation improvements
-- CSS class simplification
-- Better error handling
+**Enhanced Job Management:**
+- Job type & workplace type filter dropdowns with instant auto-submit
+- Fully functional Job Alerts — create, list, activate/deactivate, and delete alerts
+- `JobAlert` model with keyword, location, type, workplace, and frequency (instant/daily/weekly) settings
+- Job alert management interface in Django admin
+
+**Django 5.2 Compatibility & Stability:**
+- Upgraded to Django 5.2.10 with cross-platform fixes
+- Fixed WhiteNoise middleware duplication in settings
+- All migrations consolidated and production-ready
+
+---
+
+### v1.2.0 — February 8, 2026
 
 ---
 
@@ -367,12 +381,13 @@ First official release of LinkUp.
 ## 🗺️ Roadmap
 
 | Version | Status | Features |
-|---|---|---|
+|---|---|---|---|
 | v1.0.0 | ✅ Released | Auth, posts, messaging, jobs, notifications, search |
 | v1.1.0 | ✅ Released | Real-time messaging WebSocket fix |
 | v1.2.0 | ✅ Released | Job management, enhanced search, admin tools |
-| v1.3.0 | 🔵 Planned | Video posts, Stories, advanced analytics |
-| v2.0.0 | 🔵 Future | Groups, events, premium subscriptions, company pages, learning platform |
+| v2.0.0 | ✅ **Released** | UI/UX redesign, 3D background, theme switcher, job alerts & filters, Django 5.2 |
+| v2.1.0 | 🔵 Planned | Video posts, Stories, advanced analytics |
+| v3.0.0 | 🔵 Planned | Groups, events, premium subscriptions, company pages, learning platform |
 
 ---
 

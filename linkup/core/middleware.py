@@ -88,8 +88,8 @@ class RateLimitMiddleware(MiddlewareMixin):
     def process_request(self, request):
         """Check rate limits before processing request."""
         
-        # Skip rate limiting for superusers in debug mode
-        if settings.DEBUG and request.user.is_authenticated and request.user.is_superuser:
+        # Disable rate limiting entirely in debug mode for smooth development
+        if settings.DEBUG:
             return None
         
         # Get client identifier

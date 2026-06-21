@@ -20,6 +20,14 @@ class Profile(models.Model):
     )
     location = models.CharField(max_length=100, blank=True)
     
+    # Social media links
+    website = models.URLField(max_length=500, blank=True, help_text="Personal website URL")
+    linkedin = models.URLField(max_length=500, blank=True, help_text="LinkedIn profile URL")
+    github = models.URLField(max_length=500, blank=True, help_text="GitHub profile URL")
+    youtube = models.URLField(max_length=500, blank=True, help_text="YouTube channel URL")
+    instagram = models.URLField(max_length=500, blank=True, help_text="Instagram profile URL")
+    twitter = models.URLField(max_length=500, blank=True, help_text="X (Twitter) profile URL")
+    
     def __str__(self):
         return f"{self.user.username}'s Profile"
 
@@ -66,6 +74,41 @@ class Report(models.Model):
 
     def __str__(self):
         return f"Report by {self.reporter} against {self.reported}"
+
+
+class SocialLink(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='social_links')
+    label = models.CharField(max_length=100, help_text="e.g. Website, LinkedIn, GitHub, Portfolio")
+    url = models.URLField(max_length=500)
+    sort_order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['sort_order']
+
+    def __str__(self):
+        return f"{self.label}: {self.url}"
+
+    def icon_name(self):
+        name = self.label.lower().strip()
+        if 'website' in name or 'web' in name or 'portfolio' in name:
+            return 'globe'
+        if 'linkedin' in name:
+            return 'linkedin'
+        if 'github' in name or 'git' in name:
+            return 'github'
+        if 'youtube' in name or 'yt' in name:
+            return 'youtube'
+        if 'instagram' in name or 'insta' in name:
+            return 'instagram'
+        if 'twitter' in name or 'x.com' in self.url.lower():
+            return 'twitter'
+        if 'facebook' in name or 'fb' in name:
+            return 'facebook'
+        if 'tiktok' in name:
+            return 'tiktok'
+        if 'email' in name or 'mail' in name:
+            return 'email'
+        return 'link'
 
 
 class Block(models.Model):

@@ -17,7 +17,7 @@ class ThemeManager {
 
     init() {
         // Load saved theme or default to light
-        const savedTheme = this.getSavedTheme();
+        const savedTheme = this.getSavedTheme() || 'light';
         this.setTheme(savedTheme);
         
         // Add event listener to toggle button

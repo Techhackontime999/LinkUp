@@ -141,9 +141,9 @@
                 }
                 
                 .status-dot.connected {
-                    background: #10b981;
-                    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
-                    animation: pulse-green 2s infinite;
+                    background: #7c3aed;
+                    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.25);
+                    animation: pulse-aurora 2s infinite;
                 }
                 
                 .status-dot.unhealthy {
@@ -165,7 +165,7 @@
                     background: #6b7280;
                 }
                 
-                @keyframes pulse-green {
+                @keyframes pulse-aurora {
                     0%, 100% { opacity: 1; }
                     50% { opacity: 0.5; }
                 }

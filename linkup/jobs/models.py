@@ -71,3 +71,27 @@ class SavedJob(models.Model):
     class Meta:
         unique_together = ('job', 'user')
         ordering = ['-saved_at']
+
+
+class JobAlert(models.Model):
+    FREQUENCY_CHOICES = [
+        ('instant', 'Instant'),
+        ('daily', 'Daily'),
+        ('weekly', 'Weekly'),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='job_alerts')
+    keywords = models.CharField(max_length=255, blank=True, help_text="Keywords to search in job titles and descriptions")
+    location = models.CharField(max_length=255, blank=True, help_text="Desired job location")
+    workplace_type = models.CharField(max_length=10, choices=Job.WORKPLACE_TYPE_CHOICES, blank=True, null=True)
+    job_type = models.CharField(max_length=15, choices=Job.JOB_TYPE_CHOICES, blank=True, null=True)
+    frequency = models.CharField(max_length=10, choices=FREQUENCY_CHOICES, default='daily')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.keywords or 'All jobs'} alert"
+
+    class Meta:
+        ordering = ['-created_at']

@@ -1,105 +1,47 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto pt-8 pb-12">
-    <div class="premium-card p-1 shadow-2xl">
-        <div class="px-8 py-10">
-            <h1 class="text-3xl font-extrabold text-gray-900 mb-2">Post a New Opportunity</h1>
-            <p class="text-gray-500 mb-8">Reach the right talent in our professional network.</p>
+<div class="max-w-2xl mx-auto space-y-6">
+  <div class="glass-card p-8 scroll-reveal">
+    <h1 class="text-2xl font-bold text-[var(--text-primary)] mb-2">{% if job %}Edit Job{% else %}Post a New Opportunity{% endif %}</h1>
+    <p class="text-sm text-[var(--text-secondary)] mb-8">Reach the right talent in our professional network.</p>
 
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="mb-4 p-4 rounded-lg {% if message.tags == 'error' %}bg-red-50 text-red-700{% elif message.tags == 'success' %}bg-green-50 text-green-700{% else %}bg-blue-50 text-blue-700{% endif %}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
+    {% if messages %}
+      {% for message in messages %}
+      <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %} mb-6">
+        <span>{{ message }}</span>
+      </div>
+      {% endfor %}
+    {% endif %}
 
-            <form method="post" class="space-y-6">
-                {% csrf_token %}
+    <form method="post" class="space-y-5">
+      {% csrf_token %}
+      {% if form.errors %}
+      <div class="alert alert-error mb-6">
+        <span>Please correct the errors below.</span>
+        <ul class="text-xs mt-2 space-y-1">
+          {% for field, errors in form.errors.items %}{% for error in errors %}<li>{{ field|title }}: {{ error }}</li>{% endfor %}{% endfor %}
+        </ul>
+      </div>
+      {% endif %}
 
-                {% if form.errors %}
-                    <div class="mb-4 p-4 bg-red-50 text-red-700 rounded-lg">
-                        <p class="font-bold">Please correct the following errors:</p>
-                        <ul class="mt-2">
-                            {% for field, errors in form.errors.items %}
-                                {% for error in errors %}
-                                    <li>{{ field|title }}: {{ error }}</li>
-                                {% endfor %}
-                            {% endfor %}
-                        </ul>
-                    </div>
-                {% endif %}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="form-group"><label>Job Title</label>{{ form.title }}</div>
+        <div class="form-group"><label>Company Name</label>{{ form.company }}</div>
+        <div class="form-group"><label>Location</label>{{ form.location }}</div>
+        <div class="form-group"><label>Workplace Type</label>{{ form.workplace_type }}</div>
+        <div class="form-group"><label>Job Type</label>{{ form.job_type }}</div>
+      </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="block text-sm font-bold text-gray-700">Job Title</label>
-                        {{ form.title }}
-                        {% if form.title.errors %}
-                            <p class="text-red-500 text-sm">{{ form.title.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-sm font-bold text-gray-700">Company Name</label>
-                        {{ form.company }}
-                        {% if form.company.errors %}
-                            <p class="text-red-500 text-sm">{{ form.company.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-sm font-bold text-gray-700">Location</label>
-                        {{ form.location }}
-                        {% if form.location.errors %}
-                            <p class="text-red-500 text-sm">{{ form.location.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-sm font-bold text-gray-700">Workplace Type</label>
-                        {{ form.workplace_type }}
-                        {% if form.workplace_type.errors %}
-                            <p class="text-red-500 text-sm">{{ form.workplace_type.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-sm font-bold text-gray-700">Job Type</label>
-                        {{ form.job_type }}
-                        {% if form.job_type.errors %}
-                            <p class="text-red-500 text-sm">{{ form.job_type.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                </div>
+      <div class="form-group"><label>Salary Range (Optional)</label>{{ form.salary_range }}</div>
+      <div class="form-group"><label>Job Description</label>{{ form.description }}</div>
+      <div class="form-group"><label>Requirements</label>{{ form.requirements }}</div>
 
-                <div class="space-y-2">
-                    <label class="block text-sm font-bold text-gray-700">Salary Range (Optional)</label>
-                    {{ form.salary_range }}
-                    {% if form.salary_range.errors %}
-                        <p class="text-red-500 text-sm">{{ form.salary_range.errors.0 }}</p>
-                    {% endif %}
-                </div>
-
-                <div class="space-y-2">
-                    <label class="block text-sm font-bold text-gray-700">Job Description</label>
-                    {{ form.description }}
-                    {% if form.description.errors %}
-                        <p class="text-red-500 text-sm">{{ form.description.errors.0 }}</p>
-                    {% endif %}
-                </div>
-
-                <div class="space-y-2">
-                    <label class="block text-sm font-bold text-gray-700">Requirements</label>
-                    {{ form.requirements }}
-                    {% if form.requirements.errors %}
-                        <p class="text-red-500 text-sm">{{ form.requirements.errors.0 }}</p>
-                    {% endif %}
-                </div>
-
-                <div class="flex items-center justify-between pt-8 border-t border-gray-100">
-                    <a href="{% url 'jobs:job_list' %}"
-                        class="text-gray-500 font-bold hover:text-gray-700 transition-colors">Cancel</a>
-                    <button type="submit" class="btn-premium px-12 py-4 text-lg">Post Job</button>
-                </div>
-            </form>
-        </div>
-    </div>
+      <div class="flex items-center justify-between pt-6 border-t border-[var(--border-subtle)]">
+        <a href="{% url 'jobs:job_list' %}" class="btn-ghost text-sm">Cancel</a>
+        <button type="submit" class="btn-primary text-sm">{% if job %}Save Changes{% else %}Post Job{% endif %}</button>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}

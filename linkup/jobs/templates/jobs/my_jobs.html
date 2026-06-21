@@ -1,159 +1,84 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-6">
-    <!-- Left Sidebar -->
-    <div class="hidden lg:block lg:col-span-3">
-        <div class="premium-card p-6 animate-fade-in">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">My Job Postings</h3>
-            <div class="space-y-4">
-                <a href="{% url 'jobs:job_create' %}" class="btn-premium w-full text-center block text-sm">
-                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    Post New Job
-                </a>
-                <div class="border-t border-gray-100 pt-4">
-                    <p class="text-xs text-gray-500 uppercase font-semibold mb-2">Statistics</p>
-                    <div class="space-y-2 text-sm">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Total Jobs</span>
-                            <span class="font-semibold text-purple-600">{{ page_obj.paginator.count }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Active Jobs</span>
-                            <span class="font-semibold text-green-600">{{ page_obj|length }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+  <aside class="hidden lg:block lg:col-span-3">
+    <div class="card-premium p-4 scroll-reveal">
+      <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-4">My Job Postings</h3>
+      <div class="space-y-4">
+        <a href="{% url 'jobs:job_create' %}" class="btn-primary w-full text-sm justify-center">Post New Job</a>
+        <div class="h-px bg-[var(--border-subtle)] my-3"></div>
+        <p class="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Statistics</p>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between"><span class="text-[var(--text-secondary)]">Total Jobs</span><span class="font-semibold text-[var(--accent)]">{{ page_obj.paginator.count }}</span></div>
+          <div class="flex justify-between"><span class="text-[var(--text-secondary)]">Active Jobs</span><span class="font-semibold text-green-600">{{ page_obj|length }}</span></div>
         </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="lg:col-span-9 space-y-4">
+    <div class="flex items-center justify-between scroll-reveal">
+      <h1 class="text-2xl font-bold text-[var(--text-primary)]">My Job Postings</h1>
+      <a href="{% url 'jobs:job_create' %}" class="btn-primary text-sm lg:hidden">Post New</a>
     </div>
 
-    <!-- Main Content -->
-    <div class="lg:col-span-9">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">My Job Postings</h1>
-            <a href="{% url 'jobs:job_create' %}" class="btn-premium text-sm">
-                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                Post New Job
-            </a>
-        </div>
-
-        <div class="space-y-4">
-            {% for job in page_obj %}
-            <div class="post-card animate-fade-in hover:shadow-lg transition-shadow">
-                <div class="flex items-start">
-                    <div class="flex-shrink-0 mr-4">
-                        <div class="w-12 h-12 rounded-lg bg-gradient-primary flex items-center justify-center text-white font-bold text-lg">
-                            {{ job.company|slice:":1"|upper }}
-                        </div>
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex justify-between items-start">
-                            <div class="flex-1">
-                                <div class="flex items-center space-x-2 mb-1">
-                                    <h3 class="text-lg font-bold text-gray-800 hover:text-purple-600 transition-colors">
-                                        <a href="{% url 'jobs:job_detail' job.pk %}">{{ job.title }}</a>
-                                    </h3>
-                                    {% if job.is_active %}
-                                        <span class="px-2 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full">Active</span>
-                                    {% else %}
-                                        <span class="px-2 py-1 bg-red-50 text-red-700 text-xs font-bold rounded-full">Inactive</span>
-                                    {% endif %}
-                                </div>
-                                <p class="text-sm font-medium text-gray-700">{{ job.company }}</p>
-                                <div class="flex items-center mt-1 space-x-3 text-sm text-gray-500">
-                                    <span class="flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                        {{ job.location }} ({{ job.get_workplace_type_display }})
-                                    </span>
-                                    <span class="flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        {{ job.created_at|timesince }} ago
-                                    </span>
-                                    <span class="flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                        {{ job.applications.count }} applications
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="text-right ml-4">
-                                <div class="flex space-x-2 mb-2">
-                                    <a href="{% url 'jobs:job_edit' job.pk %}" class="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded hover:bg-blue-100 transition-colors">
-                                        <svg class="w-3 h-3 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                        Edit
-                                    </a>
-                                    <a href="{% url 'jobs:job_delete' job.pk %}" class="px-3 py-1 bg-red-50 text-red-700 text-xs font-bold rounded hover:bg-red-100 transition-colors">
-                                        <svg class="w-3 h-3 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                        Delete
-                                    </a>
-                                </div>
-                                <p class="text-sm font-semibold text-purple-600">{{ job.salary_range|default:"Competitive Salary" }}</p>
-                            </div>
-                        </div>
-                    </div>
+    <div class="stagger-container space-y-3">
+      {% for job in page_obj %}
+      <article class="card-premium p-5 stagger-item scroll-reveal">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-[var(--radius-md)] bg-gradient-to-br from-[var(--accent)] to-[var(--accent-dark)] flex items-center justify-center flex-shrink-0 text-sm font-bold text-white">
+            {{ job.company|slice:":1"|upper }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <div class="flex items-center gap-2 mb-1">
+                  <a href="{% url 'jobs:job_detail' job.pk %}" class="text-base font-semibold text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors no-underline">{{ job.title }}</a>
+                  <span class="badge {% if job.is_active %}badge-ghost text-green-600{% else %}badge-ghost text-red-500{% endif %} text-[10px]">{% if job.is_active %}Active{% else %}Inactive{% endif %}</span>
                 </div>
-            </div>
-            {% empty %}
-            <div class="premium-card p-12 text-center animate-fade-in">
-                <div class="mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
+                <p class="text-sm text-[var(--text-secondary)]">{{ job.company }}</p>
+                <div class="flex flex-wrap items-center gap-3 mt-1 text-xs text-[var(--text-muted)]">
+                  <span class="flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>{{ job.location }} ({{ job.get_workplace_type_display }})</span>
+                  <span class="flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>{{ job.created_at|timesince }} ago</span>
+                  <span>{{ job.applications.count }} application{{ job.applications.count|pluralize }}</span>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-700 mb-2">No Jobs Posted Yet</h3>
-                <p class="text-gray-500 mb-4">Start by posting your first job opportunity!</p>
-                <a href="{% url 'jobs:job_create' %}" class="btn-premium">
-                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    Post Your First Job
-                </a>
+              </div>
+              <div class="flex-shrink-0 flex flex-col items-end gap-2">
+                <div class="flex gap-2">
+                  <a href="{% url 'jobs:job_edit' job.pk %}" class="btn-ghost text-xs px-2.5 py-1">Edit</a>
+                  <a href="{% url 'jobs:job_delete' job.pk %}" class="btn-ghost text-xs px-2.5 py-1 text-red-500 hover:bg-red-500/10">Delete</a>
+                </div>
+                <span class="text-sm font-semibold text-[var(--accent)]">{{ job.salary_range|default:"Competitive Salary" }}</span>
+              </div>
             </div>
-            {% endfor %}
+          </div>
         </div>
-
-        <!-- Pagination -->
-        {% if page_obj.has_other_pages %}
-        <div class="flex justify-center mt-8">
-            <nav class="flex space-x-2">
-                {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-                        Previous
-                    </a>
-                {% endif %}
-                
-                {% for num in page_obj.paginator.page_range %}
-                    {% if page_obj.number == num %}
-                        <span class="px-3 py-2 bg-purple-600 border border-purple-600 rounded-md text-sm font-medium text-white">{{ num }}</span>
-                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                        <a href="?page={{ num }}" class="px-3 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">{{ num }}</a>
-                    {% endif %}
-                {% endfor %}
-                
-                {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-                        Next
-                    </a>
-                {% endif %}
-            </nav>
+      </article>
+      {% empty %}
+      <div class="glass-card p-12 text-center scroll-reveal">
+        <div class="empty-state">
+          <svg class="empty-state-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          <h3 class="text-lg font-semibold text-[var(--text-primary)] mb-1">No Jobs Posted Yet</h3>
+          <p class="text-sm text-[var(--text-muted)] mb-4">Start by posting your first job opportunity!</p>
+          <a href="{% url 'jobs:job_create' %}" class="btn-primary text-sm">Post Your First Job</a>
         </div>
-        {% endif %}
+      </div>
+      {% endfor %}
     </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="glass-card p-3 scroll-reveal">
+      <div class="pagination">
+        {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}" class="pagination-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></a>{% endif %}
+        {% for i in page_obj.paginator.page_range %}
+          {% if i == page_obj.number %}<span class="pagination-btn active">{{ i }}</span>
+          {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}<a href="?page={{ i }}" class="pagination-btn">{{ i }}</a>{% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}" class="pagination-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>{% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
 </div>
 {% endblock %}

@@ -7,6 +7,7 @@ and multi-tab synchronization support for reliable message storage and retrieval
 Requirements: 11.1, 11.3, 11.4, 11.5
 """
 
+import os
 import logging
 import asyncio
 import json
@@ -618,8 +619,9 @@ class MessagePersistenceManager:
             }
     
     def get_conversation_messages(self, user1_id: int, user2_id: int, 
-                                      limit: int = 50, before_id: int = None,
-                                      include_metadata: bool = True) -> Dict[str, Any]:
+                                    limit: int = 50, before_id: int = None,
+                                    include_metadata: bool = True,
+                                    current_user_id: int = None) -> Dict[str, Any]:
         """
         Get conversation messages with proper locking and caching (sync version).
         
@@ -629,6 +631,7 @@ class MessagePersistenceManager:
             limit: Maximum number of messages to return
             before_id: Get messages before this message ID
             include_metadata: Whether to include conversation metadata
+            current_user_id: Current user ID for filtering deleted messages
             
         Returns:
             Dictionary with messages and metadata
@@ -641,6 +644,14 @@ class MessagePersistenceManager:
                 (Q(sender_id=user1_id) & Q(recipient_id=user2_id)) |
                 (Q(sender_id=user2_id) & Q(recipient_id=user1_id))
             ).select_related('sender', 'recipient')
+            
+            # Exclude messages deleted for the current user
+            if current_user_id:
+                base_query = base_query.exclude(
+                    Q(sender_id=current_user_id) & Q(sender_deleted=True)
+                ).exclude(
+                    Q(recipient_id=current_user_id) & Q(recipient_deleted=True)
+                )
             
             # Apply before_id filter if provided
             if before_id:
@@ -836,13 +847,17 @@ class MessagePersistenceManager:
     
     def _serialize_message_sync(self, message: 'Message') -> Dict[str, Any]:
         """Serialize a message object to dictionary (synchronous version)."""
+        deleted_everyone = message.is_deleted
         return {
             'id': message.id,
             'sender_id': message.sender_id,
             'sender_username': message.sender.username,
             'recipient_id': message.recipient_id,
             'recipient_username': message.recipient.username,
-            'content': message.content,
+            'content': '[This message has been deleted]' if deleted_everyone else message.content,
+            'attachment_url': None if deleted_everyone else (message.attachment.url if message.attachment else None),
+            'attachment_name': None if deleted_everyone else (os.path.basename(message.attachment.name) if message.attachment else None),
+            'is_deleted': deleted_everyone,
             'status': message.status,
             'client_id': message.client_id,
             'created_at': message.created_at.isoformat(),
@@ -857,13 +872,17 @@ class MessagePersistenceManager:
 
     async def _serialize_message(self, message: 'Message') -> Dict[str, Any]:
         """Serialize a message object to dictionary."""
+        deleted_everyone = message.is_deleted
         return {
             'id': message.id,
             'sender_id': message.sender_id,
             'sender_username': message.sender.username,
             'recipient_id': message.recipient_id,
             'recipient_username': message.recipient.username,
-            'content': message.content,
+            'content': '[This message has been deleted]' if deleted_everyone else message.content,
+            'attachment_url': None if deleted_everyone else (message.attachment.url if message.attachment else None),
+            'attachment_name': None if deleted_everyone else (os.path.basename(message.attachment.name) if message.attachment else None),
+            'is_deleted': deleted_everyone,
             'status': message.status,
             'client_id': message.client_id,
             'created_at': message.created_at.isoformat(),

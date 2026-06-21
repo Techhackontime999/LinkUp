@@ -1,356 +1,264 @@
 {% load static tailwind_tags %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkUp - Professional Network</title>
-    {% tailwind_css %}
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/custom_styles.css' %}">
-    <link rel="stylesheet" href="{% static 'css/form-enhancements.css' %}">
-    <link rel="stylesheet" href="{% static 'css/accessibility-enhancements.css' %}">
-    <script src="{% static 'js/theme-switcher.js' %}"></script>
-    <script src="{% static 'messaging/notifications.js' %}"></script>
-    {% block extra_css %}{% endblock %}
-</head>
-
-<body class="bg-gray-100 font-sans">
-
-    <!-- Skip Links for Keyboard Navigation -->
-    <a href="#main" class="skip-link">Skip to main content</a>
-    <a href="#navigation" class="skip-link">Skip to navigation</a>
-    <a href="#search" class="skip-link">Skip to search</a>
-
-    <!-- Navbar -->
-    <nav id="navigation" class="premium-nav sticky top-0 z-50 glass shadow-md" role="navigation" aria-label="Main navigation">
-        <div class="site-container">
-            <div class="flex items-center justify-between h-16 space-x-4">
-                <!-- Left: Branding -->
-                <div class="flex-shrink-0">
-                    <a href="{% url 'feed:feed' %}" class="text-2xl font-extrabold text-gradient heading-display" aria-label="LinkUp - Go to home page">LinkUp</a>
-                </div>
-
-                <!-- Center: Search Bar -->
-                <div class="flex-1 max-w-sm lg:max-w-md">
-                    <form action="{% url 'search' %}" method="get" class="search-bar-enhanced" role="search" aria-label="Search the platform">
-                        <div
-                            class="flex items-center bg-gray-50/80 rounded-full px-4 py-1.5 border border-gray-200 focus-within:border-purple-300 focus-within:ring-2 focus-within:ring-purple-100 transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                            <label for="search-input" class="sr-only">Search for people, jobs, or posts</label>
-                            <input type="text" name="q" id="search-input" placeholder="Search..."
-                                class="bg-transparent border-none outline-none w-full text-sm ml-2 focus:ring-0" 
-                                aria-describedby="search-help" />
-                            <div id="search-help" class="sr-only">Search for people, jobs, posts, and more across the platform</div>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Right: Navigation & User -->
-                <div class="flex items-center space-x-1 lg:space-x-4">
-                    <a href="#create-post" class="btn-premium hidden sm:inline mr-2" aria-label="Create new post">Create</a>
-                    <div class="hidden sm:flex items-center space-x-1 lg:space-x-4" role="menubar" aria-label="Main navigation menu">
-                        <a href="{% url 'feed:feed' %}"
-                            class="nav-link-premium {% if request.resolver_match.url_name == 'feed' %}active{% endif %}"
-                            role="menuitem"
-                            {% if request.resolver_match.url_name == 'feed' %}aria-current="page"{% endif %}>
-                            <span class="hidden lg:inline">Home</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 lg:hidden" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
-                            <span class="sr-only lg:hidden">Home</span>
-                        </a>
-                        <a href="{% url 'network' %}"
-                            class="nav-link-premium {% if request.resolver_match.url_name == 'network' %}active{% endif %}"
-                            role="menuitem"
-                            {% if request.resolver_match.url_name == 'network' %}aria-current="page"{% endif %}>
-                            <span class="hidden lg:inline">Network</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 lg:hidden" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                            <span class="sr-only lg:hidden">Network</span>
-                        </a>
-                        <a href="{% url 'jobs:job_list' %}"
-                            class="nav-link-premium {% if 'jobs' in request.resolver_match.app_name %}active{% endif %}"
-                            role="menuitem"
-                            {% if 'jobs' in request.resolver_match.app_name %}aria-current="page"{% endif %}>
-                            <span class="hidden lg:inline">Jobs</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 lg:hidden" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                            <span class="sr-only lg:hidden">Jobs</span>
-                        </a>
-                        <a href="{% url 'messaging:inbox' %}"
-                            class="nav-link-premium {% if 'messaging' in request.resolver_match.app_name %}active{% endif %} relative"
-                            role="menuitem"
-                            {% if 'messaging' in request.resolver_match.app_name %}aria-current="page"{% endif %}>
-                            <span class="hidden lg:inline">Messages</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 lg:hidden" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                            </svg>
-                            <span class="sr-only lg:hidden">Messages</span>
-                            <span id="messages-badge" class="absolute -top-1 -right-1 bg-red-600 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center hidden" aria-label="Unread messages"></span>
-                        </a>
-                    </div>
-
-                    <!-- Theme Toggle Button -->
-                    <div class="relative mr-2">
-                        <button id="theme-toggle" type="button" class="flex items-center focus:outline-none py-1 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" 
-                                aria-label="Toggle dark mode" title="Toggle dark mode">
-                            <svg id="sun-icon" class="h-6 w-6 text-gray-600 dark:text-gray-300 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                            <svg id="moon-icon" class="h-6 w-6 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                            </svg>
-                        </button>
-                    </div>
-
-                    {% if user.is_authenticated %}
-                    <!-- Notifications -->
-                    <div class="relative mr-2">
-                        <button id="notif-btn" type="button" class="flex items-center focus:outline-none py-1"
-                                aria-haspopup="true" aria-expanded="false" aria-label="Open notifications menu"
-                                aria-describedby="notif-badge">
-                            <div class="relative">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118.6 14.6V11a6 6 0 10-12 0v3c0 .529-.21 1.039-.584 1.414L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                </svg>
-                                <span id="notif-badge" class="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center font-bold shadow-lg" style="display:none;" aria-label="unread notifications">0</span>
-                                <span id="connection-status" class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full connection-status connected shadow-sm" title="Connection status" aria-label="Connection status: connected">●</span>
-                            </div>
-                        </button>
-                        <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-96 dropdown-premium shadow-2xl origin-top-right ring-1 ring-black ring-opacity-5 focus:outline-none bg-white dark:bg-gray-800 z-50" role="menu" aria-labelledby="notif-btn">
-                            <div class="py-2">
-                                <!-- Header -->
-                                <div class="flex items-center justify-between px-4 pb-2 border-b border-gray-100 dark:border-gray-700">
-                                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white" id="notifications-heading">Notifications</h4>
-                                    <button id="mark-all-read" class="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 font-medium" aria-label="Mark all notifications as read">
-                                        Mark all read
-                                    </button>
-                                </div>
-                                
-                                <!-- Notification List -->
-                                <div id="notif-list" class="max-h-96 overflow-y-auto" role="list" aria-labelledby="notifications-heading">
-                                    <!-- Notifications will be populated here -->
-                                    <div class="flex items-center justify-center py-8 text-gray-500 dark:text-gray-400">
-                                        <div class="text-center">
-                                            <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118.6 14.6V11a6 6 0 10-12 0v3c0 .529-.21 1.039-.584 1.414L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                            </svg>
-                                            <p class="mt-2 text-sm">No notifications yet</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Load More Button -->
-                                <div class="px-4 py-2 border-t border-gray-100 dark:border-gray-700">
-                                    <button id="load-more-notifications" class="w-full text-center text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 font-medium py-2" style="display:none;" aria-label="Load more notifications">
-                                        Load more notifications
-                                    </button>
-                                </div>
-                                
-                                <!-- Footer -->
-                                <div class="border-t border-gray-100 dark:border-gray-700 px-4 py-2 bg-gray-50 dark:bg-gray-900">
-                                    <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                                        <a href="{% url 'messaging:notification_preferences_page' %}" class="hover:text-purple-600 dark:hover:text-purple-400" aria-label="Go to notification settings">
-                                            Notification settings
-                                        </a>
-                                        <a href="{% url 'messaging:notifications_list' %}" class="hover:text-purple-600 dark:hover:text-purple-400" aria-label="View all notifications">
-                                            View all
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="relative relative-dropdown group">
-                        <button type="button" class="flex items-center focus:outline-none py-1" aria-haspopup="true" aria-expanded="false" aria-label="Open user menu for {{ user.username }}">
-                            <div class="avatar-gradient p-0.5 rounded-full">
-                                <div
-                                    class="avatar-inner rounded-full overflow-hidden w-8 h-8 flex items-center justify-center bg-gradient-primary text-white text-xs font-bold"
-                                    aria-label="User avatar for {{ user.username }}">
-                                    {{ user.username|slice:":1"|upper }}</div>
-                            </div>
-                        </button>
-                        <div
-                            class="hidden group-hover:block absolute right-0 mt-0 w-52 dropdown-premium shadow-2xl origin-top-right ring-1 ring-black ring-opacity-5 focus:outline-none bg-white" role="menu" aria-label="User menu">
-                            <div class="py-1">
-                                <a href="{% url 'profile' %}" class="dropdown-item-premium" role="menuitem">Profile</a>
-                                <div class="border-t border-gray-100 mx-2 my-1" role="separator"></div>
-                                <form method="post" action="{% url 'logout' %}">
-                                    {% csrf_token %}
-                                    <button type="submit"
-                                        class="dropdown-item-premium text-red-600 w-full text-left" role="menuitem">Sign out</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    {% else %}
-                    <div class="flex items-center space-x-3">
-                        <a href="{% url 'login' %}" class="text-gray-600 hover:text-purple-600 font-bold text-sm" aria-label="Log in to your account">Log
-                            in</a>
-                        <a href="{% url 'register' %}" class="btn-premium px-5 py-1.5 text-xs" aria-label="Join LinkUp - Create new account">Join now</a>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <main id="main" class="site-container mt-6" role="main" aria-label="Main content">
-        {% block content %}{% endblock %}
-    </main>
-    
-    <!-- Accessibility Live Regions (will be populated by JavaScript) -->
-    <div id="accessibility-announcements" aria-live="polite" aria-atomic="true" class="sr-only"></div>
-    <div id="accessibility-status" role="status" aria-live="polite" class="sr-only"></div>
-    
-    <!-- Mobile Bottom Navigation -->
-    <div class="fixed bottom-0 left-0 right-0 w-full z-50 h-16 bg-white border-t border-gray-200 md:hidden">
-        <div class="flex h-full w-full">
-            <!-- Home -->
-            <a href="{% url 'feed:feed' %}" 
-               class="flex-1 flex flex-col items-center justify-center py-2 hover:bg-gray-50 group {% if request.resolver_match.url_name == 'feed' %}text-purple-600{% else %}text-gray-600{% endif %}">
-                <svg class="w-6 h-6 group-hover:text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                </svg>
-                <span class="text-xs mt-1 group-hover:text-purple-600">Home</span>
-            </a>
-            
-            <!-- Network -->
-            <a href="{% url 'network' %}" 
-               class="flex-1 flex flex-col items-center justify-center py-2 hover:bg-gray-50 group {% if request.resolver_match.url_name == 'network' %}text-purple-600{% else %}text-gray-600{% endif %}">
-                <svg class="w-6 h-6 group-hover:text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                </svg>
-                <span class="text-xs mt-1 group-hover:text-purple-600">Network</span>
-            </a>
-            
-            <!-- Jobs -->
-            <a href="{% url 'jobs:job_list' %}" 
-               class="flex-1 flex flex-col items-center justify-center py-2 hover:bg-gray-50 group {% if 'jobs' in request.resolver_match.app_name %}text-purple-600{% else %}text-gray-600{% endif %}">
-                <svg class="w-6 h-6 group-hover:text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                </svg>
-                <span class="text-xs mt-1 group-hover:text-purple-600">Jobs</span>
-            </a>
-            
-            <!-- Messages -->
-            <a href="{% url 'messaging:inbox' %}" 
-               class="flex-1 flex flex-col items-center justify-center py-2 hover:bg-gray-50 group relative {% if 'messaging' in request.resolver_match.app_name %}text-purple-600{% else %}text-gray-600{% endif %}">
-                <svg class="w-6 h-6 group-hover:text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                </svg>
-                <span id="mobile-messages-badge" class="absolute -top-1 -right-1 bg-red-600 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center hidden" aria-label="Unread messages"></span>
-                <span class="text-xs mt-1 group-hover:text-purple-600">Messages</span>
-            </a>
-        </div>
-    </div>
-    
-    <!-- Mobile Navigation Styles -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkUp — Professional Network</title>
+  {% tailwind_css %}
+  <link rel="stylesheet" href="{% static 'css/custom_styles.css' %}">
+  <script>!function(){try{var t=localStorage.getItem('linkup-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark'),document.documentElement.classList.add('dark');else document.documentElement.setAttribute('data-theme','light')}catch(e){}}()</script>
+  {% block extra_css %}{% endblock %}
     <style>
-        @media (max-width: 768px) {
-            /* Adjust main content padding for mobile nav */
-            main {
-                padding-bottom: 80px !important;
-            }
-            
-            /* Hide desktop navigation on mobile */
-            .hidden.sm\:flex {
-                display: none !important;
-            }
-        }
-        
-        @media (min-width: 769px) {
-            .fixed.bottom-0.left-0.z-50.w-full.h-16 {
-                display: none !important;
-            }
-        }
-    </style>
-    {% block extra_js %}{% endblock %}
-    
-    <!-- Initialize Theme and Notification Systems -->
-    <script>
-        // Initialize theme manager immediately
-        (function() {
-            if (!window.themeManager) {
-                console.log('Initializing theme manager...');
-                window.themeManager = new ThemeManager();
-            }
-        })();
-        
-        // Initialize notification system when DOM is ready
-        function initializeNotificationSystem() {
-            if (!window.notificationSystem) {
-                console.log('Initializing notification system...');
-                window.notificationSystem = new NotificationSystem();
-                window.notificationSystem.init();
-            }
-        }
-        
-        // Initialize immediately if DOM is already loaded, otherwise wait for DOMContentLoaded
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeNotificationSystem);
-        } else {
-            initializeNotificationSystem();
-        }
-        
-        // Simple debug script to check if everything is working
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('LinkUp page loaded successfully');
-            
-            // Check if theme toggle button exists
-            const themeToggle = document.getElementById('theme-toggle');
-            if (themeToggle) {
-                console.log('✓ Theme toggle button found');
-            } else {
-                console.log('✗ Theme toggle button not found');
-            }
-            
-            // Check if notification button exists
-            const notifBtn = document.getElementById('notif-btn');
-            if (notifBtn) {
-                console.log('✓ Notification button found');
-            } else {
-                console.log('✗ Notification button not found');
-            }
-            
-            // Test theme toggle
-            if (themeToggle) {
-                themeToggle.addEventListener('click', function() {
-                    console.log('Theme toggle clicked!');
-                    if (window.themeManager) {
-                        window.themeManager.toggleTheme();
-                    }
-                });
-            }
-            
-            // Test notification toggle
-            if (notifBtn) {
-                notifBtn.addEventListener('click', function() {
-                    console.log('Notification button clicked!');
-                    if (window.notificationSystem) {
-                        window.notificationSystem.toggleDropdown();
-                    }
-                });
-            }
-        });
-    </script>
-</body>
+    #neural-aurora-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      opacity: 1;
+    }
+    .nav-blur {
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px) saturate(1.4);
+      -webkit-backdrop-filter: blur(20px) saturate(1.4);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    #loader-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: #fafafa;
+      transition: opacity 1.2s ease, visibility 1.2s ease;
+    }
+    [data-theme="dark"] #loader-overlay { background: #05050a; }
+    #loader-overlay.hide { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
+    #main { animation: lcontent-in 0.7s ease 2.6s both; }
+    @keyframes lcontent-in { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    .loader-spinner {
+      width: 48px; height: 48px; margin-bottom: 28px;
+      border: 3px solid rgba(124,58,237,0.15);
+      border-top-color: #7c3aed;
+      border-radius: 50%;
+      animation: lspin 0.9s linear infinite;
+    }
+    [data-theme="dark"] .loader-spinner {
+      border-color: rgba(139,92,246,0.2);
+      border-top-color: #8b5cf6;
+    }
+    @keyframes lspin { to { transform: rotate(360deg); } }
+    .loader-title {
+      font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: #7c3aed;
+      margin: 0 0 6px; opacity: 0;
+      animation: lfade-up 0.5s ease 0.2s forwards;
+    }
+    [data-theme="dark"] .loader-title { color: #8b5cf6; }
+    .loader-tagline {
+      font-size: 13px; font-weight: 400; color: #a1a1aa;
+      margin: 0; letter-spacing: 0.2px;
+      opacity: 0; animation: lfade-up 0.5s ease 0.4s forwards;
+    }
+    [data-theme="dark"] .loader-tagline { color: #5c5c7a; }
+    .loader-bar {
+      position: fixed; bottom: 0; left: 0; height: 3px;
+      background: linear-gradient(90deg, #7c3aed, #14b8a6, #06b6d4);
+      width: 0; animation: lfill 1.6s ease-in-out 0.1s forwards;
+    }
+    [data-theme="dark"] .loader-bar {
+      background: linear-gradient(90deg, #8b5cf6, #2dd4bf, #22d3ee);
+    }
+    @keyframes lfade-up {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes lfill {
+      0% { width: 0; }
+      100% { width: 100%; }
+    }
+  </style>
+</head>
+<body class="bg-[var(--bg-primary)] text-[var(--text-primary)] antialiased">
 
+  <div id="loader-overlay">
+    <div class="loader-spinner"></div>
+    <h1 class="loader-title">LinkUp</h1>
+    <p class="loader-tagline">Your Professional Network</p>
+    <div class="loader-bar"></div>
+  </div>
+  <script>(function(){var s=Date.now();function h(){var e=Date.now()-s,d=Math.max(0,1800-e);setTimeout(function(){var l=document.getElementById('loader-overlay');if(l)l.classList.add('hide')},d)}if(document.readyState==='complete')h();else window.addEventListener('load',h)})()</script>
+
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <div id="neural-aurora-bg"></div>
+
+  <nav class="nav-blur sticky top-0 z-50">
+    <div class="site-container flex items-center justify-between h-14 lg:h-16">
+      <div class="flex items-center gap-6">
+        <a href="{% url 'feed:feed' %}" class="text-xl font-extrabold tracking-tight text-[var(--accent)] hover:text-[var(--accent-dark)] transition-colors no-underline">
+          LinkUp
+        </a>
+        <div class="hidden md:flex items-center gap-1">
+          <a href="{% url 'feed:feed' %}" class="nav-link {% if request.resolver_match.url_name == 'feed' %}active{% endif %}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            <span>Home</span>
+          </a>
+          <a href="{% url 'network' %}" class="nav-link {% if request.resolver_match.url_name == 'network' %}active{% endif %}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>Network</span>
+          </a>
+          <a href="{% url 'jobs:job_list' %}" class="nav-link {% if 'jobs' in request.resolver_match.app_name %}active{% endif %}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            <span>Jobs</span>
+          </a>
+          <a href="{% url 'messaging:inbox' %}" class="nav-link {% if 'messaging' in request.resolver_match.app_name %}active{% endif %}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>Messages</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <form action="{% url 'search' %}" method="get" class="hidden sm:block">
+          <div class="search-box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--text-muted)]"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" name="q" placeholder="Search people, jobs..." aria-label="Search">
+          </div>
+        </form>
+
+        <button id="theme-toggle" class="btn-ghost p-2 rounded-[var(--radius-sm)]" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <svg id="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg id="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+
+        {% if user.is_authenticated %}
+          <div class="relative" id="notif-container">
+            <button id="notif-btn" class="btn-ghost p-2 rounded-[var(--radius-sm)] relative" aria-label="Notifications" aria-haspopup="true" title="Notifications">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+              <span id="notif-badge" class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[var(--accent)] rounded-full text-[10px] font-bold text-white flex items-center justify-center shadow-sm" style="display:none">0</span>
+              <span class="live-dot accent sm" style="position:absolute;top:2px;left:2px;animation-duration:2.5s"></span>
+            </button>
+            <div id="notif-dropdown" class="dropdown-menu hidden" style="min-width:340px">
+              <div class="px-3 py-2 border-b border-[var(--border-subtle)] flex items-center justify-between">
+                <span class="text-sm font-semibold text-[var(--text-primary)]">Notifications</span>
+                <button id="mark-all-read" class="text-xs font-medium text-[var(--accent)] hover:underline">Mark all read</button>
+              </div>
+              <div id="notif-list" class="max-h-80 overflow-y-auto">
+                <div class="empty-state py-8">
+                  <svg class="empty-state-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                  <p class="text-sm">No notifications yet</p>
+                </div>
+              </div>
+              <div class="border-t border-[var(--border-subtle)] px-3 py-2 flex items-center justify-between text-xs text-[var(--text-muted)]">
+                <a href="{% url 'messaging:notification_preferences_page' %}" class="hover:text-[var(--accent)]">Settings</a>
+                <a href="{% url 'messaging:notifications_list' %}" class="hover:text-[var(--accent)]">View all</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="relative" id="user-menu-container">
+            <button id="user-menu-btn" class="flex items-center gap-2 p-1 rounded-full hover:opacity-80 transition-opacity breathing-glow" aria-label="User menu" style="animation-duration:4s">
+              <div class="avatar avatar-sm avatar-ring">
+                {{ user.username|slice:":1"|upper }}
+              </div>
+            </button>
+            <div id="user-dropdown" class="dropdown-menu hidden" style="min-width:180px">
+              <a href="{% url 'profile' %}" class="dropdown-item">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Profile
+              </a>
+              <div class="h-px bg-[var(--border-subtle)] my-1"></div>
+              <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="dropdown-item danger">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  Sign out
+                </button>
+              </form>
+            </div>
+          </div>
+        {% else %}
+          <div class="flex items-center gap-2">
+            <a href="{% url 'login' %}" class="btn-ghost text-sm font-medium">Log in</a>
+            <a href="{% url 'register' %}" class="btn-primary text-sm px-4 py-2">Join now</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <main id="main" class="site-container py-6 lg:py-8">
+    {% block content %}{% endblock %}
+  </main>
+
+  <div id="accessibility-announcements" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+  <div id="accessibility-status" role="status" aria-live="polite" class="sr-only"></div>
+
+  {% if user.is_authenticated %}
+  <nav class="mobile-nav">
+    <a href="{% url 'feed:feed' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'feed' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      <span>Home</span>
+    </a>
+    <a href="{% url 'network' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'network' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Network</span>
+    </a>
+    <a href="{% url 'jobs:job_list' %}" class="mobile-nav-item {% if 'jobs' in request.resolver_match.app_name %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      <span>Jobs</span>
+    </a>
+    <a href="{% url 'messaging:inbox' %}" class="mobile-nav-item {% if 'messaging' in request.resolver_match.app_name %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Messages</span>
+    </a>
+  </nav>
+  {% endif %}
+
+  <script src="{% static 'js/theme-switcher.js' %}"></script>
+  <script src="{% static 'messaging/notifications.js' %}"></script>
+  <script src="{% static 'js/animations.js' %}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="{% static 'js/neural-aurora.js' %}"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const notifBtn = document.getElementById('notif-btn');
+      const notifDropdown = document.getElementById('notif-dropdown');
+      if (notifBtn && notifDropdown) {
+        notifBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          notifDropdown.classList.toggle('hidden');
+        });
+        document.addEventListener('click', function(e) {
+          if (!e.target.closest('#notif-container')) {
+            notifDropdown.classList.add('hidden');
+          }
+        });
+      }
+
+      const userMenuBtn = document.getElementById('user-menu-btn');
+      const userDropdown = document.getElementById('user-dropdown');
+      if (userMenuBtn && userDropdown) {
+        userMenuBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          userDropdown.classList.toggle('hidden');
+        });
+        document.addEventListener('click', function(e) {
+          if (!e.target.closest('#user-menu-container')) {
+            userDropdown.classList.add('hidden');
+          }
+        });
+      }
+
+      window.addEventListener('themeChanged', function(e) {
+        var isDark = e.detail && e.detail.isDark;
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (!meta) {
+          meta = document.createElement('meta');
+          meta.name = 'theme-color';
+          document.head.appendChild(meta);
+        }
+        meta.content = isDark ? '#05050a' : '#fafafa';
+      });
+    });
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
 </html>

@@ -22,8 +22,8 @@ User = get_user_model()
 
 @receiver(post_save, sender=Message)
 def create_message_notification(sender, instance, created, **kwargs):
-    """Create notification when a new message is sent"""
-    if created:
+    """Create notification when a new message is sent (skip for self-chat)"""
+    if created and instance.sender_id != instance.recipient_id:
         try:
             notify_new_message(
                 sender=instance.sender,
