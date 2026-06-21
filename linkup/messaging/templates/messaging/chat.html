@@ -6,14 +6,14 @@
 {% endblock %}
 
 {% block content %}
-<div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:400px;width:100%;pointer-events:none"></div>
+<div id="toast-container" class="toast-container"></div>
 <div class="max-w-5xl mx-auto space-y-4">
   <a href="{% url 'messaging:inbox' %}" class="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors no-underline">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
     Back to Messages
   </a>
 
-  <div class="glass-card overflow-hidden" style="height:calc(100vh - 200px);min-height:480px">
+  <div class="glass-card overflow-hidden chat-container">
     <div class="bg-gradient-to-br from-[var(--accent)] to-[var(--accent-dark)] p-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
@@ -56,14 +56,14 @@
       </div>
 
       <div class="border-t border-[var(--border-subtle)] bg-[var(--bg-card)] p-4">
-        <form id="chat-form" class="flex items-end gap-2" onsubmit="return false;">
+        <form id="chat-form" class="flex items-end gap-1.5 sm:gap-2" onsubmit="return false;">
           {% csrf_token %}
-          <label class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl hover:bg-[var(--bg-secondary)] cursor-pointer transition-colors text-[var(--text-muted)] hover:text-[var(--accent)]" title="Attach file">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          <label class="flex-shrink-0 flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl hover:bg-[var(--bg-secondary)] cursor-pointer transition-colors text-[var(--text-muted)] hover:text-[var(--accent)]" title="Attach file">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
             <input type="file" id="chat-file-input" class="hidden" accept="image/*,video/mp4,video/webm,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,.csv">
           </label>
-          <div class="flex-1">
-            <textarea id="chat-input" rows="1" class="input-premium" placeholder="Type a message..." autocomplete="off" style="max-height:120px;resize:none"></textarea>
+          <div class="flex-1 min-w-0">
+            <textarea id="chat-input" rows="1" class="input-premium text-sm sm:text-base" placeholder="Type a message..." autocomplete="off" style="max-height:120px;resize:none"></textarea>
             <div id="chat-file-preview" class="hidden mt-2 flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-secondary)] text-xs text-[var(--text-secondary)]">
               <div id="chat-file-preview-thumb" class="flex-shrink-0 w-8 h-8 rounded overflow-hidden bg-[var(--bg-card)] flex items-center justify-center">
                 <svg id="chat-file-preview-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -77,7 +77,7 @@
               </button>
             </div>
           </div>
-          <button id="chat-send" type="button" class="btn-primary px-5 py-2.5">
+          <button id="chat-send" type="button" class="btn-primary p-2.5 sm:px-5 sm:py-2.5 flex-shrink-0">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
             <span class="hidden sm:inline ml-1">Send</span>
           </button>

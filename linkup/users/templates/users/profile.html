@@ -1,35 +1,35 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-<div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:400px;width:100%;pointer-events:none"></div>
+<div id="toast-container" class="toast-container"></div>
 <div class="max-w-4xl mx-auto px-4 space-y-6" data-page="profile-edit">
   <div class="double-bezel tilt-card scroll-reveal">
     <div class="bezel-outer">
       <div class="bezel-inner p-6 md:p-8">
 
         <div class="relative mb-8 -mx-6 md:-mx-8 -mt-6 md:-mt-8">
-          <div class="relative h-40 sm:h-48 md:h-56 overflow-hidden {% if not user.profile.cover_photo %}bg-gradient-to-br from-[var(--aurora-purple)] via-[var(--aurora-teal)] to-[var(--aurora-cyan)]{% endif %}" id="cover-preview" {% if not user.profile.cover_photo %}style="background-size:200% 200%;animation:gradient-shift 6s ease infinite"{% endif %}>
+          <div class="relative h-32 sm:h-48 md:h-56 overflow-hidden {% if not user.profile.cover_photo %}bg-gradient-to-br from-[var(--aurora-purple)] via-[var(--aurora-teal)] to-[var(--aurora-cyan)]{% endif %}" id="cover-preview" {% if not user.profile.cover_photo %}style="background-size:200% 200%;animation:gradient-shift 6s ease infinite"{% endif %}>
             {% if user.profile.cover_photo %}
             <img src="{{ user.profile.cover_photo.url }}" alt="Cover" class="w-full h-full object-cover">
             {% endif %}
             <div class="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)]/40 via-transparent to-transparent"></div>
             <div class="absolute inset-0 bg-[var(--bg-primary)]/5"></div>
           </div>
-          <div class="absolute flex items-end gap-4" style="bottom:-48px;left:1.5rem;">
-            <div class="relative group" id="avatar-preview" style="width:88px;height:88px;border-radius:20px;overflow:hidden;background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal));color:white;font-weight:700;font-size:1.5rem;display:flex;align-items:center;justify-content:center;outline:4px solid var(--bg-card);outline-offset:-2px;box-shadow:0 8px 24px rgba(0,0,0,0.12),inset 0 1px 0 rgba(255,255,255,0.15);">
+          <div class="absolute flex items-end gap-4" style="bottom:-36px;left:1rem;">
+            <div class="relative group" id="avatar-preview" style="width:72px;height:72px;border-radius:18px;overflow:hidden;background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal));color:white;font-weight:700;font-size:1.25rem;display:flex;align-items:center;justify-content:center;outline:4px solid var(--bg-card);outline-offset:-2px;box-shadow:0 8px 24px rgba(0,0,0,0.12),inset 0 1px 0 rgba(255,255,255,0.15);">
               {% if user.profile.avatar %}
-              <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="w-full h-full object-cover" style="border-radius:18px;">
+              <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="w-full h-full object-cover" style="border-radius:16px;">
               {% else %}
-              <span class="text-lg font-bold" style="border-radius:18px;">{{ user.username|slice:":2"|upper }}</span>
+              <span class="text-base font-bold" style="border-radius:16px;">{{ user.username|slice:":2"|upper }}</span>
               {% endif %}
-              <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center bg-black/30 backdrop-blur-[2px]" style="border-radius:18px;cursor:pointer;" onclick="document.querySelector('#avatar-upload-zone input[type=file]').click()">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center bg-black/30 backdrop-blur-[2px]" style="border-radius:16px;cursor:pointer;" onclick="document.querySelector('#avatar-upload-zone input[type=file]').click()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
               </div>
             </div>
           </div>
         </div>
-        <div class="relative z-10 mt-28 sm:mt-24 mb-6 pb-6 border-b border-[var(--border-subtle)]">
-          <h2 class="text-xl font-bold text-[var(--text-primary)]">{{ user.get_full_name|default:user.username }}</h2>
+        <div class="relative z-10 mt-20 sm:mt-24 mb-6 pb-6 border-b border-[var(--border-subtle)]">
+          <h2 class="text-lg sm:text-xl font-bold text-[var(--text-primary)]">{{ user.get_full_name|default:user.username }}</h2>
           <p class="text-sm text-[var(--text-secondary)]">{{ user.profile.headline|default:"Complete your profile" }}</p>
           <div class="flex items-center gap-2 mt-1.5">
             <span class="live-dot sm"></span>
@@ -159,7 +159,7 @@
                   {{ social_formset.management_form }}
                   <div id="social-link-forms" class="space-y-2">
                     {% for sf in social_formset %}
-                    <div class="social-form-row form-row-enter flex items-start gap-2 p-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-primary)]/50 hover:bg-[var(--bg-secondary)]/50 transition-colors">
+                    <div class="social-form-row form-row-enter flex flex-col sm:flex-row items-stretch sm:items-start gap-2 p-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-primary)]/50 hover:bg-[var(--bg-secondary)]/50 transition-colors">
                       {% for hidden in sf.hidden_fields %}{{ hidden }}{% endfor %}
                       <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <div class="form-group mb-0">
@@ -171,9 +171,9 @@
                           {{ sf.url }}
                         </div>
                       </div>
-                      <div class="flex items-center gap-1 pt-4">
+                      <div class="flex items-center gap-1 sm:pt-4 self-end sm:self-auto">
                         {% if sf.instance.pk %}
-                        <label class="flex items-center gap-1 text-xs text-[var(--text-muted)] cursor-pointer hover:text-[var(--aurora-pink)] transition-colors p-1 rounded-md hover:bg-[var(--aurora-pink)]/5">
+                        <label class="flex items-center gap-1 text-xs text-[var(--text-muted)] cursor-pointer hover:text-[var(--aurora-pink)] transition-colors p-1.5 rounded-md hover:bg-[var(--aurora-pink)]/5">
                           {{ sf.DELETE }}
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                         </label>
@@ -207,10 +207,10 @@
                   {{ exp_formset.management_form }}
                   <div id="experience-forms" class="space-y-3">
                     {% for exp_form in exp_formset %}
-                    <div class="exp-form-row form-row-enter p-4 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-primary)]/50 hover:bg-[var(--bg-secondary)]/30 transition-colors">
+                    <div class="exp-form-row form-row-enter p-3 sm:p-4 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-primary)]/50 hover:bg-[var(--bg-secondary)]/30 transition-colors">
                       {% if exp_form.instance.pk %}
                       <div class="flex items-center gap-2 mb-3 pb-2 border-b border-[var(--border-subtle)]">
-                        <label class="flex items-center gap-1.5 text-xs text-[var(--text-muted)] cursor-pointer hover:text-[var(--aurora-pink)] transition-colors ml-auto p-1 rounded-md hover:bg-[var(--aurora-pink)]/5">
+                        <label class="flex items-center gap-1.5 text-xs text-[var(--text-muted)] cursor-pointer hover:text-[var(--aurora-pink)] transition-colors ml-auto p-1.5 rounded-md hover:bg-[var(--aurora-pink)]/5">
                           {{ exp_form.DELETE }}
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                           Remove
@@ -241,7 +241,7 @@
                           <label class="text-[10px] font-medium text-[var(--text-muted)]">End</label>
                           {{ exp_form.end_date }}
                         </div>
-                        <div class="form-group mb-0 flex items-end pb-2">
+                        <div class="form-group mb-0 flex items-end sm:pb-2">
                           <label class="flex items-center gap-2 text-xs text-[var(--text-secondary)] cursor-pointer select-none">
                             {{ exp_form.is_current }}
                             <span>Currently active</span>
@@ -278,10 +278,10 @@
                   {{ edu_formset.management_form }}
                   <div id="education-forms" class="space-y-3">
                     {% for edu_form in edu_formset %}
-                    <div class="edu-form-row form-row-enter p-4 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-primary)]/50 hover:bg-[var(--bg-secondary)]/30 transition-colors">
+                    <div class="edu-form-row form-row-enter p-3 sm:p-4 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-primary)]/50 hover:bg-[var(--bg-secondary)]/30 transition-colors">
                       {% if edu_form.instance.pk %}
                       <div class="flex items-center gap-2 mb-3 pb-2 border-b border-[var(--border-subtle)]">
-                        <label class="flex items-center gap-1.5 text-xs text-[var(--text-muted)] cursor-pointer hover:text-[var(--aurora-pink)] transition-colors ml-auto p-1 rounded-md hover:bg-[var(--aurora-pink)]/5">
+                        <label class="flex items-center gap-1.5 text-xs text-[var(--text-muted)] cursor-pointer hover:text-[var(--aurora-pink)] transition-colors ml-auto p-1.5 rounded-md hover:bg-[var(--aurora-pink)]/5">
                           {{ edu_form.DELETE }}
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                           Remove
@@ -330,19 +330,19 @@
             </div>
           </div>
 
-          <div class="flex items-center justify-between gap-4 pt-6 mt-8 border-t border-[var(--border-subtle)]">
-            <div class="flex items-center gap-2 text-[11px] text-[var(--text-muted)]">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 mt-8 border-t border-[var(--border-subtle)] pb-4 sm:pb-0">
+            <div class="hidden sm:flex items-center gap-2 text-[11px] text-[var(--text-muted)]">
               <span class="kbd-hint">Ctrl</span>
               <span class="text-[var(--text-muted)]">+</span>
               <span class="kbd-hint">Enter</span>
               <span>to save</span>
             </div>
-            <div class="flex items-center gap-3">
-              <a href="{% url 'public_profile' user.username %}" class="btn-secondary text-sm">
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+              <a href="{% url 'public_profile' user.username %}" class="btn-secondary text-sm flex-1 sm:flex-none justify-center">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
                 Cancel
               </a>
-              <button type="submit" class="btn-primary text-sm">
+              <button type="submit" class="btn-primary text-sm flex-1 sm:flex-none justify-center">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
                 Save changes
               </button>

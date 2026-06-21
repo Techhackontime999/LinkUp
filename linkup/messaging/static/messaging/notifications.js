@@ -40,9 +40,9 @@ class NotificationSystem {
     }
 
     setupEventListeners() {
-        // Toggle dropdown
+        // Toggle dropdown on click (works on both desktop and mobile)
         this.btn.addEventListener('click', (e) => {
-            e.preventDefault();
+            e.stopPropagation();
             this.toggleDropdown();
         });
 
@@ -62,10 +62,11 @@ class NotificationSystem {
 
         // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
-            if (!this.dropdown.contains(e.target) && !this.btn.contains(e.target)) {
+            if (this.dropdown && !this.dropdown.classList.contains('hidden') &&
+                !this.dropdown.contains(e.target) && !this.btn.contains(e.target)) {
                 this.closeDropdown();
             }
-        });
+        }, true);
 
         // Handle visibility change for connection management
         document.addEventListener('visibilitychange', () => {
@@ -443,47 +444,18 @@ class NotificationSystem {
     }
     
     toggleDropdown() {
-        console.log('=== NOTIFICATION DEBUG ===');
-        console.log('toggleDropdown called');
-        console.log('dropdown element:', this.dropdown);
-        console.log('btn element:', this.btn);
-        console.log('dropdown classes:', this.dropdown ? this.dropdown.className : 'NOT FOUND');
-        console.log('btn classes:', this.btn ? this.btn.className : 'NOT FOUND');
-        
-        if (!this.dropdown) {
-            console.error('Dropdown element not found!');
-            return;
-        }
-        
-        if (!this.btn) {
-            console.error('Button element not found!');
-            return;
-        }
+        if (!this.dropdown || !this.btn) return;
         
         const isHidden = this.dropdown.classList.contains('hidden');
-        console.log('Dropdown is hidden:', isHidden);
         
         if (isHidden) {
-            console.log('Opening dropdown...');
-            // Show dropdown
             this.dropdown.classList.remove('hidden');
             this.dropdown.classList.add('block');
             this.btn.setAttribute('aria-expanded', 'true');
-            
-            // Load fresh notifications when opening
             this.loadInitialNotifications();
-            
-            // Add click outside listener
-            this.addClickOutsideListener();
-            
-            console.log('Notification dropdown opened successfully');
         } else {
-            console.log('Closing dropdown...');
-            // Hide dropdown
             this.closeDropdown();
         }
-        
-        console.log('=== END DEBUG ===');
     }
     
     closeDropdown() {
@@ -491,24 +463,7 @@ class NotificationSystem {
             this.dropdown.classList.add('hidden');
             this.dropdown.classList.remove('block');
             this.btn.setAttribute('aria-expanded', 'false');
-            this.removeClickOutsideListener();
             console.log('Notification dropdown closed');
-        }
-    }
-    
-    addClickOutsideListener() {
-        this.clickOutsideHandler = (e) => {
-            if (!this.dropdown.contains(e.target) && !this.btn.contains(e.target)) {
-                this.closeDropdown();
-            }
-        };
-        document.addEventListener('click', this.clickOutsideHandler);
-    }
-    
-    removeClickOutsideListener() {
-        if (this.clickOutsideHandler) {
-            document.removeEventListener('click', this.clickOutsideHandler);
-            this.clickOutsideHandler = null;
         }
     }
     
@@ -627,7 +582,6 @@ class NotificationSystem {
 function initializeNotificationSystem() {
     if (!window.notificationSystem) {
         window.notificationSystem = new NotificationSystem();
-        window.notificationSystem.init();
     }
 }
 
