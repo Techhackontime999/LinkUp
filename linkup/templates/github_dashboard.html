@@ -7,15 +7,15 @@
 .github-dashboard {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: clamp(1rem, 4vw, 2rem);
 }
 
 .github-header {
     background: linear-gradient(135deg, #24292e 0%, #2f363d 100%);
     color: white;
-    padding: 2rem;
+    padding: clamp(1.25rem, 4vw, 2rem);
     border-radius: 12px;
-    margin-bottom: 2rem;
+    margin-bottom: clamp(1rem, 3vw, 2rem);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
@@ -24,14 +24,14 @@
     align-items: center;
     gap: 1rem;
     margin: 0 0 0.5rem 0;
-    font-size: 2.5rem;
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
     font-weight: 700;
 }
 
 .github-header .subtitle {
     opacity: 0.9;
-    font-size: 1.1rem;
-    margin-bottom: 1.5rem;
+    font-size: clamp(0.9rem, 3vw, 1.1rem);
+    margin-bottom: clamp(1rem, 3vw, 1.5rem);
 }
 
 .github-status-badge {
@@ -57,15 +57,15 @@
 
 .github-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 2rem;
-    margin-bottom: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
+    gap: clamp(1rem, 3vw, 2rem);
+    margin-bottom: clamp(1rem, 3vw, 2rem);
 }
 
 .github-card {
     background: white;
     border-radius: 12px;
-    padding: 1.5rem;
+    padding: clamp(1rem, 3vw, 1.5rem);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;

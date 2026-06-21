@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-<div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:400px;width:100%;pointer-events:none"></div>
+<div id="toast-container" class="toast-container"></div>
 <div id="feed-skeleton" style="display:none" class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
   <aside class="hidden lg:block lg:col-span-3 space-y-6">
     <div class="skeleton" style="border-radius:var(--radius-xl);height:320px;background:var(--bg-secondary)"></div>
@@ -541,7 +541,7 @@
         {% endif %}
         {% endwith %}
 
-        <div class="flex items-center gap-1 pt-3 border-t border-[var(--border-subtle)]">
+        <div class="flex items-center gap-1 pt-3 border-t border-[var(--border-subtle)] responsive-wrap">
           <button class="like-btn {% if request.user in post.likes.all %}liked{% endif %}" data-post-id="{{ post.id }}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="{% if request.user in post.likes.all %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
             <span class="like-count">{{ post.total_likes }}</span>
@@ -689,7 +689,7 @@
 <!-- Edit Post Modal -->
 <div id="editPostModal" class="modal-overlay hidden">
   <div class="modal-content">
-    <div class="modal-header">
+    <div class="modal-header responsive-px">
       <h3 class="text-lg font-bold text-[var(--text-primary)]">Edit post</h3>
       <button id="closeEditModal" class="btn-ghost p-1.5">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>

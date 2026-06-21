@@ -127,7 +127,7 @@ LOGIN_URL = 'login'
 
 # Tailwind
 TAILWIND_APP_NAME = 'theme'
-NPM_BIN_PATH = "npm"
+NPM_BIN_PATH = "C:\\Program Files\\nodejs\\npm.cmd"
 
 # Performance Settings
 DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024  # 50MB

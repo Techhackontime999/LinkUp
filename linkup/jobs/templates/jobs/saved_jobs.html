@@ -18,36 +18,36 @@
 
   <div class="lg:col-span-9 space-y-4">
     <div class="flex items-center justify-between scroll-reveal">
-      <h1 class="text-2xl font-bold text-[var(--text-primary)]">Saved Jobs</h1>
+      <h1 class="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Saved Jobs</h1>
       <a href="{% url 'jobs:job_list' %}" class="btn-primary text-sm">Find More Jobs</a>
     </div>
 
     <div class="stagger-container space-y-3">
       {% for saved_job in page_obj %}
-      <article class="card-premium p-5 stagger-item scroll-reveal">
-        <div class="flex items-start gap-4">
+      <article class="card-premium p-4 sm:p-5 stagger-item scroll-reveal">
+        <div class="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
           <div class="w-10 h-10 rounded-[var(--radius-md)] bg-gradient-to-br from-[var(--accent)] to-[var(--accent-dark)] flex items-center justify-center flex-shrink-0 text-sm font-bold text-white">
             {{ saved_job.job.company|slice:":1"|upper }}
           </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-start justify-between gap-4">
+          <div class="flex-1 min-w-0 w-full sm:w-auto">
+            <div class="flex flex-col sm:flex-row items-start justify-between gap-3">
               <div>
                 <div class="flex items-center gap-2 mb-1">
-                  <a href="{% url 'jobs:job_detail' saved_job.job.pk %}" class="text-base font-semibold text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors no-underline">{{ saved_job.job.title }}</a>
-                  <span class="badge badge-ghost text-[10px] flex items-center gap-1"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19 21-5-5h-6L5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Saved</span>
+                  <a href="{% url 'jobs:job_detail' saved_job.job.pk %}" class="text-sm sm:text-base font-semibold text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors no-underline">{{ saved_job.job.title }}</a>
+                  <span class="badge badge-ghost text-[10px] flex items-center gap-1 flex-shrink-0"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19 21-5-5h-6L5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Saved</span>
                 </div>
                 <p class="text-sm text-[var(--text-secondary)]">{{ saved_job.job.company }}</p>
-                <div class="flex flex-wrap items-center gap-3 mt-1 text-xs text-[var(--text-muted)]">
+                <div class="flex flex-wrap items-center gap-2 sm:gap-3 mt-1 text-xs text-[var(--text-muted)]">
                   <span>{{ saved_job.job.location }} ({{ saved_job.job.get_workplace_type_display }})</span>
                   <span>Saved {{ saved_job.saved_at|timesince }} ago</span>
                 </div>
               </div>
-              <div class="flex-shrink-0 flex flex-col items-end gap-2">
+              <div class="flex flex-row sm:flex-col items-center sm:items-end gap-2 self-start sm:self-end">
                 <div class="flex gap-2">
                   <a href="{% url 'jobs:job_detail' saved_job.job.pk %}" class="btn-ghost text-xs px-2.5 py-1">View</a>
                   <form action="{% url 'jobs:save_job' saved_job.job.pk %}" method="post">{% csrf_token %}<button type="submit" class="btn-ghost text-xs px-2.5 py-1 text-red-500 hover:bg-red-500/10">Unsave</button></form>
                 </div>
-                <span class="text-sm font-semibold text-[var(--accent)]">{{ saved_job.job.salary_range|default:"Competitive Salary" }}</span>
+                <span class="text-xs sm:text-sm font-semibold text-[var(--accent)]">{{ saved_job.job.salary_range|default:"Competitive Salary" }}</span>
               </div>
             </div>
           </div>
@@ -70,6 +70,14 @@
       <div class="pagination">{% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}" class="pagination-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></a>{% endif %}{% for i in page_obj.paginator.page_range %}{% if i == page_obj.number %}<span class="pagination-btn active">{{ i }}</span>{% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}<a href="?page={{ i }}" class="pagination-btn">{{ i }}</a>{% endif %}{% endfor %}{% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}" class="pagination-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>{% endif %}</div>
     </div>
     {% endif %}
+
+    <div class="card-premium p-4 scroll-reveal lg:hidden">
+      <div class="flex items-center justify-between">
+        <span class="text-xs text-[var(--text-secondary)]">Saved Jobs</span>
+        <span class="text-sm font-semibold text-[var(--accent)]">{{ page_obj.paginator.count }}</span>
+      </div>
+      <a href="{% url 'jobs:job_list' %}" class="btn-primary w-full text-sm justify-center mt-3">Browse More Jobs</a>
+    </div>
   </div>
 </div>
 {% endblock %}

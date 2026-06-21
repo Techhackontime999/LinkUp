@@ -45,17 +45,17 @@
           </div>
           <div class="space-y-3">
             {% for req in received_requests %}
-            <div class="flex items-center justify-between gap-4 p-4 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-secondary)]/80 transition-colors">
-              <div class="flex items-center gap-4 min-w-0">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-[var(--bg-secondary)] hover:bg-[var(--bg-secondary)]/80 transition-colors">
+              <div class="flex items-center gap-3 sm:gap-4 min-w-0">
                 <div class="flex-shrink-0" style="width:44px;height:44px;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal));color:white;font-weight:700;font-size:0.875rem;display:flex;align-items:center;justify-content:center;">{{ req.user.username|slice:":2"|upper }}</div>
-                <div class="min-w-0">
+                <div class="min-w-0 flex-1">
                   <h3 class="text-sm font-semibold text-[var(--text-primary)] truncate">{{ req.user.get_full_name|default:req.user.username }}</h3>
                   <p class="text-xs text-[var(--text-secondary)] truncate">{{ req.user.profile.headline|default:"Professional" }}</p>
                 </div>
               </div>
-              <div class="flex items-center gap-2 flex-shrink-0">
-                <a href="{% url 'reject_request' req.id %}" class="btn-ghost text-sm px-3 py-1.5">Ignore</a>
-                <a href="{% url 'accept_request' req.id %}" class="btn-primary text-sm px-4 py-1.5">Accept</a>
+              <div class="flex items-center gap-2 flex-shrink-0 ml-0 sm:ml-2">
+                <a href="{% url 'reject_request' req.id %}" class="btn-ghost text-sm px-3 py-1.5 flex-1 sm:flex-none justify-center">Ignore</a>
+                <a href="{% url 'accept_request' req.id %}" class="btn-primary text-sm px-4 py-1.5 flex-1 sm:flex-none justify-center">Accept</a>
               </div>
             </div>
             {% endfor %}
