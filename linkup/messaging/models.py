@@ -135,6 +135,7 @@ class Message(models.Model):
             'created_at': self.created_at.isoformat(),
             'attachment_url': self.attachment.url if self.attachment else None,
             'status_icon': self.get_status_icon(),
+            'sender_avatar_url': self.sender.profile.avatar.url if hasattr(self.sender, 'profile') and self.sender.profile.avatar else None,
         }
     
     def to_websocket_message(self) -> dict:
@@ -152,6 +153,7 @@ class Message(models.Model):
             'read_at': self.read_at.isoformat() if self.read_at else None,
             'is_read': self.is_read,
             'status_icon': self.get_status_icon(),
+            'sender_avatar_url': self.sender.profile.avatar.url if hasattr(self.sender, 'profile') and self.sender.profile.avatar else None,
         }
 
 

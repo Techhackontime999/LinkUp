@@ -41,7 +41,7 @@ class CustomUserCreationForm(UserCreationForm):
         return password2
 
 class UserUpdateForm(forms.ModelForm):
-    email = forms.EmailField(required=True)
+    email = forms.EmailField(required=False)
 
     class Meta:
         model = User
@@ -58,14 +58,15 @@ class UserUpdateForm(forms.ModelForm):
     
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        if User.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
-            raise ValidationError("A user with this email already exists.")
+        if email:
+            if User.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+                raise ValidationError("A user with this email already exists.")
         return email
 
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['headline', 'bio', 'location', 'avatar', 'website', 'linkedin', 'github', 'youtube', 'instagram', 'twitter']
+        fields = ['headline', 'bio', 'location', 'avatar', 'cover_photo', 'website', 'linkedin', 'github', 'youtube', 'instagram', 'twitter']
         widgets = {
             'bio': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Tell us about yourself...'}),
             'headline': forms.TextInput(attrs={'placeholder': 'Your professional headline'}),

@@ -44,7 +44,11 @@
        data-username="{{ conv.user.username|lower }}">
       <div class="relative flex-shrink-0">
         <div class="avatar avatar-md avatar-ring">
+          {% if conv.user.profile.avatar %}
+          <img src="{{ conv.user.profile.avatar.url }}" alt="{{ conv.user.username }}" class="w-full h-full object-cover">
+          {% else %}
           {{ conv.user.username|slice:":2"|upper }}
+          {% endif %}
         </div>
         <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-[var(--bg-card)] {% if conv.is_online %}bg-green-500{% else %}bg-[var(--text-muted)]{% endif %}"></span>
       </div>

@@ -156,7 +156,11 @@
           <div class="relative" id="user-menu-container">
             <button id="user-menu-btn" class="flex items-center gap-2 p-1 rounded-full hover:opacity-80 transition-opacity breathing-glow" aria-label="User menu" style="animation-duration:4s">
               <div class="avatar avatar-sm avatar-ring">
+                {% if user.profile.avatar %}
+                <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="w-full h-full object-cover">
+                {% else %}
                 {{ user.username|slice:":1"|upper }}
+                {% endif %}
               </div>
             </button>
             <div id="user-dropdown" class="dropdown-menu hidden" style="min-width:180px">

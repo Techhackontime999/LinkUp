@@ -19,6 +19,13 @@ class Profile(models.Model):
         help_text="Upload a profile picture (max 5MB, JPG/PNG/GIF/WebP only)"
     )
     location = models.CharField(max_length=100, blank=True)
+    cover_photo = models.ImageField(
+        upload_to=get_upload_path,
+        blank=True,
+        null=True,
+        validators=[ImageUploadValidator(max_size=20 * 1024 * 1024)],
+        help_text="Upload a cover photo (max 20MB, JPG/PNG/GIF/WebP only)"
+    )
     
     # Social media links
     website = models.URLField(max_length=500, blank=True, help_text="Personal website URL")

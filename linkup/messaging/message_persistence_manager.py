@@ -867,7 +867,8 @@ class MessagePersistenceManager:
             'is_read': message.is_read,
             'retry_count': message.retry_count,
             'last_error': message.last_error,
-            'updated_at': message.updated_at.isoformat() if hasattr(message, 'updated_at') and message.updated_at else None
+            'updated_at': message.updated_at.isoformat() if hasattr(message, 'updated_at') and message.updated_at else None,
+            'sender_avatar_url': message.sender.profile.avatar.url if hasattr(message.sender, 'profile') and message.sender.profile.avatar else None,
         }
 
     async def _serialize_message(self, message: 'Message') -> Dict[str, Any]:
@@ -892,7 +893,8 @@ class MessagePersistenceManager:
             'is_read': message.is_read,
             'retry_count': message.retry_count,
             'last_error': message.last_error,
-            'updated_at': message.updated_at.isoformat() if hasattr(message, 'updated_at') and message.updated_at else None
+            'updated_at': message.updated_at.isoformat() if hasattr(message, 'updated_at') and message.updated_at else None,
+            'sender_avatar_url': message.sender.profile.avatar.url if hasattr(message.sender, 'profile') and message.sender.profile.avatar else None,
         }
     
     async def _get_conversation_metadata(self, user1_id: int, user2_id: int) -> Dict[str, Any]:

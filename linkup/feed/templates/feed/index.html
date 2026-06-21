@@ -24,36 +24,59 @@
   <aside class="hidden lg:block lg:col-span-3 space-y-6">
     <div class="double-bezel tilt-card scroll-reveal">
 <div class="bezel-outer">
-          <div class="bezel-inner p-0 overflow-hidden">
-          <div class="h-20 bg-gradient-to-br from-[var(--aurora-purple)] via-[var(--aurora-teal)] to-[var(--aurora-cyan)] relative"
-               style="background-size:200% 200%;animation:gradient-shift 6s ease infinite">
-            <div class="absolute inset-0 bg-[var(--bg-primary)]/10"></div>
+          <div class="bezel-inner p-0 overflow-hidden relative">
+          <a href="{% url 'profile' %}" class="block group">
+          <div class="h-24 relative overflow-hidden bg-gradient-to-br from-[var(--aurora-purple)] via-[var(--aurora-teal)] to-[var(--aurora-cyan)]"
+               {% if user.profile.cover_photo %}style="background:none"{% else %}style="background-size:200% 200%;animation:gradient-shift 6s ease infinite"{% endif %}>
+            {% if user.profile.cover_photo %}
+            <img src="{{ user.profile.cover_photo.url }}" alt="Cover" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+            {% endif %}
+            <div class="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)]/30 to-transparent"></div>
+            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center bg-black/20">
+              <span class="backdrop-blur-sm bg-white/20 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full border border-white/20">Change cover</span>
+            </div>
           </div>
-          <div class="px-5 pb-5 -mt-10">
-            <div class="mb-3">
-              <div style="width:56px;height:56px;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal));color:white;font-weight:700;font-size:1.125rem;display:flex;align-items:center;justify-content:center;outline:3px solid var(--bg-card);outline-offset:-2px;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+          </a>
+          <div class="px-5 pb-5 -mt-12">
+            <div class="mb-3 relative">
+              <a href="{% url 'profile' %}" class="block group">
+              <div class="float-anim" style="width:60px;height:60px;border-radius:18px;overflow:hidden;background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal));color:white;font-weight:700;font-size:1.125rem;display:flex;align-items:center;justify-content:center;outline:3px solid var(--bg-card);outline-offset:-2px;box-shadow:0 4px 16px rgba(0,0,0,0.12),inset 0 1px 0 rgba(255,255,255,0.15);">
+                {% if user.profile.avatar %}
+                <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
+                {% else %}
                 {{ user.username|slice:":2"|upper }}
+                {% endif %}
               </div>
+              <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" style="width:60px;height:60px;border-radius:18px;margin-top:0;">
+                <div class="w-full h-full rounded-[18px] bg-black/30 flex items-center justify-center backdrop-blur-[2px]">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                </div>
+              </div>
+              </a>
             </div>
             <h2 class="text-base font-bold text-[var(--text-primary)]">{{ user.get_full_name|default:user.username }}</h2>
             <p class="text-xs text-[var(--text-secondary)] mt-0.5">{{ user.profile.headline|default:"Building the future" }}</p>
+            <a href="{% url 'profile' %}" class="inline-flex items-center gap-1 text-[10px] text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors mt-1.5 no-underline">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+              Edit profile
+            </a>
             <div class="h-px bg-[var(--border-subtle)] my-3"></div>
-            <div class="space-y-2.5">
-              <div class="flex items-center justify-between py-1.5 px-3 rounded-xl bg-[var(--bg-secondary)]">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between py-1.5 px-3 rounded-xl bg-[var(--bg-secondary)] transition-colors hover:bg-[var(--bg-secondary)]/80">
                 <span class="text-xs text-[var(--text-muted)]">Profile views</span>
                 <div class="flex items-center gap-1.5">
                   <span class="w-1.5 h-1.5 rounded-full bg-[var(--aurora-teal)] animate-pulse"></span>
                   <span class="stat-counter text-sm font-bold text-[var(--accent)]" data-target="{{ profile_views|default:127 }}">0</span>
                 </div>
               </div>
-              <div class="flex items-center justify-between py-1.5 px-3 rounded-xl bg-[var(--bg-secondary)]">
+              <div class="flex items-center justify-between py-1.5 px-3 rounded-xl bg-[var(--bg-secondary)] transition-colors hover:bg-[var(--bg-secondary)]/80">
                 <span class="text-xs text-[var(--text-muted)]">Post impressions</span>
                 <div class="flex items-center gap-1.5">
                   <span class="w-1.5 h-1.5 rounded-full bg-[var(--aurora-cyan)] animate-pulse" style="animation-delay:0.5s"></span>
                   <span class="text-sm font-bold text-[var(--accent)]">{{ post_impressions|default:"1.4k" }}</span>
                 </div>
               </div>
-              <div class="flex items-center justify-between py-1.5 px-3 rounded-xl bg-[var(--bg-secondary)]">
+              <div class="flex items-center justify-between py-1.5 px-3 rounded-xl bg-[var(--bg-secondary)] transition-colors hover:bg-[var(--bg-secondary)]/80">
                 <span class="text-xs text-[var(--text-muted)]">Connections</span>
                 <span class="stat-counter text-sm font-bold text-[var(--accent)]" data-target="{{ total_connections|default:0 }}">0</span>
               </div>
@@ -186,7 +209,7 @@
             {% csrf_token %}
             {{ form.media }}
             <div class="flex items-start gap-3">
-              <div style="width:40px;height:40px;border-radius:12px;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal));color:white;font-weight:700;font-size:0.75rem;display:flex;align-items:center;justify-content:center;">{{ user.username|slice:":2"|upper }}</div>
+              <div style="width:40px;height:40px;border-radius:12px;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal));color:white;font-weight:700;font-size:0.75rem;display:flex;align-items:center;justify-content:center;">{% if user.profile.avatar %}<img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="w-full h-full object-cover">{% else %}{{ user.username|slice:":2"|upper }}{% endif %}</div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-center justify-between mb-2">
                   <div>
@@ -228,7 +251,7 @@
       <article class="post-card stagger-item scroll-reveal post-card-clickable" data-post-id="{{ post.id }}" data-index="{{ forloop.counter0 }}">
         <div class="flex items-start gap-3 mb-3">
           <a href="{% url 'public_profile' post.user.username %}">
-            <div style="width:44px;height:44px;border-radius:14px;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal));color:white;font-weight:700;font-size:0.75rem;display:flex;align-items:center;justify-content:center;outline:2px solid var(--bg-card);outline-offset:-1px;">{{ post.user.username|slice:":2"|upper }}</div>
+            <div style="width:44px;height:44px;border-radius:14px;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal));color:white;font-weight:700;font-size:0.75rem;display:flex;align-items:center;justify-content:center;outline:2px solid var(--bg-card);outline-offset:-1px;">{% if post.user.profile.avatar %}<img src="{{ post.user.profile.avatar.url }}" alt="{{ post.user.username }}" class="w-full h-full object-cover">{% else %}{{ post.user.username|slice:":2"|upper }}{% endif %}</div>
           </a>
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between gap-2">
@@ -538,7 +561,7 @@
         <div class="comments-section hidden pt-3 mt-3 border-t border-[var(--border-subtle)]" data-post-id="{{ post.id }}">
           <div class="comments-list space-y-3 mb-3 max-h-72 overflow-y-auto"></div>
           <div class="flex items-start gap-3">
-            <div style="width:32px;height:32px;border-radius:10px;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal));color:white;font-weight:700;font-size:0.625rem;display:flex;align-items:center;justify-content:center;">{{ request.user.username|slice:":2"|upper }}</div>
+            <div style="width:32px;height:32px;border-radius:10px;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal));color:white;font-weight:700;font-size:0.625rem;display:flex;align-items:center;justify-content:center;">{% if request.user.profile.avatar %}<img src="{{ request.user.profile.avatar.url }}" alt="{{ request.user.username }}" class="w-full h-full object-cover">{% else %}{{ request.user.username|slice:":2"|upper }}{% endif %}</div>
             <div class="flex-1">
               <form class="comment-form" data-post-id="{{ post.id }}">
                 {% csrf_token %}
@@ -605,9 +628,7 @@
           <div class="space-y-3">
             {% for suggested in suggested_users|slice:":5" %}
             <div class="flex items-center gap-3 group">
-              <div style="width:36px;height:36px;border-radius:12px;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal));color:white;font-weight:700;font-size:0.625rem;display:flex;align-items:center;justify-content:center;">
-                {{ suggested.username|slice:":1"|upper }}
-              </div>
+              <div style="width:36px;height:36px;border-radius:12px;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal));color:white;font-weight:700;font-size:0.625rem;display:flex;align-items:center;justify-content:center;">{% if suggested.profile.avatar %}<img src="{{ suggested.profile.avatar.url }}" alt="{{ suggested.username }}" class="w-full h-full object-cover">{% else %}{{ suggested.username|slice:":1"|upper }}{% endif %}</div>
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-medium text-[var(--text-primary)] truncate">{{ suggested.get_full_name|default:suggested.username }}</p>
                 <p class="text-xs text-[var(--text-muted)] truncate">{{ suggested.profile.headline|default:"Professional" }}</p>
@@ -655,8 +676,11 @@
 
 <!-- Lightbox Overlay -->
 <div id="lightbox" class="hidden fixed inset-0 z-[9999] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeLightbox(event)">
-  <button class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors p-2" onclick="closeLightbox()">
+  <button class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors p-2 z-10" onclick="closeLightbox()">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+  </button>
+  <button id="lb-fullscreen-btn" class="absolute top-4 right-14 text-white/70 hover:text-white transition-colors p-2 z-10" onclick="toggleDocFullscreen(document.getElementById('lightbox').querySelector('#lightbox-img, #lightbox-video'))" title="Full screen">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
   </button>
   <img id="lightbox-img" src="" alt="" class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl" style="display:none">
   <video id="lightbox-video" controls class="max-w-full max-h-[90vh] rounded-lg shadow-2xl" style="display:none" preload="metadata"></video>
@@ -789,6 +813,15 @@ document.addEventListener('DOMContentLoaded', function() {
       if (!lb.classList.contains('hidden')) closeLightbox();
     }
   });
+
+  // --- Fullscreen API ---
+  window.toggleDocFullscreen = function(el) {
+    if (!document.fullscreenElement) {
+      if (el.requestFullscreen) el.requestFullscreen();
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+    }
+  };
 
   const composerToggle = document.getElementById('composer-toggle');
   const composer = document.querySelector('.composer');
@@ -1031,8 +1064,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const div = document.createElement('div');
     div.className = 'flex items-start gap-3';
     const color = comment.user === '{{ request.user.username }}' ? 'var(--aurora-purple),var(--aurora-teal)' : 'var(--aurora-cyan),var(--aurora-teal)';
+    const avatarHtml = comment.avatar_url
+      ? `<img src="${comment.avatar_url}" alt="${comment.user}" class="w-full h-full object-cover">`
+      : `${comment.user.substring(0,2).toUpperCase()}`;
     div.innerHTML = `
-      <div style="width:32px;height:32px;border-radius:10px;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,${color});color:white;font-weight:700;font-size:0.625rem;display:flex;align-items:center;justify-content:center;">${comment.user.substring(0,2).toUpperCase()}</div>
+      <div style="width:32px;height:32px;border-radius:10px;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,${color});color:white;font-weight:700;font-size:0.625rem;display:flex;align-items:center;justify-content:center;">${avatarHtml}</div>
       <div class="flex-1 bg-[var(--bg-secondary)] rounded-xl p-3">
         <div class="flex items-center justify-between gap-2 mb-1">
           <span class="text-sm font-semibold text-[var(--text-primary)]">${comment.user}</span>

@@ -116,6 +116,9 @@ def add_comment(request, post_id):
                 user=request.user,
                 content=content
             )
+            avatar_url = None
+            if comment.user.profile.avatar:
+                avatar_url = comment.user.profile.avatar.url
             return JsonResponse({
                 'success': True,
                 'comment': {
@@ -123,7 +126,8 @@ def add_comment(request, post_id):
                     'user': comment.user.username,
                     'content': comment.content,
                     'created_at': comment.created_at.strftime('%b %d, %Y at %I:%M %p'),
-                    'is_owner': comment.user == request.user
+                    'is_owner': comment.user == request.user,
+                    'avatar_url': avatar_url
                 },
                 'comments_count': post.total_comments()
             })
@@ -137,13 +141,19 @@ def get_comments(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     comments = post.comments.select_related('user').all()
     
-    comments_data = [{
-        'id': comment.id,
-        'user': comment.user.username,
-        'content': comment.content,
-        'created_at': comment.created_at.strftime('%b %d, %Y at %I:%M %p'),
-        'is_owner': comment.user == request.user
-    } for comment in comments]
+    comments_data = []
+    for comment in comments:
+        avatar_url = None
+        if comment.user.profile.avatar:
+            avatar_url = comment.user.profile.avatar.url
+        comments_data.append({
+            'id': comment.id,
+            'user': comment.user.username,
+            'content': comment.content,
+            'created_at': comment.created_at.strftime('%b %d, %Y at %I:%M %p'),
+            'is_owner': comment.user == request.user,
+            'avatar_url': avatar_url
+        })
     
     return JsonResponse({
         'success': True,

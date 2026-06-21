@@ -19,7 +19,11 @@
         <div class="flex items-center gap-4">
           <div class="relative">
             <div class="avatar avatar-md avatar-ring ring-[var(--accent)]">
+              {% if target.profile.avatar %}
+              <img src="{{ target.profile.avatar.url }}" alt="{{ target.username }}" class="w-full h-full object-cover">
+              {% else %}
               {{ target.username|slice:":2"|upper }}
+              {% endif %}
             </div>
             <span id="online-indicator" class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-[var(--accent)] {% if is_online %}bg-green-400 animate-pulse{% else %}bg-[var(--text-muted)]{% endif %}"></span>
           </div>

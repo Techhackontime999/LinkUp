@@ -10,6 +10,7 @@ import hashlib
 import logging
 from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.core.files.base import File
 from django.core.files.uploadedfile import UploadedFile
 from django.utils.deconstruct import deconstructible
 from PIL import Image
@@ -109,13 +110,15 @@ class FileUploadValidator:
         Validate uploaded file for security and compliance.
         
         Args:
-            file: Django UploadedFile instance
+            file: Django File or UploadedFile instance
             
         Raises:
             ValidationError: If file fails any validation check
         """
-        if not isinstance(file, UploadedFile):
+        if not isinstance(file, (File, UploadedFile)):
             raise ValidationError("Invalid file upload.")
+        if not file.name:
+            raise ValidationError("File must have a name.")
         
         # Check file size
         self._validate_file_size(file)
@@ -195,8 +198,8 @@ class FileUploadValidator:
                     else:
                         detected_mime = 'application/octet-stream'
             
-            # Also check Django's content_type
-            declared_mime = file.content_type
+            # Also check Django's content_type (only UploadedFile has this)
+            declared_mime = getattr(file, 'content_type', None)
             
             # Validate against allowed types
             if detected_mime not in self.allowed_types:

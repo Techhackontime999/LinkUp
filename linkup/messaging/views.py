@@ -239,7 +239,8 @@ def fetch_history(request, username):
                         'read_at': m.read_at.isoformat() if m.read_at else None,
                         'is_read': m.is_read,
                         'retry_count': m.retry_count,
-                        'status_icon': m.get_status_icon()
+                        'status_icon': m.get_status_icon(),
+                        'sender_avatar_url': m.sender.profile.avatar.url if hasattr(m.sender, 'profile') and m.sender.profile.avatar else None,
                     }
                     messages.append(message_data)
                 except Exception as e:

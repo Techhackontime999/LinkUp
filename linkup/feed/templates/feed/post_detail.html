@@ -10,7 +10,7 @@
   <article class="post-card scroll-reveal">
     <div class="flex items-start gap-3 mb-4">
       <a href="{% url 'public_profile' post.user.username %}">
-        <div class="avatar avatar-md avatar-ring">{{ post.user.username|slice:":2"|upper }}</div>
+          <div class="avatar avatar-md avatar-ring">{% if post.user.profile.avatar %}<img src="{{ post.user.profile.avatar.url }}" alt="{{ post.user.username }}" class="w-full h-full object-cover">{% else %}{{ post.user.username|slice:":2"|upper }}{% endif %}</div>
       </a>
       <div class="flex-1 min-w-0">
         <div class="flex items-center justify-between gap-2">
@@ -312,7 +312,7 @@
       <div class="comments-list space-y-3 mb-3 max-h-96 overflow-y-auto">
         {% for comment in comments %}
         <div class="flex items-start gap-3">
-          <div class="avatar avatar-sm flex-shrink-0">{{ comment.user.username|slice:":2"|upper }}</div>
+          <div class="avatar avatar-sm flex-shrink-0">{% if comment.user.profile.avatar %}<img src="{{ comment.user.profile.avatar.url }}" alt="{{ comment.user.username }}" class="w-full h-full object-cover">{% else %}{{ comment.user.username|slice:":2"|upper }}{% endif %}</div>
           <div class="flex-1 bg-[var(--bg-secondary)] rounded-[var(--radius-md)] p-3">
             <div class="flex items-center justify-between mb-1">
               <span class="text-sm font-semibold text-[var(--text-primary)]">{{ comment.user.username }}</span>
@@ -326,7 +326,7 @@
         {% endfor %}
       </div>
       <div class="flex items-start gap-3">
-        <div class="avatar avatar-sm flex-shrink-0">{{ request.user.username|slice:":2"|upper }}</div>
+        <div class="avatar avatar-sm flex-shrink-0">{% if request.user.profile.avatar %}<img src="{{ request.user.profile.avatar.url }}" alt="{{ request.user.username }}" class="w-full h-full object-cover">{% else %}{{ request.user.username|slice:":2"|upper }}{% endif %}</div>
         <div class="flex-1">
           <form class="comment-form" data-post-id="{{ post.id }}">
             {% csrf_token %}
@@ -339,6 +339,18 @@
       </div>
     </div>
   </article>
+</div>
+
+<!-- Lightbox with fullscreen -->
+<div id="lightbox" class="hidden fixed inset-0 z-[9999] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4" onclick="closeLightbox(event)">
+  <button class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors p-2 z-10" onclick="closeLightbox()">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+  </button>
+  <button id="lb-fullscreen-btn" class="absolute top-4 right-14 text-white/70 hover:text-white transition-colors p-2 z-10" onclick="toggleDocFullscreen(document.getElementById('lightbox').querySelector('#lightbox-img, #lightbox-video'))" title="Full screen">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+  </button>
+  <img id="lightbox-img" src="" alt="" class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl" style="display:none">
+  <video id="lightbox-video" controls class="max-w-full max-h-[90vh] rounded-lg shadow-2xl" style="display:none" preload="metadata"></video>
 </div>
 
 <script>
@@ -391,5 +403,47 @@ document.addEventListener('DOMContentLoaded', function () {
       .then(r => r.json()).then(data => { if (data.success) location.reload(); });
   });
 });
+
+// --- Lightbox ---
+window.openLightbox = function(url) {
+  const lb = document.getElementById('lightbox');
+  const img = document.getElementById('lightbox-img');
+  const video = document.getElementById('lightbox-video');
+  img.style.display = 'none';
+  video.style.display = 'none';
+  if (url.match(/\.(mp4|webm|mov)(\?|$)/i)) {
+    video.src = url;
+    video.style.display = '';
+    video.play();
+  } else {
+    img.src = url;
+    img.style.display = '';
+  }
+  lb.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+};
+window.closeLightbox = function(e) {
+  if (e && e.target !== e.currentTarget) return;
+  const lb = document.getElementById('lightbox');
+  lb.classList.add('hidden');
+  document.body.style.overflow = '';
+  const video = document.getElementById('lightbox-video');
+  if (video) { video.pause(); video.src = ''; }
+};
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const lb = document.getElementById('lightbox');
+    if (!lb.classList.contains('hidden')) closeLightbox();
+  }
+});
+
+// --- Fullscreen API ---
+window.toggleDocFullscreen = function(el) {
+  if (!document.fullscreenElement) {
+    if (el.requestFullscreen) el.requestFullscreen();
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen();
+  }
+};
 </script>
 {% endblock %}

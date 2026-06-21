@@ -4,10 +4,13 @@
   <div class="double-bezel tilt-card scroll-reveal">
     <div class="bezel-outer">
       <div class="bezel-inner p-0 overflow-hidden">
-        <div class="h-28 sm:h-36 md:h-40 lg:h-44 relative" style="background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal),var(--aurora-cyan),var(--aurora-purple));background-size:300% 300%;animation:gradient-shift 6s ease infinite">
-          <div class="absolute inset-0 bg-[var(--bg-primary)]/10"></div>
+        <div class="h-28 sm:h-36 md:h-40 lg:h-44 relative overflow-hidden" style="{% if profile_user.profile.cover_photo %}background:none{% else %}background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal),var(--aurora-cyan),var(--aurora-purple));background-size:300% 300%;animation:gradient-shift 6s ease infinite{% endif %}">
+          {% if profile_user.profile.cover_photo %}
+          <img src="{{ profile_user.profile.cover_photo.url }}" alt="Cover" class="w-full h-full object-cover">
+          {% endif %}
+          <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[var(--bg-card)]/60"></div>
         </div>
-        <div class="p-5 sm:p-6 -mt-6 sm:-mt-8 md:-mt-10 lg:-mt-12">
+        <div class="p-5 sm:p-6 -mt-8 sm:-mt-10 md:-mt-14 lg:-mt-16 relative z-10">
           <div class="flex flex-col sm:flex-row items-center sm:items-end gap-2 sm:gap-4 lg:gap-6">
             <div class="profile-avatar avatar-ring shadow-xl flex-shrink-0 relative">
               {% if profile_user.profile.avatar %}

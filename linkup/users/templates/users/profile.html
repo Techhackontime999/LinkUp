@@ -7,21 +7,33 @@
     <div class="bezel-outer">
       <div class="bezel-inner p-6 md:p-8">
 
-        <div class="flex items-center gap-4 mb-8 pb-6 border-b border-[var(--border-subtle)]">
-          <div class="avatar avatar-xl avatar-ring flex-shrink-0" id="avatar-preview">
-            {% if user.profile.avatar %}
-            <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="w-full h-full object-cover">
-            {% else %}
-            <span class="text-lg font-bold">{{ user.username|slice:":2"|upper }}</span>
+        <div class="relative mb-8 -mx-6 md:-mx-8 -mt-6 md:-mt-8">
+          <div class="relative h-40 sm:h-48 md:h-56 overflow-hidden {% if not user.profile.cover_photo %}bg-gradient-to-br from-[var(--aurora-purple)] via-[var(--aurora-teal)] to-[var(--aurora-cyan)]{% endif %}" id="cover-preview" {% if not user.profile.cover_photo %}style="background-size:200% 200%;animation:gradient-shift 6s ease infinite"{% endif %}>
+            {% if user.profile.cover_photo %}
+            <img src="{{ user.profile.cover_photo.url }}" alt="Cover" class="w-full h-full object-cover">
             {% endif %}
+            <div class="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)]/40 via-transparent to-transparent"></div>
+            <div class="absolute inset-0 bg-[var(--bg-primary)]/5"></div>
           </div>
-          <div>
-            <h2 class="text-xl font-bold text-[var(--text-primary)]">{{ user.get_full_name|default:user.username }}</h2>
-            <p class="text-sm text-[var(--text-secondary)]">{{ user.profile.headline|default:"Complete your profile" }}</p>
-            <div class="flex items-center gap-2 mt-1.5">
-              <span class="live-dot sm"></span>
-              <span class="text-[11px] text-[var(--text-muted)]">Editing your profile</span>
+          <div class="absolute flex items-end gap-4" style="bottom:-48px;left:1.5rem;">
+            <div class="relative group" id="avatar-preview" style="width:88px;height:88px;border-radius:20px;overflow:hidden;background:linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal));color:white;font-weight:700;font-size:1.5rem;display:flex;align-items:center;justify-content:center;outline:4px solid var(--bg-card);outline-offset:-2px;box-shadow:0 8px 24px rgba(0,0,0,0.12),inset 0 1px 0 rgba(255,255,255,0.15);">
+              {% if user.profile.avatar %}
+              <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="w-full h-full object-cover" style="border-radius:18px;">
+              {% else %}
+              <span class="text-lg font-bold" style="border-radius:18px;">{{ user.username|slice:":2"|upper }}</span>
+              {% endif %}
+              <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center bg-black/30 backdrop-blur-[2px]" style="border-radius:18px;cursor:pointer;" onclick="document.querySelector('#avatar-upload-zone input[type=file]').click()">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              </div>
             </div>
+          </div>
+        </div>
+        <div class="relative z-10 mt-28 sm:mt-24 mb-6 pb-6 border-b border-[var(--border-subtle)]">
+          <h2 class="text-xl font-bold text-[var(--text-primary)]">{{ user.get_full_name|default:user.username }}</h2>
+          <p class="text-sm text-[var(--text-secondary)]">{{ user.profile.headline|default:"Complete your profile" }}</p>
+          <div class="flex items-center gap-2 mt-1.5">
+            <span class="live-dot sm"></span>
+            <span class="text-[11px] text-[var(--text-muted)]">Editing your profile</span>
           </div>
         </div>
 
@@ -90,13 +102,41 @@
                       {{ p_form.location }}
                     </div>
                     <div class="form-group">
-                      <label class="text-xs font-medium text-[var(--text-secondary)]">Avatar</label>
-                      <div class="file-upload-zone" id="avatar-upload-zone">
+                      <label class="text-xs font-medium text-[var(--text-secondary)]">Profile Photo</label>
+                      <div class="file-upload-zone drop-zone" id="avatar-upload-zone">
                         {{ p_form.avatar }}
                         <div class="file-upload-hint">
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                          <span>Upload photo</span>
+                          <span>{% if user.profile.avatar %}Change photo{% else %}Upload photo{% endif %}</span>
                         </div>
+                        <div class="drop-zone-overlay">
+                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                          <span>Drop photo here</span>
+                        </div>
+                      </div>
+                      {% if p_form.avatar.errors %}<div class="error-text text-xs mt-1">{{ p_form.avatar.errors.0 }}</div>{% endif %}
+                      <div class="help-text text-[10px] mt-1.5 flex items-center gap-1 text-[var(--text-muted)]">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        Square image recommended — will be cropped to a rounded square (88×88)
+                      </div>
+                    </div>
+                    <div class="form-group sm:col-span-2">
+                      <label class="text-xs font-medium text-[var(--text-secondary)]">Cover Photo</label>
+                      <div class="file-upload-zone drop-zone" id="cover-upload-zone">
+                        {{ p_form.cover_photo }}
+                        <div class="file-upload-hint">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="14" x="3" y="4" rx="2" ry="2"/><path d="M21 15l-5-5L5 21"/><line x1="8.5" y1="8" x2="8.51" y2="8"/></svg>
+                          <span>{% if user.profile.cover_photo %}Change cover{% else %}Upload cover{% endif %}</span>
+                        </div>
+                        <div class="drop-zone-overlay">
+                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="14" x="3" y="4" rx="2" ry="2"/><path d="M21 15l-5-5L5 21"/><line x1="8.5" y1="8" x2="8.51" y2="8"/></svg>
+                          <span>Drop cover here</span>
+                        </div>
+                      </div>
+                      {% if p_form.cover_photo.errors %}<div class="error-text text-xs mt-1">{{ p_form.cover_photo.errors.0 }}</div>{% endif %}
+                      <div class="help-text text-[10px] mt-1.5 flex items-center gap-1 text-[var(--text-muted)]">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        Wide banner recommended (e.g. 1200×400) — cropped to fill the banner area, top/bottom may be trimmed
                       </div>
                     </div>
                   </div>
@@ -331,6 +371,11 @@
   cursor: pointer;
   z-index: 2;
 }
+.file-upload-zone a,
+.file-upload-zone input[type="checkbox"],
+.file-upload-zone label {
+  display: none !important;
+}
 .file-upload-hint {
   display: flex;
   align-items: center;
@@ -354,6 +399,43 @@
 .file-upload-zone:hover .file-upload-hint svg {
   color: var(--accent);
 }
+.cover-upload-area {
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.drop-zone {
+  position: relative;
+}
+.drop-zone-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-md);
+  border: 2px dashed var(--accent);
+  background: rgba(124, 58, 237, 0.06);
+  color: var(--accent);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  backdrop-filter: blur(4px);
+  animation: dropZoneIn 0.25s ease-out;
+}
+.drop-zone.dragover .file-upload-hint {
+  opacity: 0.3;
+}
+.drop-zone.dragover .drop-zone-overlay {
+  display: flex;
+}
+@keyframes dropZoneIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
 </style>
 
 <script>
@@ -371,6 +453,90 @@ document.addEventListener('DOMContentLoaded', function() {
     autoGrow();
   });
 
+  // --- Remove photo buttons ---
+  function addRemoveHandler(zoneId, clearName) {
+    const zone = document.getElementById(zoneId);
+    if (!zone) return;
+    const fileInput = zone.querySelector('input[type="file"]');
+    const hasFile = fileInput && fileInput.value;
+    const existingRemove = zone.parentElement.querySelector('.remove-photo-btn');
+    if (existingRemove) existingRemove.remove();
+
+    const clearInput = document.querySelector('input[name="' + clearName + '"]');
+    if (clearInput) {
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'remove-photo-btn flex items-center gap-1.5 text-[11px] text-[var(--aurora-pink)] hover:text-[var(--aurora-pink)]/80 transition-colors mt-1.5 cursor-pointer bg-transparent border-none';
+      removeBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg> Remove';
+      removeBtn.addEventListener('click', function() {
+        clearInput.checked = true;
+        clearInput.dispatchEvent(new Event('change', {bubbles: true}));
+        this.remove();
+        // Also reset the preview
+        var preview = document.getElementById(zoneId === 'avatar-upload-zone' ? 'avatar-preview' : 'cover-preview');
+        if (zoneId === 'avatar-upload-zone' && preview) {
+          var img = preview.querySelector('img');
+          if (img) {
+            var span = document.createElement('span');
+            span.className = 'text-lg font-bold';
+            span.style.borderRadius = '18px';
+            span.textContent = '{{ user.username|slice:":2"|upper }}';
+            img.replaceWith(span);
+          }
+          var camOverlay = preview.querySelector('.absolute.inset-0');
+          if (camOverlay) camOverlay.style.display = '';
+        }
+        if (zoneId === 'cover-upload-zone' && preview) {
+          preview.style.background = 'linear-gradient(135deg,var(--aurora-purple),var(--aurora-teal),var(--aurora-cyan))';
+          preview.style.backgroundSize = '200% 200%';
+          preview.style.animation = 'gradient-shift 6s ease infinite';
+          preview.innerHTML = '';
+          var gradient = document.createElement('div');
+          gradient.className = 'absolute inset-0 bg-gradient-to-t from-[var(--bg-card)]/40 via-transparent to-transparent';
+          preview.appendChild(gradient);
+          var overlay = document.createElement('div');
+          overlay.className = 'absolute inset-0 bg-[var(--bg-primary)]/5';
+          preview.appendChild(overlay);
+        }
+        var hint = zone.querySelector('.file-upload-hint span');
+        if (hint) hint.textContent = zoneId === 'avatar-upload-zone' ? 'Upload photo' : 'Upload cover';
+      });
+      zone.parentElement.appendChild(removeBtn);
+    }
+  }
+  addRemoveHandler('avatar-upload-zone', 'avatar-clear');
+  addRemoveHandler('cover-upload-zone', 'cover_photo-clear');
+
+  // --- Drag-and-drop support ---
+  document.querySelectorAll('.drop-zone').forEach(function(zone) {
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(function(evt) {
+      zone.addEventListener(evt, function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }, false);
+    });
+    ['dragenter', 'dragover'].forEach(function(evt) {
+      zone.addEventListener(evt, function() {
+        zone.classList.add('dragover');
+      }, false);
+    });
+    ['dragleave', 'drop'].forEach(function(evt) {
+      zone.addEventListener(evt, function() {
+        zone.classList.remove('dragover');
+      }, false);
+    });
+    zone.addEventListener('drop', function(e) {
+      var files = e.dataTransfer.files;
+      if (files.length) {
+        var input = zone.querySelector('input[type="file"]');
+        if (input) {
+          input.files = files;
+          input.dispatchEvent(new Event('change', {bubbles: true}));
+        }
+      }
+    }, false);
+  });
+
   // --- Avatar preview ---
   const avatarInput = document.querySelector('#avatar-upload-zone input[type="file"]');
   if (avatarInput) {
@@ -384,20 +550,62 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       const reader = new FileReader();
       reader.onload = function(e) {
-        const preview = document.querySelector('#avatar-preview img, #avatar-preview span');
-        if (preview.tagName === 'SPAN') {
-          const img = document.createElement('img');
-          img.src = e.target.result;
-          img.alt = '{{ user.username }}';
-          img.className = 'w-full h-full object-cover';
-          preview.replaceWith(img);
+        const preview = document.querySelector('#avatar-preview');
+        const existingImg = preview.querySelector('img');
+        const existingSpan = preview.querySelector('span');
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.alt = '{{ user.username }}';
+        img.className = 'w-full h-full object-cover';
+        img.style.borderRadius = '18px';
+        if (existingImg) {
+          existingImg.replaceWith(img);
+        } else if (existingSpan) {
+          existingSpan.replaceWith(img);
         } else {
-          preview.src = e.target.result;
+          preview.insertBefore(img, preview.firstChild);
         }
+        // Hide the camera overlay after selection
+        var camOverlay = preview.querySelector('.absolute.inset-0');
+        if (camOverlay) camOverlay.style.display = 'none';
       };
       reader.readAsDataURL(file);
-      // Update hint text
-      const hint = document.querySelector('.file-upload-hint span');
+      const hint = document.querySelector('#avatar-upload-zone .file-upload-hint span');
+      if (hint) hint.textContent = file.name;
+    });
+  }
+
+  // --- Cover photo preview ---
+  const coverInput = document.querySelector('#cover-upload-zone input[type="file"]');
+  if (coverInput) {
+    coverInput.addEventListener('change', function() {
+      const file = this.files[0];
+      if (!file) return;
+      if (file.size > 20 * 1024 * 1024) {
+        showToast('Cover photo must be under 20MB', 'error');
+        this.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const cover = document.querySelector('#cover-preview');
+        cover.innerHTML = '';
+        cover.style.background = 'none';
+        cover.style.animation = 'none';
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.alt = 'Cover preview';
+        img.className = 'w-full h-full object-cover';
+        cover.appendChild(img);
+        const gradient = document.createElement('div');
+        gradient.className = 'absolute inset-0 bg-gradient-to-t from-[var(--bg-card)]/40 via-transparent to-transparent';
+        cover.appendChild(gradient);
+        const overlay = document.createElement('div');
+        overlay.className = 'absolute inset-0 bg-[var(--bg-primary)]/5';
+        cover.appendChild(overlay);
+      };
+      reader.readAsDataURL(file);
+      const hint = document.querySelector('#cover-upload-zone .file-upload-hint span');
       if (hint) hint.textContent = file.name;
     });
   }

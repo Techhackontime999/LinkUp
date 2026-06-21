@@ -764,10 +764,22 @@
         }
         
         var attachmentHtml = m.attachment_url ? renderAttachmentHtml(m, isCurrentUser) : '';
+        
+        // Build avatar HTML for other users' messages
+        var avatarHtml = '';
+        if (!isCurrentUser) {
+            var initials = escapeHtml(senderUsername).slice(0, 2).toUpperCase();
+            var imgHtml = m.sender_avatar_url 
+                ? '<img src="' + m.sender_avatar_url + '" alt="' + escapeHtml(senderUsername) + '" class="w-full h-full object-cover">' 
+                : initials;
+            avatarHtml = '<div class="w-6 h-6 rounded-full flex-shrink-0 overflow-hidden bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-[9px] font-bold shadow-sm mt-1">' + imgHtml + '</div>';
+        }
 
         el.innerHTML = `
-            <div class="max-w-xs lg:max-w-md transform transition-all duration-200 hover:scale-[1.02]">
-                ${!isCurrentUser ? `<div class="text-xs text-gray-500 mb-1 ml-1 font-medium">${escapeHtml(senderUsername)}</div>` : ''}
+            <div class="${isCurrentUser ? 'max-w-xs lg:max-w-md' : 'flex gap-2 max-w-xs lg:max-w-md'} transform transition-all duration-200 hover:scale-[1.02]">
+                ${avatarHtml}
+                <div class="${isCurrentUser ? '' : 'flex-1 min-w-0'}">
+                    ${!isCurrentUser ? `<div class="text-xs text-gray-500 mb-1 ml-1 font-medium">${escapeHtml(senderUsername)}</div>` : ''}
                 <div class="relative group">
                     <div class="px-4 py-2.5 rounded-2xl shadow-sm transition-all duration-200 ${
                         isCurrentUser 
@@ -808,6 +820,7 @@
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
         `;
         
