@@ -3,7 +3,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#05050a" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <title>LinkUp — Professional Network</title>
   {% tailwind_css %}
   <link rel="stylesheet" href="{% static 'css/custom_styles.css' %}">
@@ -115,11 +119,14 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
-        <form action="{% url 'search' %}" method="get" class="hidden sm:block">
+      <div class="flex items-center gap-1 sm:gap-2">
+        <form action="{% url 'search' %}" method="get" class="search-form">
           <div class="search-box">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--text-muted)]"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            <input type="text" name="q" placeholder="Search people, jobs..." aria-label="Search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--text-muted)] search-icon"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" name="q" placeholder="Search people, jobs..." aria-label="Search" class="search-input">
+            <button type="button" class="search-close hidden" aria-label="Close search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
           </div>
         </form>
 
@@ -135,7 +142,7 @@
               <span id="notif-badge" class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[var(--accent)] rounded-full text-[10px] font-bold text-white flex items-center justify-center shadow-sm" style="display:none">0</span>
               <span class="live-dot accent sm" style="position:absolute;top:2px;left:2px;animation-duration:2.5s"></span>
             </button>
-            <div id="notif-dropdown" class="dropdown-menu hidden" style="min-width:340px">
+            <div id="notif-dropdown" class="dropdown-menu dropdown-menu-notif hidden">
               <div class="px-3 py-2 border-b border-[var(--border-subtle)] flex items-center justify-between">
                 <span class="text-sm font-semibold text-[var(--text-primary)]">Notifications</span>
                 <button id="mark-all-read" class="text-xs font-medium text-[var(--accent)] hover:underline">Mark all read</button>
@@ -223,20 +230,7 @@
   <script src="{% static 'js/neural-aurora.js' %}"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      const notifBtn = document.getElementById('notif-btn');
-      const notifDropdown = document.getElementById('notif-dropdown');
-      if (notifBtn && notifDropdown) {
-        notifBtn.addEventListener('click', function(e) {
-          e.stopPropagation();
-          notifDropdown.classList.toggle('hidden');
-        });
-        document.addEventListener('click', function(e) {
-          if (!e.target.closest('#notif-container')) {
-            notifDropdown.classList.add('hidden');
-          }
-        });
-      }
-
+      // --- User menu dropdown ---
       const userMenuBtn = document.getElementById('user-menu-btn');
       const userDropdown = document.getElementById('user-dropdown');
       if (userMenuBtn && userDropdown) {
@@ -251,6 +245,34 @@
         });
       }
 
+      // --- Mobile search toggle ---
+      const searchForm = document.querySelector('.search-form');
+      const searchInput = searchForm?.querySelector('.search-input');
+      const searchClose = searchForm?.querySelector('.search-close');
+      const searchIcon = searchForm?.querySelector('.search-icon');
+      if (searchForm && searchInput && searchClose && window.innerWidth < 640) {
+        searchForm.addEventListener('click', function(e) {
+          if (e.target.closest('.search-close')) {
+            searchForm.classList.remove('expanded');
+            searchInput.blur();
+            return;
+          }
+          if (!searchForm.classList.contains('expanded')) {
+            e.preventDefault();
+            searchForm.classList.add('expanded');
+            searchInput.focus();
+          }
+        });
+        document.addEventListener('click', function(e) {
+          if (searchForm.classList.contains('expanded') && !e.target.closest('.search-form')) {
+            if (!searchInput.value) {
+              searchForm.classList.remove('expanded');
+            }
+          }
+        });
+      }
+
+      // --- Theme-color meta update ---
       window.addEventListener('themeChanged', function(e) {
         var isDark = e.detail && e.detail.isDark;
         var meta = document.querySelector('meta[name="theme-color"]');

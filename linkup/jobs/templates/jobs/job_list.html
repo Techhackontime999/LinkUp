@@ -36,17 +36,17 @@
       </div>
     </div>
 
-    <form class="card-premium p-4 scroll-reveal" method="get">
-      <div class="flex items-center gap-3 mb-3">
+    <form class="card-premium p-3 sm:p-4 scroll-reveal" method="get">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mb-3">
         <div class="search-box flex-1">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
           <input type="text" name="query" placeholder="Search jobs by title, company, or keyword..." aria-label="Search jobs" value="{{ request.GET.query }}">
         </div>
-        <button type="submit" class="btn-primary text-sm">Search</button>
+        <button type="submit" class="btn-primary text-sm w-full sm:w-auto justify-center">Search</button>
       </div>
-      <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-[var(--border-subtle)]">
-        <div class="relative">
-          <select name="job_type" onchange="this.form.submit()" class="appearance-none bg-[var(--bg-secondary)] text-sm text-[var(--text-secondary)] px-3 py-1.5 pr-8 rounded-[var(--radius-md)] border border-[var(--border-subtle)] cursor-pointer focus:outline-none focus:border-[var(--accent)]">
+      <div class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2 pt-3 border-t border-[var(--border-subtle)]">
+        <div class="relative flex-1 sm:flex-none">
+          <select name="job_type" onchange="this.form.submit()" class="appearance-none w-full bg-[var(--bg-secondary)] text-sm text-[var(--text-secondary)] px-3 py-1.5 pr-8 rounded-[var(--radius-md)] border border-[var(--border-subtle)] cursor-pointer focus:outline-none focus:border-[var(--accent)]">
             <option value="">All Job Types</option>
             {% for value, label in search_form.job_type.field.choices %}
               {% if value %}
@@ -55,8 +55,8 @@
             {% endfor %}
           </select>
         </div>
-        <div class="relative">
-          <select name="workplace_type" onchange="this.form.submit()" class="appearance-none bg-[var(--bg-secondary)] text-sm text-[var(--text-secondary)] px-3 py-1.5 pr-8 rounded-[var(--radius-md)] border border-[var(--border-subtle)] cursor-pointer focus:outline-none focus:border-[var(--accent)]">
+        <div class="relative flex-1 sm:flex-none">
+          <select name="workplace_type" onchange="this.form.submit()" class="appearance-none w-full bg-[var(--bg-secondary)] text-sm text-[var(--text-secondary)] px-3 py-1.5 pr-8 rounded-[var(--radius-md)] border border-[var(--border-subtle)] cursor-pointer focus:outline-none focus:border-[var(--accent)]">
             <option value="">All Workplace Types</option>
             {% for value, label in search_form.workplace_type.field.choices %}
               {% if value %}
@@ -65,28 +65,28 @@
             {% endfor %}
           </select>
         </div>
-        <div class="search-box flex-1 max-w-[200px]">
+        <div class="search-box flex-1 sm:max-w-[200px]">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
           <input type="text" name="location" placeholder="Location..." aria-label="Location" value="{{ request.GET.location }}" class="text-sm">
         </div>
         {% if request.GET.query or request.GET.job_type or request.GET.workplace_type or request.GET.location %}
-        <a href="{% url 'jobs:job_list' %}" class="text-xs text-[var(--accent)] hover:underline ml-auto">Clear filters</a>
+        <a href="{% url 'jobs:job_list' %}" class="text-xs text-[var(--accent)] hover:underline text-center sm:text-left sm:ml-auto">Clear filters</a>
         {% endif %}
       </div>
     </form>
 
     <div class="stagger-container space-y-3">
       {% for job in page_obj %}
-      <article class="card-premium p-5 stagger-item scroll-reveal">
-        <div class="flex items-start justify-between gap-4">
-          <div class="flex-1 min-w-0">
+      <article class="card-premium p-4 sm:p-5 stagger-item scroll-reveal">
+        <div class="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
+          <div class="flex-1 min-w-0 w-full">
             <div class="flex items-start gap-3">
               <div class="w-10 h-10 rounded-[var(--radius-md)] bg-[var(--bg-secondary)] flex items-center justify-center flex-shrink-0 text-sm font-bold text-[var(--text-secondary)]">
                 {{ job.company|slice:":2"|upper }}
               </div>
-              <div>
+              <div class="min-w-0 flex-1">
                 <a href="{% url 'jobs:job_detail' job.id %}" class="text-base font-semibold text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors no-underline">{{ job.title }}</a>
-                <p class="text-sm text-[var(--text-secondary)]">{{ job.company }} · {{ job.location }}</p>
+                <p class="text-sm text-[var(--text-secondary)] truncate">{{ job.company }} · {{ job.location }}</p>
                 <div class="flex flex-wrap items-center gap-2 mt-2">
                   <span class="badge badge-accent text-[10px]">{{ job.get_job_type_display }}</span>
                   <span class="text-xs text-[var(--text-muted)]">Posted {{ job.created_at|timesince }} ago</span>
@@ -95,9 +95,9 @@
               </div>
             </div>
           </div>
-          <div class="flex-shrink-0 flex flex-col items-end gap-2">
+          <div class="flex sm:flex-col items-center sm:items-end gap-2 sm:gap-2 w-full sm:w-auto justify-between sm:justify-end">
             <span class="text-sm font-semibold text-[var(--accent)]">{{ job.salary_range|default:"Competitive" }}</span>
-            <a href="{% url 'jobs:apply_job' job.id %}" class="btn-primary text-xs px-4 py-1.5">Apply</a>
+            <a href="{% url 'jobs:apply_job' job.id %}" class="btn-primary text-xs px-4 py-1.5 w-full sm:w-auto text-center">Apply</a>
           </div>
         </div>
       </article>
