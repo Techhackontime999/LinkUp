@@ -1,0 +1,54 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - mode: ingress
+        target: 8000
+        published: 8000
+    environment:
+      - DJANGO_ENVIRONMENT=development
+      - SECRET_KEY=django-insecure-dev-key-not-for-production
+      - DEBUG=true
+      - ALLOWED_HOSTS=*
+    volumes:
+      - .:/app
+    command: python manage.py runserver 0.0.0.0:8000
+    depends_on:
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: linkup
+      POSTGRES_USER: linkup
+      POSTGRES_PASSWORD: linkup_dev
+    ports:
+      - mode: host
+        target: 5432
+        published: 5432
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - mode: host
+        target: 6379
+        published: 6379
+    volumes:
+      - redis_dev_data:/data
+
+volumes:
+  postgres_dev_data:
+  redis_dev_data:
