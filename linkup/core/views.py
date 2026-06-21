@@ -1,14 +1,16 @@
 from django.shortcuts import render
 from django.db.models import Q, Count, Case, When, IntegerField
 from django.contrib.auth import get_user_model
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, FileResponse
 from django.middleware.csrf import get_token
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET
 from django.core.paginator import Paginator
 from django.utils.html import format_html
 from django.db.models.functions import Lower
+from pathlib import Path
 import re
+import os
 from feed.models import Post
 from jobs.models import Job
 from users.models import Experience, Education
@@ -418,3 +420,18 @@ def csrf_token_refresh(request):
         'csrf_token': token,
         'status': 'success'
     })
+
+
+@require_GET
+def service_worker(request):
+    path = Path(__file__).resolve().parent.parent / 'theme' / 'static' / 'pwa' / 'sw.js'
+    if not path.exists():
+        return HttpResponse('', status=404)
+    with open(path, 'r', encoding='utf-8') as f:
+        content = f.read()
+    return HttpResponse(content, content_type='application/javascript')
+
+
+@require_GET
+def offline_page(request):
+    return render(request, 'pwa/offline.html')

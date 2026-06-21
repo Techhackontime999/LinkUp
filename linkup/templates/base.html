@@ -8,6 +8,11 @@
   <meta name="theme-color" content="#05050a" media="(prefers-color-scheme: dark)">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="{% static 'pwa/manifest.json' %}">
+  <link rel="apple-touch-icon" sizes="192x192" href="{% static 'pwa/icons/icon-192x192.png' %}">
+  <link rel="icon" type="image/png" sizes="512x512" href="{% static 'pwa/icons/icon-512x512.png' %}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{% static 'pwa/icons/icon-192x192.png' %}">
+  <meta name="apple-mobile-web-app-title" content="LinkUp">
   <title>LinkUp — Professional Network</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%232563eb'/><text x='16' y='22' font-size='18' font-weight='bold' text-anchor='middle' fill='white'>L</text></svg>">
   {% tailwind_css %}
@@ -236,6 +241,7 @@
   <script src="{% static 'js/animations.js' %}"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="{% static 'js/neural-aurora.js' %}"></script>
+  <script src="{% static 'pwa/pwa.js' %}"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // --- User menu dropdown ---
